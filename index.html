@@ -1,0 +1,2461 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CARGO SERVICES JL — Sistema de Guías</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore-compat.js"></script>
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyCMj0Nfy8t0sngkw8oSsk9SZbJjd7eGmzc",
+  authDomain: "cargoservicesjl-d30b5.firebaseapp.com",
+  projectId: "cargoservicesjl-d30b5",
+  storageBucket: "cargoservicesjl-d30b5.firebasestorage.app",
+  messagingSenderId: "440373882533",
+  appId: "1:440373882533:web:1de8d71ea4c099c93de74c"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+</script>
+<style>
+:root{
+  --navy:#0B1F3A;--navy2:#152D4F;--blue:#1D5FA8;--blue2:#3B82C4;--blue3:#EBF4FF;
+  --amber:#F59E0B;--amber2:#FEF3C7;
+  --green:#10B981;--green2:#D1FAE5;
+  --red:#EF4444;--red2:#FEE2E2;
+  --purple:#7C3AED;--purple2:#EDE9FE;
+  --white:#fff;--bg:#F0F5FB;--card:#fff;
+  --border:#DDE8F5;--border2:#C4D8EF;
+  --t1:#0B1F3A;--t2:#3D5875;--t3:#8AA4C0;
+  --sh:0 2px 8px rgba(11,31,58,.07);
+  --sh2:0 8px 32px rgba(11,31,58,.12);
+  --sh3:0 20px 60px rgba(11,31,58,.18);
+  --r:14px;--r2:10px;--r3:7px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--t1);min-height:100vh;-webkit-font-smoothing:antialiased;}
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:99px;}
+.screen{display:none;}.screen.active{display:block;}
+.tab-pane{display:none;}.tab-pane.active{display:block;}
+
+/* ── LOGIN ── */
+#loginScreen{min-height:100vh;background:linear-gradient(145deg,#071628,#0e2444 50%,#163860);display:none;align-items:center;justify-content:center;padding:20px;position:relative;overflow:hidden;}
+#loginScreen.active{display:flex;}
+#loginScreen::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 70% 60% at 80% 20%,rgba(29,95,168,.22) 0%,transparent 70%);}
+
+.lw{position:relative;z-index:2;display:flex;border-radius:20px;overflow:hidden;box-shadow:var(--sh3);width:min(900px,95vw);}
+.lb{width:330px;flex-shrink:0;background:linear-gradient(170deg,#0e2848,#1a4a8a);padding:46px 38px;display:flex;flex-direction:column;justify-content:space-between;}
+.lb-icon{width:54px;height:54px;background:rgba(245,158,11,.15);border:1.5px solid rgba(245,158,11,.3);border-radius:14px;display:flex;align-items:center;justify-content:center;margin-bottom:18px;}
+.lb-icon svg{width:28px;height:28px;fill:var(--amber);}
+.lb-name{font-family:'Space Grotesk',sans-serif;font-size:21px;font-weight:700;color:#fff;line-height:1.2;}
+.lb-name em{color:var(--amber);font-style:normal;display:block;}
+.lb-sub{font-size:11px;color:rgba(255,255,255,.35);letter-spacing:1.5px;text-transform:uppercase;margin-top:6px;}
+.lb-feats{display:flex;flex-direction:column;gap:10px;margin-top:32px;}
+.lbf{display:flex;align-items:center;gap:11px;padding:10px 13px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.07);border-radius:10px;}
+.lbf-ic{width:30px;height:30px;border-radius:8px;background:rgba(29,95,168,.35);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
+.lbf-t strong{display:block;font-size:12.5px;color:rgba(255,255,255,.9);font-weight:600;}
+.lbf-t small{font-size:11px;color:rgba(255,255,255,.45);}
+.lb-copy{font-size:11px;color:rgba(255,255,255,.2);}
+
+.lf{flex:1;background:var(--white);padding:46px 42px;display:flex;flex-direction:column;justify-content:center;}
+.lf-head{margin-bottom:26px;}
+.lf-head h2{font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:700;color:var(--navy);}
+.lf-head p{font-size:13px;color:var(--t2);margin-top:5px;}
+
+.seg{display:flex;background:var(--bg);border-radius:var(--r3);padding:3px;gap:3px;margin-bottom:26px;}
+.seg-b{flex:1;padding:9px;border:none;background:transparent;border-radius:5px;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:600;color:var(--t3);cursor:pointer;transition:all .2s;}
+.seg-b.on{background:var(--white);color:var(--blue);box-shadow:0 1px 5px rgba(0,0,0,.09);}
+
+.al{padding:10px 13px;border-radius:var(--r3);font-size:13px;font-weight:500;margin-bottom:14px;display:none;}
+.al.show{display:block;}
+.al-ok{background:var(--green2);color:#065F46;border:1px solid #6EE7B7;}
+.al-er{background:var(--red2);color:#991B1B;border:1px solid #FCA5A5;}
+
+.fi{margin-bottom:14px;}
+.fi label{display:block;font-size:11px;font-weight:700;color:var(--navy);letter-spacing:.5px;text-transform:uppercase;margin-bottom:5px;}
+.fi-w{position:relative;}
+.fi-w .ico{position:absolute;left:11px;top:50%;transform:translateY(-50%);width:15px;height:15px;pointer-events:none;color:var(--t3);}
+.fi input,.fi select,.fi textarea{width:100%;padding:11px 13px 11px 35px;border:1.5px solid var(--border);border-radius:var(--r3);font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;color:var(--t1);background:var(--white);outline:none;transition:border-color .2s,box-shadow .2s;}
+.fi input:focus,.fi select:focus,.fi textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(29,95,168,.1);}
+.fi input::placeholder,.fi textarea::placeholder{color:var(--t3);}
+.fi textarea{padding-left:13px;resize:vertical;min-height:72px;}
+.fi select{padding-left:13px;cursor:pointer;}
+.ni input,.ni select{padding-left:13px!important;}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:11px 20px;border:none;border-radius:var(--r3);font-family:'Plus Jakarta Sans',sans-serif;font-size:13.5px;font-weight:600;cursor:pointer;transition:all .2s;white-space:nowrap;}
+.btn svg{width:15px;height:15px;flex-shrink:0;}
+.bp{background:linear-gradient(135deg,var(--blue),var(--blue2));color:#fff;box-shadow:0 4px 14px rgba(29,95,168,.35);}
+.bp:hover{transform:translateY(-1px);box-shadow:0 6px 22px rgba(29,95,168,.42);}
+.bn{background:linear-gradient(135deg,var(--navy),var(--navy2));color:#fff;box-shadow:0 4px 14px rgba(11,31,58,.3);}
+.bn:hover{transform:translateY(-1px);}
+.bs{background:linear-gradient(135deg,#059669,var(--green));color:#fff;box-shadow:0 4px 14px rgba(16,185,129,.3);}
+.bs:hover{transform:translateY(-1px);}
+.ba{background:linear-gradient(135deg,#D97706,var(--amber));color:#fff;box-shadow:0 4px 14px rgba(245,158,11,.35);}
+.ba:hover{transform:translateY(-1px);}
+.bg{background:transparent;color:var(--blue);border:1.5px solid var(--border2);}
+.bg:hover{background:var(--blue3);}
+.bd{background:linear-gradient(135deg,#DC2626,var(--red));color:#fff;}
+.sm{padding:7px 14px;font-size:12.5px;}
+.xs{padding:5px 11px;font-size:12px;}
+.full{width:100%;}
+
+.g{display:grid;gap:14px;}
+.g2{grid-template-columns:1fr 1fr;}
+.g3{grid-template-columns:1fr 1fr 1fr;}
+.g4{grid-template-columns:1fr 1fr 1fr 1fr;}
+.s2{grid-column:span 2;}
+.s3{grid-column:span 3;}
+.s4{grid-column:span 4;}
+
+@media(max-width:860px){.lb{display:none;}.lf{padding:32px 24px;}}
+
+/* ── MAIN ── */
+#mainScreen{display:none;min-height:100vh;}
+#mainScreen.active{display:flex;}
+
+.sidebar{width:242px;background:linear-gradient(180deg,var(--navy) 0%,#0d1e38 100%);display:flex;flex-direction:column;flex-shrink:0;position:fixed;top:0;left:0;bottom:0;z-index:200;}
+.sb-logo{padding:22px 18px 16px;border-bottom:1px solid rgba(255,255,255,.07);}
+.sb-li{width:36px;height:36px;background:rgba(245,158,11,.15);border:1px solid rgba(245,158,11,.25);border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:10px;}
+.sb-li svg{width:18px;height:18px;fill:var(--amber);}
+.sb-ln{font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:700;color:#fff;line-height:1.25;}
+.sb-ln em{color:var(--amber);font-style:normal;}
+.sb-ls{font-size:9.5px;color:rgba(255,255,255,.3);letter-spacing:1.5px;text-transform:uppercase;margin-top:3px;display:block;}
+
+.sb-nav{flex:1;padding:12px 10px;overflow-y:auto;}
+.sb-sec{font-size:9.5px;font-weight:700;letter-spacing:1.5px;color:rgba(255,255,255,.22);text-transform:uppercase;padding:10px 8px 5px;margin-top:4px;}
+.ni-item{display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:10px;cursor:pointer;transition:all .2s;margin-bottom:2px;color:rgba(255,255,255,.52);font-size:13.5px;font-weight:500;position:relative;}
+.ni-item svg{width:17px;height:17px;flex-shrink:0;}
+.ni-item:hover{background:rgba(255,255,255,.08);color:rgba(255,255,255,.88);}
+.ni-item.on{background:rgba(29,95,168,.38);color:#fff;font-weight:600;}
+.ni-item.on::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:3px;height:20px;background:var(--amber);border-radius:0 3px 3px 0;}
+.nb{margin-left:auto;background:var(--amber);color:var(--navy);font-size:10px;font-weight:700;padding:1px 7px;border-radius:99px;}
+
+.sb-foot{padding:12px 10px;border-top:1px solid rgba(255,255,255,.07);}
+.sb-usr{display:flex;align-items:center;gap:10px;padding:10px 12px;background:rgba(255,255,255,.06);border-radius:10px;margin-bottom:10px;}
+.sb-av{width:33px;height:33px;border-radius:50%;background:linear-gradient(135deg,var(--amber),#D97706);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:var(--navy);flex-shrink:0;}
+.sb-ui{flex:1;min-width:0;}
+.sb-ui small{font-size:9.5px;color:rgba(255,255,255,.3);display:block;}
+.sb-ui p{font-size:12.5px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+
+.main{flex:1;margin-left:242px;display:flex;flex-direction:column;min-height:100vh;}
+.topbar{background:var(--white);border-bottom:1px solid var(--border);padding:0 28px;height:58px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:var(--sh);}
+.tb-l{display:flex;align-items:center;gap:10px;}
+.tb-title{font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:700;color:var(--navy);}
+.tb-date{font-size:11.5px;color:var(--t3);background:var(--bg);padding:4px 12px;border-radius:99px;border:1px solid var(--border);}
+.tb-r{display:flex;align-items:center;gap:9px;}
+
+.page{display:none;padding:26px 28px;flex:1;}
+.page.active{display:block;}
+
+/* ── PAGE HEADER ── */
+.ph{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:24px;}
+.ph-l h2{font-family:'Space Grotesk',sans-serif;font-size:21px;font-weight:700;color:var(--navy);}
+.ph-l p{font-size:13px;color:var(--t2);margin-top:3px;}
+.ph-r{display:flex;gap:8px;align-items:center;}
+
+/* ── CARD ── */
+.card{background:var(--card);border-radius:var(--r);border:1px solid var(--border);box-shadow:var(--sh);}
+.ch{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.ch h4{font-family:'Space Grotesk',sans-serif;font-size:14.5px;font-weight:700;color:var(--navy);}
+.cb{padding:20px;}
+.cb0{padding:0;}
+
+/* ── STATS ── */
+.sg{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px;}
+.sc{background:var(--card);border-radius:var(--r);border:1px solid var(--border);box-shadow:var(--sh);padding:18px;display:flex;align-items:center;gap:14px;transition:box-shadow .2s,transform .2s;}
+.sc:hover{box-shadow:var(--sh2);transform:translateY(-1px);}
+.sci{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.sci svg{width:21px;height:21px;}
+.ib{background:var(--blue3);color:var(--blue);}
+.ig{background:var(--green2);color:#059669;}
+.ia{background:var(--amber2);color:#D97706;}
+.ip{background:var(--purple2);color:var(--purple);}
+.si p{font-size:12px;color:var(--t2);font-weight:500;margin-bottom:2px;}
+.si h3{font-family:'Space Grotesk',sans-serif;font-size:24px;font-weight:700;color:var(--navy);}
+
+/* ── TABLE ── */
+.tw{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;}
+thead th{background:var(--bg);padding:10px 15px;text-align:left;font-size:11px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--border);white-space:nowrap;}
+tbody td{padding:12px 15px;border-bottom:1px solid var(--border);font-size:13.5px;color:var(--t1);}
+tbody tr:last-child td{border-bottom:none;}
+tbody tr:hover{background:#FAFCFF;}
+.te{text-align:center;padding:44px 24px;color:var(--t3);}
+.te svg{width:38px;height:38px;margin:0 auto 10px;display:block;opacity:.3;}
+
+/* ── BADGE ── */
+.bdg{display:inline-flex;align-items:center;padding:2px 9px;border-radius:99px;font-size:11px;font-weight:700;white-space:nowrap;}
+.bbl{background:var(--blue3);color:var(--blue);}
+.bam{background:var(--amber2);color:#92400E;}
+.bgr{background:var(--green2);color:#065F46;}
+.brd{background:var(--red2);color:#991B1B;}
+.bpu{background:var(--purple2);color:var(--purple);}
+.bnv{background:#E8EFF7;color:var(--navy);}
+
+/* ── SECTION TITLE ── */
+.stitle{font-size:10.5px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--blue);margin-bottom:13px;padding-bottom:7px;border-bottom:2px solid var(--blue3);display:flex;align-items:center;gap:6px;}
+.stitle .dot{width:6px;height:6px;border-radius:50%;background:var(--amber);flex-shrink:0;}
+.dvd{border:none;border-top:1px solid var(--border);margin:20px 0;}
+
+/* ── CORRELATIVO BOX ── */
+.cb-box{background:linear-gradient(135deg,#EBF4FF,#D6EAFF);border:1.5px solid var(--border2);border-radius:var(--r);padding:16px 20px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;gap:16px;}
+.cc-row{display:flex;align-items:center;gap:14px;}
+.cc-pill{background:var(--white);border:1.5px solid var(--border2);border-radius:var(--r2);padding:9px 16px;text-align:center;min-width:126px;cursor:pointer;transition:all .2s;position:relative;box-shadow:var(--sh);}
+.cc-pill:hover{border-color:var(--blue);box-shadow:var(--sh2);}
+.cc-pill small{display:block;font-size:9.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--t3);margin-bottom:3px;}
+.cc-pill strong{font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:700;color:var(--navy);}
+.cc-pill .eh{position:absolute;top:5px;right:7px;font-size:9px;color:var(--t3);opacity:0;transition:opacity .2s;}
+.cc-pill:hover .eh{opacity:1;}
+.cc-sep{font-size:20px;color:var(--border2);}
+.cc-meta small{font-size:11px;color:var(--t2);}
+.cc-meta strong{display:block;font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:700;color:var(--navy);margin-top:2px;}
+
+/* ── CORR EDITOR ── */
+.ce{background:var(--amber2);border:1.5px solid #FCD34D;border-radius:var(--r2);padding:13px 16px;margin-bottom:16px;display:none;}
+.ce.open{display:block;}
+.ce-title{font-size:12px;font-weight:700;color:#92400E;margin-bottom:10px;}
+.ce-row{display:flex;align-items:center;gap:9px;flex-wrap:wrap;}
+.ce-field{display:flex;align-items:center;gap:7px;}
+.ce-field label{font-size:12px;font-weight:600;color:#92400E;white-space:nowrap;}
+.ce-field input{width:100px;padding:8px 11px;border:1.5px solid #FCD34D;border-radius:6px;font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:700;color:var(--navy);background:var(--white);outline:none;text-align:center;}
+.ce-field input:focus{border-color:var(--amber);}
+
+/* ── SEARCH ── */
+.srch{position:relative;}
+.srch svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);width:14px;height:14px;color:var(--t3);pointer-events:none;}
+.srch input{padding:9px 12px 9px 32px;border:1.5px solid var(--border);border-radius:var(--r3);font-family:'Plus Jakarta Sans',sans-serif;font-size:13.5px;color:var(--t1);background:var(--white);outline:none;transition:border-color .2s;width:230px;}
+.srch input:focus{border-color:var(--blue);}
+
+/* ── OVERLAY ── */
+.ov{display:none;position:fixed;inset:0;background:rgba(7,18,38,.5);z-index:500;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px);}
+.ov.show{display:flex;}
+.modal{background:var(--white);border-radius:var(--r);box-shadow:var(--sh3);width:min(680px,98vw);max-height:90vh;display:flex;flex-direction:column;overflow:hidden;}
+.mh{padding:16px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.mh h4{font-family:'Space Grotesk',sans-serif;font-size:15.5px;font-weight:700;color:var(--navy);}
+.mb{padding:22px;overflow-y:auto;flex:1;}
+.mf{padding:14px 22px;border-top:1px solid var(--border);display:flex;gap:9px;justify-content:flex-end;flex-shrink:0;}
+.mcl{background:none;border:none;cursor:pointer;padding:6px;border-radius:6px;color:var(--t3);display:flex;align-items:center;transition:background .2s;}
+.mcl:hover{background:var(--bg);color:var(--t1);}
+.mcl svg{width:17px;height:17px;}
+
+/* ── TOAST ── */
+.tw-c{position:fixed;bottom:22px;right:22px;z-index:9999;display:flex;flex-direction:column;gap:8px;}
+.toast{background:var(--white);border-radius:var(--r2);padding:12px 16px;box-shadow:0 8px 30px rgba(0,0,0,.14);display:flex;align-items:center;gap:10px;font-size:13.5px;font-weight:500;border-left:4px solid var(--green);min-width:260px;animation:tsI .3s ease;}
+.toast.te{border-left-color:var(--red);}
+.ti{width:23px;height:23px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;background:var(--green2);}
+.toast.te .ti{background:var(--red2);}
+@keyframes tsI{from{transform:translateX(110%);opacity:0;}to{transform:translateX(0);opacity:1;}}
+@keyframes tsO{to{transform:translateX(110%);opacity:0;}}
+
+/* ── ACTIVITY ── */
+.al-list{display:flex;flex-direction:column;}
+.al-item{display:flex;align-items:center;gap:13px;padding:12px 20px;border-bottom:1px solid var(--border);transition:background .15s;cursor:pointer;}
+.al-item:last-child{border-bottom:none;}
+.al-item:hover{background:#FAFCFF;}
+.al-ic{width:35px;height:35px;border-radius:10px;background:var(--blue3);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:17px;}
+.al-info{flex:1;min-width:0;}
+.al-info strong{font-size:13.5px;font-weight:600;color:var(--navy);}
+.al-info span{display:block;font-size:12px;color:var(--t2);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.al-meta{text-align:right;flex-shrink:0;}
+.al-meta small{font-size:11px;color:var(--t3);}
+
+/* ── USER GRID ── */
+.ug{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:13px;}
+.uc{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:18px;box-shadow:var(--sh);display:flex;align-items:center;gap:13px;transition:box-shadow .2s;}
+.uc:hover{box-shadow:var(--sh2);}
+.ua{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--blue2));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:17px;color:#fff;flex-shrink:0;}
+.ui h4{font-size:14px;font-weight:700;color:var(--navy);}
+.ui small{font-size:12px;color:var(--t3);}
+.uu{display:flex;gap:6px;margin-left:auto;}
+
+/* ══════════════════════════════════════
+   ETIQUETA TÉRMICA 100×150 mm
+   Blanco puro · Bordes finos · Texto grande
+══════════════════════════════════════ */
+.corr-selector{display:flex;gap:8px;margin-top:10px;}
+.cs-btn{flex:1;padding:9px 12px;border:2px solid var(--border2);border-radius:var(--r3);background:#fff;font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:700;color:var(--t2);cursor:pointer;transition:all .2s;text-align:center;}
+.cs-btn.active{border-color:var(--blue);background:var(--blue3);color:var(--blue);}
+.cs-btn:hover{border-color:var(--blue);color:var(--blue);}
+.label-wrap{width:380px;margin:0 auto;}
+
+.et{font-family:'Plus Jakarta Sans',sans-serif;background:#fff;border:2px solid #1a1a1a;width:380px;color:#111;line-height:1.4;}
+.et-head{border-bottom:2px solid #1a1a1a;padding:9px 12px;display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.et-logo-name{font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:800;color:#111;letter-spacing:.4px;}
+.et-logo-name em{color:var(--blue);font-style:normal;}
+.et-logo-sub{font-size:9px;color:#666;letter-spacing:1.2px;text-transform:uppercase;margin-top:1px;}
+.et-head-srv{border:2px solid #1a1a1a;border-radius:5px;padding:4px 12px;text-align:center;}
+.et-head-srv small{display:block;font-size:8px;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:.8px;}
+.et-head-srv span{font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:800;color:#111;letter-spacing:.5px;}
+.et-code-block{border-bottom:2px solid #1a1a1a;padding:14px 12px 12px;text-align:center;background:#fff;}
+.et-code-label{font-size:10px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:4px;}
+.et-code-main{font-family:'Space Grotesk',sans-serif;font-size:44px;font-weight:800;color:#111;letter-spacing:3px;line-height:1;}
+.et-code-sep{width:60px;height:3px;background:#1a1a1a;margin:8px auto 0;border-radius:2px;}
+.et-dates{border-bottom:1px solid #ccc;display:flex;}
+.et-date-cell{flex:1;padding:6px 10px;font-size:11.5px;}
+.et-date-cell+.et-date-cell{border-left:1px solid #ccc;}
+.et-date-cell small{display:block;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#666;margin-bottom:1px;}
+.et-date-cell strong{font-size:12px;font-weight:700;color:#111;}
+.et-parties{border-bottom:1.5px solid #1a1a1a;display:flex;}
+.et-party{flex:1;padding:8px 10px;}
+.et-party+.et-party{border-left:1.5px solid #1a1a1a;}
+.et-party-hdr{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;color:#111;padding-bottom:5px;border-bottom:1px solid #ddd;margin-bottom:6px;}
+.et-party-doc{font-size:11.5px;color:#444;margin-bottom:2px;}
+.et-party-name{font-size:14px;font-weight:800;color:#111;margin-bottom:2px;line-height:1.25;}
+.et-party-tel{font-size:12px;font-weight:600;color:#222;margin-top:3px;}
+.et-party-addr{font-size:11px;color:#444;line-height:1.35;margin-top:2px;}
+.et-data-row{border-bottom:1px solid #ccc;display:flex;}
+.et-data-cell{flex:1;padding:6px 10px;text-align:center;}
+.et-data-cell:first-child{flex:2;text-align:left;}
+.et-data-cell+.et-data-cell{border-left:1px solid #ccc;}
+.et-data-hdr{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#555;margin-bottom:2px;}
+.et-data-val{font-size:13.5px;font-weight:700;color:#111;}
+.et-obs{border-bottom:1px solid #ccc;padding:5px 10px;display:flex;align-items:baseline;gap:6px;}
+.et-obs small{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#555;white-space:nowrap;}
+.et-obs span{font-size:12px;font-weight:500;color:#111;}
+.et-bottom{padding:10px 12px;display:flex;align-items:center;gap:14px;}
+.et-bottom-text{flex:1;text-align:center;}
+.et-bottom-brand{font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:600;color:#444;letter-spacing:.5px;margin-bottom:3px;}
+.et-bottom-num{font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:800;color:#111;letter-spacing:1px;line-height:1;}
+.et-bottom-num em{color:var(--blue);font-style:normal;}
+.et-bottom-sub{font-size:9px;color:#888;letter-spacing:.8px;text-transform:uppercase;margin-top:4px;}
+#qrBox canvas,#qrBox img{display:block;border:1px solid #ddd;}
+</style>
+</head>
+<body>
+<div class="tw-c" id="toastC"></div>
+
+<!-- ════════════════════════════
+     LOGIN
+════════════════════════════ -->
+<div id="loginScreen" class="screen">
+  <div class="lw">
+    <div class="lb">
+      <div>
+        <div class="lb-icon"><svg viewBox="0 0 24 24"><path d="M20 8h-3V4H3c-1.1 0-2 .9-2 2v11h2c0 1.66 1.34 3 3 3s3-1.34 3-3h6c0 1.66 1.34 3 3 3s3-1.34 3-3h2v-5l-3-4zm-.5 1.5 1.96 2.5H17V9.5h2.5zM6 18c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm2.22-3c-.55-.61-1.36-1-2.22-1H3V6h12v9H8.22zM18 18c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1z"/></svg></div>
+        <div class="lb-name">CARGO SERVICES <em>JL</em></div>
+        <div class="lb-sub">Sistema de Guías Térmicas</div>
+        <div class="lb-feats">
+          <div class="lbf"><div class="lbf-ic">📦</div><div class="lbf-t"><strong>Etiquetas con QR</strong><small>100×150 mm listas para imprimir</small></div></div>
+          <div class="lbf"><div class="lbf-ic">🔢</div><div class="lbf-t"><strong>Correlativos editables</strong><small>Control total de COL y CJL</small></div></div>
+          <div class="lbf"><div class="lbf-ic">📊</div><div class="lbf-t"><strong>Excel profesional</strong><small>Reporte con estadísticas y fórmulas</small></div></div>
+        </div>
+      </div>
+      <div class="lb-copy">© 2025 Cargo Services JL</div>
+    </div>
+    <div class="lf">
+      <div class="lf-head">
+        <h2 id="fh">Bienvenido de vuelta</h2>
+        <p id="fs">Ingresa tus credenciales para continuar</p>
+      </div>
+      <div class="seg">
+        <button class="seg-b on" onclick="stab('login',this)">Iniciar sesión</button>
+        <button class="seg-b" onclick="stab('register',this)">Crear cuenta</button>
+      </div>
+      <!-- LOGIN -->
+      <div id="pl" class="tab-pane active">
+        <div id="laAlert" class="al"></div>
+        <div class="fi">
+          <label>Usuario</label>
+          <div class="fi-w">
+            <svg class="ico" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg>
+            <input type="text" id="lU" placeholder="Ej: admin" onkeydown="if(event.key==='Enter')doLogin()">
+          </div>
+        </div>
+        <div class="fi">
+          <label>Contraseña</label>
+          <div class="fi-w">
+            <svg class="ico" viewBox="0 0 24 24" fill="currentColor"><path d="M18 8h-1V6c0-2.8-2.2-5-5-5S7 3.2 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.7 1.4-3.1 3.1-3.1 1.7 0 3.1 1.4 3.1 3.1v2z"/></svg>
+            <input type="password" id="lP" placeholder="Contraseña" onkeydown="if(event.key==='Enter')doLogin()">
+          </div>
+        </div>
+        <button class="btn bp full" style="margin-top:6px;" onclick="doLogin()">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M11 7 9.6 8.4l2.6 2.6H2v2h10.2l-2.6 2.6L11 17l5-5-5-5zm9 12h-8v2h8c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-8v2h8v14z"/></svg>
+          Ingresar al sistema
+        </button>
+      </div>
+      <!-- REGISTER -->
+      <div id="pr" class="tab-pane">
+        <div id="raAlert" class="al"></div>
+        <div class="g g2">
+          <div class="fi ni"><label>Nombre completo</label><div class="fi-w"><input type="text" id="rN" placeholder="Juan Pérez"></div></div>
+          <div class="fi ni"><label>Usuario</label><div class="fi-w"><input type="text" id="rU" placeholder="juanperez"></div></div>
+          <div class="fi ni s2"><label>Contraseña</label><div class="fi-w"><input type="password" id="rP" placeholder="Mínimo 4 caracteres"></div></div>
+        </div>
+        <button class="btn bs full" onclick="doRegister()">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M15 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm-9-2V7H4v3H1v2h3v3h2v-3h3v-2H6zm9 4c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+          Crear cuenta
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════
+     MAIN
+════════════════════════════ -->
+<div id="mainScreen" class="screen">
+  <nav class="sidebar">
+    <div class="sb-logo">
+      <div class="sb-li"><svg viewBox="0 0 24 24"><path d="M20 8h-3V4H3c-1.1 0-2 .9-2 2v11h2c0 1.66 1.34 3 3 3s3-1.34 3-3h6c0 1.66 1.34 3 3 3s3-1.34 3-3h2v-5l-3-4zm-.5 1.5 1.96 2.5H17V9.5h2.5zM6 18c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm2.22-3c-.55-.61-1.36-1-2.22-1H3V6h12v9H8.22zM18 18c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1z"/></svg></div>
+      <div class="sb-ln">CARGO SERVICES <em>JL</em></div>
+      <span class="sb-ls">Sistema de Guías v2</span>
+    </div>
+    <div class="sb-nav">
+      <div class="sb-sec">Principal</div>
+      <div class="ni-item on" data-p="dashboard" onclick="goP('dashboard',this)">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>Dashboard
+      </div>
+      <div class="ni-item" data-p="guia" onclick="goP('guia',this)">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>Nueva Guía
+      </div>
+      <div class="sb-sec">Gestión</div>
+      <div class="ni-item" data-p="registros" onclick="goP('registros',this)">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-1 9H9V9h10v2zm-4 4H9v-2h6v2zm4-8H9V5h10v2z"/></svg>Registros<span class="nb" id="nbadge">0</span>
+      </div>
+      <div class="ni-item" data-p="manifiestos" onclick="goP('manifiestos',this)">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 6h-2.18c.07-.44.18-.87.18-1.33C18 2.1 15.9 0 13.33 0c-1.33 0-2.54.58-3.38 1.5L9 3 8.05 1.5C7.21.58 6 0 4.67 0 2.1 0 0 2.1 0 4.67c0 .46.11.89.18 1.33H0v2h20V6zm-6.67-4c.92 0 1.67.75 1.67 1.67 0 .92-.75 1.67-1.67 1.67S11.67 5.25 11.67 4.34c0-.92.74-1.67 1.66-1.67zM4.67 5.33C3.75 5.33 3 4.58 3 3.66c0-.91.75-1.66 1.67-1.66.92 0 1.66.75 1.66 1.66 0 .92-.74 1.67-1.66 1.67zM0 20c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8H0v12zm8-7.5h8v1.5H8v-1.5zm0 3h8v1.5H8V15.5zM4 12h2v2H4v-2zm0 3.5h2v2H4v-2z"/></svg>Manifiestos<span class="nb" id="mnbadge" style="background:var(--amber);color:var(--navy);">0</span>
+      </div>
+      <div class="ni-item" data-p="usuarios" onclick="goP('usuarios',this)">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>Usuarios
+      </div>
+    </div>
+    <div class="sb-foot">
+      <div class="sb-usr">
+        <div class="sb-av" id="sbAv">A</div>
+        <div class="sb-ui">
+          <small id="sbRole" style="font-size:10px;color:rgba(255,255,255,.35);display:block;">Sesión activa</small>
+          <p id="sbNm">Admin</p>
+        </div>
+      </div>
+      <button class="btn bg full sm" style="margin-bottom:6px;" onclick="abrirCambioPass()">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
+        Cambiar contraseña
+      </button>
+      <button class="btn bg full sm" onclick="doLogout()">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg>
+        Cerrar sesión
+      </button>
+    </div>
+  </nav>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="tb-l">
+        <span class="tb-title" id="topTitle">Dashboard</span>
+        <span class="tb-date" id="topDate"></span>
+      </div>
+      <div class="tb-r">
+        <button class="btn bp sm" onclick="goP('guia',document.querySelector('[data-p=guia]'))">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>Nueva Guía
+        </button>
+      </div>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div id="pg-dashboard" class="page active">
+      <div class="ph"><div class="ph-l"><h2>Panel de control</h2><p>Resumen del sistema de guías térmicas</p></div></div>
+      <div class="sg">
+        <div class="sc"><div class="sci ib"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm-1 7V3.5L18.5 9H13z"/></svg></div><div class="si"><p>Total guías</p><h3 id="sG">0</h3></div></div>
+        <div class="sc"><div class="sci ig"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg></div><div class="si"><p>Destinos únicos</p><h3 id="sD">0</h3></div></div>
+        <div class="sc"><div class="sci ia"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg></div><div class="si"><p>Usuarios</p><h3 id="sU">0</h3></div></div>
+        <div class="sc"><div class="sci ip"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 3h-4.18C14.4 1.84 13.3 1 12 1c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm2 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg></div><div class="si"><p>Último correlativo</p><h3 id="sC" style="font-size:16px;">—</h3></div></div>
+      </div>
+      <div class="card">
+        <div class="ch"><h4>Actividad reciente</h4><button class="btn bg sm" onclick="goP('registros',document.querySelector('[data-p=registros]'))">Ver todos →</button></div>
+        <div id="dashAct" class="al-list"></div>
+      </div>
+    </div>
+
+    <!-- NUEVA GUÍA -->
+    <div id="pg-guia" class="page">
+      <div class="ph"><div class="ph-l"><h2>Nueva Guía Térmica</h2><p>Complete los datos · Etiqueta 100×150 mm con código QR generada automáticamente</p></div></div>
+
+      <!-- CORRELATIVO -->
+      <div class="cb-box">
+        <div>
+          <div style="font-size:11px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;">Correlativos asignados — <span style="color:var(--blue);cursor:pointer;font-weight:600;" onclick="toggleCE()">✏️ Editar número</span></div>
+          <div class="cc-row">
+            <div class="cc-pill" onclick="toggleCE()">
+              <small>Código COL</small><strong id="pCOL">COL-0001</strong><span class="eh">✏️</span>
+            </div>
+            <div class="cc-sep">↔</div>
+            <div class="cc-pill" onclick="toggleCE()">
+              <small>Código CJL</small><strong id="pCJL">CJL-0001</strong><span class="eh">✏️</span>
+            </div>
+          </div>
+          <div style="font-size:11px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.5px;margin-top:14px;margin-bottom:6px;">¿Qué código mostrar en la etiqueta?</div>
+          <div class="corr-selector">
+            <button class="cs-btn active" id="csBtnCOL" onclick="selCorr('COL')">
+              🏷️ Mostrar <strong>COL</strong>
+            </button>
+            <button class="cs-btn" id="csBtnCJL" onclick="selCorr('CJL')">
+              🏷️ Mostrar <strong>CJL</strong>
+            </button>
+            <button class="cs-btn" id="csBtnAMBOS" onclick="selCorr('AMBOS')">
+              🏷️ Mostrar <strong>AMBOS</strong>
+            </button>
+          </div>
+        </div>
+        <div style="text-align:right">
+          <div class="cc-meta"><small>Formato etiqueta</small><strong>100 × 150 mm</strong></div>
+        </div>
+      </div>
+
+      <!-- EDITOR CORRELATIVO -->
+      <div class="ce" id="ceBox">
+        <div class="ce-title">✏️ Editar número inicial del correlativo</div>
+        <div class="ce-row">
+          <div class="ce-field"><label>COL-</label><input type="number" id="ceNum" min="1" max="9999" oninput="previewCE()"></div>
+          <span style="font-size:12px;color:#92400E;">— CJL usará el mismo número —</span>
+          <button class="btn ba xs" onclick="applyCE()">✓ Aplicar</button>
+          <button class="btn bg xs" onclick="toggleCE()">Cancelar</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="cb">
+          <div id="gAlert" class="al"></div>
+
+          <div class="stitle"><span class="dot"></span>Datos del remitente</div>
+          <div class="g g3" style="margin-bottom:16px;">
+            <div class="fi ni"><label>Nombre completo *</label><div class="fi-w"><input id="gRN" type="text" placeholder="Nombre del remitente"></div></div>
+            <div class="fi ni"><label>RUC / DNI</label><div class="fi-w"><input id="gRD" type="text" placeholder="Documento de identidad"></div></div>
+            <div class="fi ni"><label>Teléfono</label><div class="fi-w"><input id="gRT" type="text" placeholder="Número de contacto"></div></div>
+            <div class="fi ni"><label>Ciudad de origen *</label><div class="fi-w"><input id="gRC" type="text" placeholder="Ciudad"></div></div>
+            <div class="fi ni s2"><label>Dirección de recojo</label><div class="fi-w"><input id="gRDir" type="text" placeholder="Dirección completa"></div></div>
+          </div>
+
+          <hr class="dvd">
+          <div class="stitle"><span class="dot"></span>Datos del destinatario</div>
+          <div class="g g3" style="margin-bottom:16px;">
+            <div class="fi ni"><label>Nombre completo *</label><div class="fi-w"><input id="gDN" type="text" placeholder="Nombre del destinatario"></div></div>
+            <div class="fi ni"><label>RUC / DNI</label><div class="fi-w"><input id="gDD" type="text" placeholder="Documento de identidad"></div></div>
+            <div class="fi ni"><label>Teléfono *</label><div class="fi-w"><input id="gDT" type="text" placeholder="Número de contacto"></div></div>
+            <div class="fi ni"><label>Ciudad de destino *</label><div class="fi-w"><input id="gDC" type="text" placeholder="Ciudad"></div></div>
+            <div class="fi ni s2"><label>Dirección de entrega *</label><div class="fi-w"><input id="gDDir" type="text" placeholder="Dirección completa de entrega"></div></div>
+          </div>
+
+          <hr class="dvd">
+          <div class="stitle"><span class="dot"></span>Datos del envío</div>
+          <div class="g g4">
+            <div class="fi ni"><label>Servicio</label><div class="fi-w"><select id="gSrv"><option>Estándar</option><option>Express</option><option>Económico</option><option>Frágil</option><option>Refrigerado</option></select></div></div>
+            <div class="fi ni"><label>Peso (kg)</label><div class="fi-w"><input id="gPeso" type="number" placeholder="0.00" step="0.01"></div></div>
+            <div class="fi ni"><label>N° de cajas</label><div class="fi-w"><input id="gBul" type="number" value="1" min="1"></div></div>
+            <div class="fi ni"><label>Forma de pago</label><div class="fi-w"><select id="gPago"><option>Contado</option><option>Crédito</option><option>Contra entrega</option></select></div></div>
+            <div class="fi ni s2"><label>Descripción del contenido</label><div class="fi-w"><input id="gDesc" type="text" placeholder="¿Qué contiene el paquete?"></div></div>
+            <div class="fi ni s2" style="display:flex;flex-direction:column;">
+              <label>Medidas del paquete (cm)</label>
+              <div style="display:flex;gap:8px;align-items:center;">
+                <input id="gAlto" type="number" placeholder="Alto" step="0.1" min="0" style="flex:1;padding:11px 10px;border:1.5px solid var(--border);border-radius:var(--r3);font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;color:var(--t1);background:#fff;outline:none;">
+                <span style="color:var(--t3);font-weight:700;font-size:16px;">×</span>
+                <input id="gLargo" type="number" placeholder="Largo" step="0.1" min="0" style="flex:1;padding:11px 10px;border:1.5px solid var(--border);border-radius:var(--r3);font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;color:var(--t1);background:#fff;outline:none;">
+                <span style="color:var(--t3);font-weight:700;font-size:16px;">×</span>
+                <input id="gAncho" type="number" placeholder="Ancho" step="0.1" min="0" style="flex:1;padding:11px 10px;border:1.5px solid var(--border);border-radius:var(--r3);font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;color:var(--t1);background:#fff;outline:none;">
+              </div>
+            </div>
+            <div class="fi ni s4"><label>Observaciones</label><div class="fi-w"><input id="gObs" type="text" placeholder="Instrucciones especiales, cuidados..."></div></div>
+          </div>
+
+          <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:8px;">
+            <button class="btn bg sm" onclick="resetG()">Limpiar</button>
+            <button class="btn bp" onclick="generarGuia()">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
+              Generar etiqueta
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- REGISTROS -->
+    <div id="pg-registros" class="page">
+      <div class="ph">
+        <div class="ph-l"><h2>Registro de Guías</h2><p>Haz clic en cualquier fila para ver la etiqueta</p></div>
+        <div class="ph-r">
+          <div class="srch">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+            <input type="text" id="sq" placeholder="Buscar guía, cliente, ciudad..." oninput="renderReg()">
+          </div>
+          <button class="btn bs sm" onclick="exportExcel()">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+            Exportar Excel Pro
+          </button>
+        </div>
+      </div>
+      <!-- Barra selección múltiple -->
+      <div id="multiBar" style="display:none;padding:10px 18px;background:linear-gradient(135deg,var(--blue),var(--blue2));border-radius:10px;margin-bottom:12px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+        <span style="color:#fff;font-weight:700;font-size:13px;"><span id="selCount">0</span> guías seleccionadas</span>
+        <button class="btn sm" style="background:rgba(255,255,255,.2);color:#fff;border:1.5px solid rgba(255,255,255,.4);" onclick="selAll()">Seleccionar todas</button>
+        <button class="btn sm" style="background:rgba(255,255,255,.2);color:#fff;border:1.5px solid rgba(255,255,255,.4);" onclick="deselAll()">Deseleccionar</button>
+        <button class="btn sm" style="background:#fff;color:var(--blue);font-weight:800;" onclick="abrirMultiEstatus()">
+          📦 Cambiar estado
+        </button>
+        <button class="btn sm" style="background:var(--amber);color:var(--navy);font-weight:800;" onclick="crearManifiesto()">
+          📋 Crear Manifiesto
+        </button>
+      </div>
+      <div class="card cb0">
+        <div class="tw">
+          <table>
+            <thead><tr>
+              <th style="width:36px;"><input type="checkbox" id="chkAll" onclick="toggleAll(this)" style="cursor:pointer;width:15px;height:15px;"></th>
+              <th>#</th><th>Fecha</th><th>COL</th><th>CJL</th><th>Remitente</th><th>Destinatario</th><th>Ruta</th><th>Servicio</th><th>Peso</th><th>Estado</th><th>Acciones</th>
+            </tr></thead>
+            <tbody id="rTbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- MANIFIESTOS -->
+    <div id="pg-manifiestos" class="page">
+      <div class="ph">
+        <div class="ph-l"><h2>Manifiestos</h2><p>Guías archivadas y cerradas por corte</p></div>
+        <div class="ph-r">
+          <div class="srch">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+            <input type="text" id="mq" placeholder="Buscar manifiesto..." oninput="renderManifiestos()">
+          </div>
+        </div>
+      </div>
+      <div id="mGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;"></div>
+    </div>
+
+    <!-- DETALLE MANIFIESTO -->
+    <div id="pg-manifiesto-detalle" class="page">
+      <div class="ph">
+        <div class="ph-l">
+          <button class="btn bg sm" style="margin-bottom:8px;" onclick="goP('manifiestos',document.querySelector('[data-p=manifiestos]'))">← Volver</button>
+          <h2 id="mDetTitle">Manifiesto</h2>
+          <p id="mDetSub"></p>
+        </div>
+        <div class="ph-r">
+          <button class="btn bs sm" onclick="exportManifiestoExcel()">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+            Exportar Excel
+          </button>
+        </div>
+      </div>
+      <div class="card cb0">
+        <div class="tw">
+          <table>
+            <thead><tr><th>#</th><th>Fecha</th><th>COL</th><th>CJL</th><th>Remitente</th><th>Destinatario</th><th>Ruta</th><th>Servicio</th><th>Peso</th><th>Estado</th></tr></thead>
+            <tbody id="mDetBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- USUARIOS -->
+    <div id="pg-usuarios" class="page">
+      <div class="ph"><div class="ph-l"><h2>Gestión de usuarios</h2><p>Administra las cuentas del sistema</p></div></div>
+      <div class="ug" id="uGrid"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- MODAL ETIQUETA -->
+<div class="ov" id="ovLabel">
+  <div class="modal" style="max-width:500px;">
+    <div class="mh">
+      <h4>🏷️ Etiquetas — <span id="modalBoxInfo">100×150 mm</span></h4>
+      <button class="mcl" onclick="closeOv('ovLabel')"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg></button>
+    </div>
+    <!-- Navegador de cajas -->
+    <div id="boxNav" style="display:none;padding:10px 22px;background:var(--bg);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:10px;">
+      <button class="btn bg sm" id="btnPrev" onclick="navBox(-1)">← Anterior</button>
+      <span id="boxNavLabel" style="font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:700;color:var(--navy);"></span>
+      <button class="btn bg sm" id="btnNext" onclick="navBox(1)">Siguiente →</button>
+    </div>
+    <!-- Editor peso/medidas por caja -->
+    <div id="boxEditor" style="display:none;padding:12px 22px;background:#FFFBEB;border-bottom:1px solid #FCD34D;">
+      <div style="font-size:11px;font-weight:800;color:#92400E;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;">✏️ Editar peso y medidas de esta caja</div>
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+        <div style="display:flex;flex-direction:column;gap:3px;">
+          <label style="font-size:10px;font-weight:700;color:#555;text-transform:uppercase;">Peso (kg)</label>
+          <input id="editCajaPeso" type="number" step="0.01" placeholder="0.00" style="width:90px;padding:7px 10px;border:1.5px solid #FCD34D;border-radius:6px;font-size:14px;font-weight:700;text-align:center;outline:none;">
+        </div>
+        <span style="color:#ccc;font-size:18px;margin-top:16px;">·</span>
+        <div style="display:flex;flex-direction:column;gap:3px;">
+          <label style="font-size:10px;font-weight:700;color:#555;text-transform:uppercase;">Alto cm</label>
+          <input id="editCajaAlto" type="number" step="0.1" placeholder="0" style="width:72px;padding:7px 8px;border:1.5px solid #FCD34D;border-radius:6px;font-size:13px;text-align:center;outline:none;">
+        </div>
+        <span style="color:#ccc;font-size:16px;margin-top:16px;">×</span>
+        <div style="display:flex;flex-direction:column;gap:3px;">
+          <label style="font-size:10px;font-weight:700;color:#555;text-transform:uppercase;">Largo cm</label>
+          <input id="editCajaLargo" type="number" step="0.1" placeholder="0" style="width:72px;padding:7px 8px;border:1.5px solid #FCD34D;border-radius:6px;font-size:13px;text-align:center;outline:none;">
+        </div>
+        <span style="color:#ccc;font-size:16px;margin-top:16px;">×</span>
+        <div style="display:flex;flex-direction:column;gap:3px;">
+          <label style="font-size:10px;font-weight:700;color:#555;text-transform:uppercase;">Ancho cm</label>
+          <input id="editCajaAncho" type="number" step="0.1" placeholder="0" style="width:72px;padding:7px 8px;border:1.5px solid #FCD34D;border-radius:6px;font-size:13px;text-align:center;outline:none;">
+        </div>
+        <button class="btn ba sm" style="margin-top:16px;" onclick="guardarCajaData()">
+          <svg viewBox="0 0 24 24" fill="currentColor" style="width:14px;height:14px;"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+          Guardar
+        </button>
+      </div>
+    </div>
+    <div class="mb" id="labelCont"></div>
+    <div class="mf">
+      <button class="btn bd sm" onclick="eliminarGuia()" id="btnEliminar">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+        Eliminar guía
+      </button>
+      <button class="btn bg sm" onclick="closeOv('ovLabel')">Cerrar</button>
+      <button class="btn sm" style="background:#1565C0;color:#fff;font-weight:700;" onclick="abrirZoom()" id="btnZoom">
+        ✈️ Crear Guía ZOOM
+      </button>
+      <button class="btn bs sm" id="btnPrintAll" onclick="printAllLabels()" style="display:none;">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z"/></svg>
+        Imprimir todas
+      </button>
+      <button class="btn bn sm" onclick="printLabel()">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z"/></svg>
+        Imprimir esta caja
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CAMBIAR CONTRASEÑA -->
+<div class="ov" id="ovPass">
+  <div class="modal" style="max-width:380px;">
+    <div class="mh">
+      <h4>🔒 Cambiar contraseña</h4>
+      <button class="mcl" onclick="closeOv('ovPass')"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg></button>
+    </div>
+    <div class="mb">
+      <p style="font-size:13px;color:var(--t2);margin-bottom:16px;">Cambia la contraseña de tu cuenta <strong id="passUserRef"></strong></p>
+      <div class="fi ni"><label>Contraseña actual</label>
+        <div class="fi-w"><input type="password" id="passActual" placeholder="Tu contraseña actual"></div>
+      </div>
+      <div class="fi ni"><label>Nueva contraseña</label>
+        <div class="fi-w"><input type="password" id="passNueva" placeholder="Mínimo 4 caracteres"></div>
+      </div>
+      <div class="fi ni"><label>Confirmar nueva contraseña</label>
+        <div class="fi-w"><input type="password" id="passConfirm" placeholder="Repite la nueva contraseña"></div>
+      </div>
+      <div class="al" id="passAlert"></div>
+    </div>
+    <div class="mf">
+      <button class="btn bg sm" onclick="closeOv('ovPass')">Cancelar</button>
+      <button class="btn bs sm" onclick="guardarNuevaPass()">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+        Guardar contraseña
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL ZOOM -->
+<div class="ov" id="ovZoom">
+  <div class="modal" style="max-width:560px;">
+    <div class="mh" style="background:linear-gradient(135deg,#1565C0,#1976D2);">
+      <h4 style="color:#fff;">✈️ Crear Guía ZOOM — <span id="zoomGuiaRef" style="color:#90CAF9;"></span></h4>
+      <button class="mcl" style="color:#fff;" onclick="closeOv('ovZoom')"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg></button>
+    </div>
+    <div class="mb">
+      <!-- Estado del proceso -->
+      <div id="zoomStatus" style="padding:14px;background:var(--sky);border-radius:10px;margin-bottom:16px;font-size:13px;color:var(--blue);font-weight:600;display:none;"></div>
+
+      <!-- Datos mapeados -->
+      <div id="zoomDatos" style="display:none;">
+        <p style="font-size:12px;color:var(--t2);margin-bottom:14px;padding:10px;background:#E3F2FD;border-radius:8px;border-left:3px solid #1565C0;">
+          ✅ Datos mapeados automáticamente desde tu guía. Revisa y confirma.
+        </p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
+          <div class="fi ni"><label>Referencia (tu COL)</label><div class="fi-w"><input type="text" id="zRef" readonly style="background:#f9f9f9;"></div></div>
+          <div class="fi ni"><label>Tipo de Envío</label>
+            <div class="fi-w"><select id="zTipo"><option value="M">Mercancía</option><option value="D">Documento</option></select></div>
+          </div>
+        </div>
+        <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.7px;color:#1565C0;margin-bottom:8px;">📥 Destinatario</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
+          <div class="fi ni"><label>Nombre *</label><div class="fi-w"><input type="text" id="zDN"></div></div>
+          <div class="fi ni"><label>C.I / RIF / Pasaporte</label><div class="fi-w"><input type="text" id="zDD"></div></div>
+          <div class="fi ni"><label>Teléfono</label><div class="fi-w"><input type="text" id="zDT"></div></div>
+          <div class="fi ni"><label>Celular</label><div class="fi-w"><input type="text" id="zDCel"></div></div>
+          <div class="fi ni" style="grid-column:span 2;"><label>Dirección / Localidad *</label><div class="fi-w"><input type="text" id="zDDir"></div></div>
+        </div>
+        <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.7px;color:#1565C0;margin-bottom:8px;">📦 Destino y Paquete</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
+          <div class="fi ni"><label>Ciudad Destino *</label>
+            <div class="fi-w" style="position:relative;" id="zCiudadWrap">
+              <input type="text" id="zCiudad" placeholder="Escribe la ciudad..." autocomplete="off"
+                style="width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-family:'Plus Jakarta Sans',sans-serif;"
+                oninput="filtrarCiudades(this.value)">
+              <div id="zCiudadList" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1.5px solid var(--blue);border-radius:8px;max-height:200px;overflow-y:auto;z-index:999;box-shadow:0 8px 24px rgba(0,0,0,.15);"></div>
+            </div>
+          </div>
+          <div class="fi ni"><label>Sucursal Destino *</label>
+            <div class="fi-w"><select id="zSucursal"><option value="">Selecciona ciudad primero</option></select></div>
+          </div>
+          <div class="fi ni"><label>Peso Ref. (kg) *</label><div class="fi-w"><input type="number" id="zPeso" step="0.01"></div></div>
+          <div class="fi ni"><label>Descripción contenido *</label><div class="fi-w"><input type="text" id="zDesc"></div></div>
+          <div class="fi ni"><label>Alto (cm)</label><div class="fi-w"><input type="text" id="zAlto"></div></div>
+          <div class="fi ni"><label>Ancho (cm)</label><div class="fi-w"><input type="text" id="zAncho"></div></div>
+          <div class="fi ni"><label>Largo (cm)</label><div class="fi-w"><input type="text" id="zLargo"></div></div>
+          <div class="fi ni"><label>Valor Mercancía ($)</label><div class="fi-w"><input type="number" id="zValor" step="0.01" value="0"></div></div>
+        </div>
+        <div class="al" id="zoomAlert"></div>
+      </div>
+
+      <!-- Resultado exitoso -->
+      <div id="zoomResultado" style="display:none;text-align:center;padding:20px;">
+        <div style="font-size:48px;margin-bottom:12px;">✅</div>
+        <h3 style="font-family:'Space Grotesk',sans-serif;color:var(--navy);margin-bottom:6px;">¡Guía ZOOM creada!</h3>
+        <div style="font-family:'Space Grotesk',sans-serif;font-size:28px;font-weight:800;color:#1565C0;margin:12px 0;" id="zoomNumero">—</div>
+        <p style="font-size:13px;color:var(--t2);">Este número fue guardado en tu guía automáticamente</p>
+        <div style="display:flex;gap:10px;justify-content:center;margin-top:16px;">
+          <button class="btn sm" style="background:#1565C0;color:#fff;font-weight:700;" onclick="imprimirEtiquetaZoom()">🖨️ Imprimir Etiqueta ZOOM</button>
+          <button class="btn bg sm" onclick="closeOv('ovZoom')">Cerrar</button>
+        </div>
+      </div>
+    </div>
+    <div class="mf" id="zoomFooter">
+      <button class="btn bg sm" onclick="closeOv('ovZoom')">Cancelar</button>
+      <button class="btn sm" style="background:#1565C0;color:#fff;font-weight:700;" onclick="enviarAZoom()">
+        ✈️ Crear en ZOOM
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL EDITAR GUÍA -->
+<div class="ov" id="ovEditar">
+  <div class="modal" style="max-width:580px;">
+    <div class="mh">
+      <h4>✏️ Editar guía — <span id="editGuiaRef" style="color:var(--blue);"></span></h4>
+      <button class="mcl" onclick="closeOv('ovEditar')"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg></button>
+    </div>
+    <div class="mb" style="max-height:65vh;overflow-y:auto;">
+      <div style="padding:10px 14px;background:var(--blue3);border-radius:8px;font-size:12px;color:var(--blue);margin-bottom:16px;font-weight:600;">ℹ️ Solo se editan los datos del envío. El estado e historial <strong>no se modifican</strong>.</div>
+      <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.7px;color:var(--navy);margin-bottom:10px;">📤 Remitente</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
+        <div class="fi ni"><label>Nombre *</label><div class="fi-w"><input type="text" id="eRN"></div></div>
+        <div class="fi ni"><label>Documento</label><div class="fi-w"><input type="text" id="eRD"></div></div>
+        <div class="fi ni"><label>Teléfono</label><div class="fi-w"><input type="text" id="eRT"></div></div>
+        <div class="fi ni"><label>Ciudad origen *</label><div class="fi-w"><input type="text" id="eRC"></div></div>
+        <div class="fi ni" style="grid-column:span 2;"><label>Dirección</label><div class="fi-w"><input type="text" id="eRDir"></div></div>
+      </div>
+      <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.7px;color:var(--navy);margin-bottom:10px;">📥 Destinatario</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
+        <div class="fi ni"><label>Nombre *</label><div class="fi-w"><input type="text" id="eDN"></div></div>
+        <div class="fi ni"><label>Documento</label><div class="fi-w"><input type="text" id="eDD"></div></div>
+        <div class="fi ni"><label>Teléfono</label><div class="fi-w"><input type="text" id="eDT"></div></div>
+        <div class="fi ni"><label>Ciudad destino *</label><div class="fi-w"><input type="text" id="eDC"></div></div>
+        <div class="fi ni" style="grid-column:span 2;"><label>Dirección de entrega *</label><div class="fi-w"><input type="text" id="eDDir"></div></div>
+      </div>
+      <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.7px;color:var(--navy);margin-bottom:10px;">📦 Paquete</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">
+        <div class="fi ni"><label>Servicio</label><div class="fi-w"><select id="eSrv"><option>Estándar</option><option>Express</option><option>Frágil</option><option>Documentos</option><option>Refrigerado</option></select></div></div>
+        <div class="fi ni"><label>Forma de pago</label><div class="fi-w"><select id="ePago"><option>Contado</option><option>Crédito</option><option>Contra entrega</option></select></div></div>
+        <div class="fi ni"><label>N° cajas</label><div class="fi-w"><input type="number" id="eBul" min="1" value="1"></div></div>
+        <div class="fi ni"><label>Peso (kg)</label><div class="fi-w"><input type="text" id="ePeso"></div></div>
+        <div class="fi ni"><label>Alto (cm)</label><div class="fi-w"><input type="text" id="eAlto"></div></div>
+        <div class="fi ni"><label>Largo (cm)</label><div class="fi-w"><input type="text" id="eLargo"></div></div>
+        <div class="fi ni"><label>Ancho (cm)</label><div class="fi-w"><input type="text" id="eAncho"></div></div>
+        <div class="fi ni" style="grid-column:span 2;"><label>Descripción del contenido</label><div class="fi-w"><input type="text" id="eDesc"></div></div>
+        <div class="fi ni" style="grid-column:span 3;"><label>Observaciones</label><div class="fi-w"><input type="text" id="eObs"></div></div>
+      </div>
+      <div class="al" id="editAlert" style="margin-top:12px;"></div>
+    </div>
+    <div class="mf">
+      <button class="btn bg sm" onclick="closeOv('ovEditar')">Cancelar</button>
+      <button class="btn bs sm" onclick="guardarEdicion()">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+        Guardar cambios
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL ESTADO MÚLTIPLE -->
+<div class="ov" id="ovMultiStatus">
+  <div class="modal" style="max-width:420px;">
+    <div class="mh">
+      <h4>📦 Cambiar estado — múltiples guías</h4>
+      <button class="mcl" onclick="closeOv('ovMultiStatus')"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg></button>
+    </div>
+    <div class="mb">
+      <p style="font-size:13px;color:var(--t2);margin-bottom:14px;">Se aplicará a <strong id="multiCount" style="color:var(--blue);font-size:15px;">0</strong> guías seleccionadas</p>
+      <div class="fi ni"><label>Nuevo estado</label>
+        <div class="fi-w"><select id="multiSelect">
+          <option value="Recogido">📦 Recogido</option>
+          <option value="En almacén">🏬 En almacén</option>
+          <option value="En tránsito" selected>🚚 En tránsito</option>
+          <option value="En reparto">🛵 En reparto local</option>
+          <option value="Entregado">✅ Entregado</option>
+          <option value="Con incidencia">⚠️ Con incidencia</option>
+        </select></div>
+      </div>
+      <div class="fi ni"><label>Transportista (opcional)</label>
+        <div class="fi-w"><input type="text" id="multiTrans" placeholder="Ej: ZOOM, Olva..."></div>
+      </div>
+      <div class="fi ni"><label>Nota (opcional)</label>
+        <div class="fi-w"><input type="text" id="multiNota" placeholder="Nota de seguimiento..."></div>
+      </div>
+    </div>
+    <div class="mf">
+      <button class="btn bg sm" onclick="closeOv('ovMultiStatus')">Cancelar</button>
+      <button class="btn bs sm" onclick="aplicarMultiEstatus()">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+        Aplicar a todas
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="ov" id="ovStatus">
+  <div class="modal" style="max-width:420px;">
+    <div class="mh">
+      <h4>📦 Cambiar estado del paquete</h4>
+      <button class="mcl" onclick="closeOv('ovStatus')"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg></button>
+    </div>
+    <div class="mb">
+      <p style="font-size:13px;color:var(--t2);margin-bottom:14px;">Guía: <strong id="stGuiaRef">—</strong></p>
+      <div class="fi ni"><label>Nuevo estado</label>
+        <div class="fi-w"><select id="stSelect">
+          <option value="Recogido">📦 Recogido</option>
+          <option value="En almacén">🏬 En almacén</option>
+          <option value="En tránsito" selected>🚚 En tránsito</option>
+          <option value="En reparto">🛵 En reparto local</option>
+          <option value="Entregado">✅ Entregado</option>
+          <option value="Con incidencia">⚠️ Con incidencia</option>
+        </select></div>
+      </div>
+      <div class="fi ni"><label>Operador/Transportista</label>
+        <div class="fi-w"><input type="text" id="stTransportista" placeholder="Ej: ZOOM, Olva, propio..."></div>
+      </div>
+      <div class="fi ni"><label>Nota de seguimiento (opcional)</label>
+        <div class="fi-w"><input type="text" id="stNota" placeholder="Ej: En oficina principal, cliente ausente..."></div>
+      </div>
+    </div>
+    <div class="mf">
+      <button class="btn bg sm" onclick="closeOv('ovStatus')">Cancelar</button>
+      <button class="btn bs sm" onclick="aplicarEstatus()">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+        Guardar estado
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ─── STATE ─── */
+let users  = []; // ahora viene de Firestore
+let guias  = [];
+let corrOf = parseInt(localStorage.getItem('csjl2_off')||'0');
+let cu=null, ag=null;
+let unsubscribeGuias = null;
+let unsubUsers = null;
+
+function saveO(){localStorage.setItem('csjl2_off',corrOf);}
+
+/* ─── FIREBASE: USUARIOS ─── */
+async function initAdmin(){
+  // Crear admin si no existe en Firestore
+  const snap = await db.collection('usuarios').doc('admin').get();
+  if(!snap.exists){
+    await db.collection('usuarios').doc('admin').set({
+      user:'admin', pass:'admin123', nombre:'Administrador',
+      role:'admin', activo:true, creadoEn: new Date().toISOString()
+    });
+  }
+}
+
+async function escucharUsuarios(){
+  unsubUsers = db.collection('usuarios').onSnapshot(snap=>{
+    users = snap.docs.map(d=>d.data());
+  });
+}
+
+async function doLogin(){
+  const u=document.getElementById('lU').value.trim();
+  const p=document.getElementById('lP').value;
+  if(!u||!p) return sal('laAlert','Ingresa usuario y contraseña');
+
+  sal('laAlert','🔄 Verificando...','ok');
+  try{
+    const snap = await db.collection('usuarios').where('user','==',u).where('pass','==',p).limit(1).get();
+    if(snap.empty) return sal('laAlert','Usuario o contraseña incorrectos');
+    const f = snap.docs[0].data();
+    if(f.activo===false) return sal('laAlert','Tu cuenta está desactivada. Contacta al administrador.');
+    cu=f;
+    document.getElementById('sbNm').textContent=f.nombre;
+    document.getElementById('sbAv').textContent=f.nombre[0].toUpperCase();
+    const roleEl=document.getElementById('sbRole');
+    if(roleEl){
+      roleEl.textContent=f.role==='admin'?'👑 Administrador':'👤 Operador';
+      roleEl.style.color=f.role==='admin'?'var(--amber)':'rgba(255,255,255,.55)';
+    }
+    document.getElementById('loginScreen').classList.remove('active');
+    document.getElementById('mainScreen').classList.add('active');
+    escucharGuias();
+    escucharUsuarios();
+    escucharManifiestos();
+    updDate();
+  }catch(e){ sal('laAlert','Error de conexión: '+e.message); }
+}
+
+async function doRegister(){
+  const n=document.getElementById('rN').value.trim();
+  const u=document.getElementById('rU').value.trim();
+  const p=document.getElementById('rP').value;
+  if(!n||!u||!p) return sal('raAlert','Completa todos los campos');
+  if(p.length<4) return sal('raAlert','Contraseña mínimo 4 caracteres');
+  sal('raAlert','🔄 Creando cuenta...','ok');
+  try{
+    const existe = await db.collection('usuarios').where('user','==',u).limit(1).get();
+    if(!existe.empty) return sal('raAlert','Ese nombre de usuario ya existe');
+    await db.collection('usuarios').doc(u).set({
+      user:u, pass:p, nombre:n,
+      role:'operador', activo:true,
+      creadoEn: new Date().toISOString()
+    });
+    sal('raAlert','✅ Cuenta creada. Ya puedes iniciar sesión.','ok');
+    setTimeout(()=>stab('login',document.querySelector('.seg-b')),1800);
+  }catch(e){ sal('raAlert','Error: '+e.message); }
+}
+
+function doLogout(){
+  cu=null;
+  if(unsubscribeGuias){unsubscribeGuias();unsubscribeGuias=null;}
+  if(unsubUsers){unsubUsers();unsubUsers=null;}
+  guias=[];users=[];
+  document.getElementById('mainScreen').classList.remove('active');
+  document.getElementById('loginScreen').classList.add('active');
+  document.getElementById('lU').value='';document.getElementById('lP').value='';
+}
+
+/* ─── FIREBASE: guardar guía ─── */
+async function saveGuiaFS(g){
+  try{
+    await db.collection('guias').doc(g.col).set(g);
+  }catch(e){ toast('Error al guardar en nube: '+e.message,1); }
+}
+
+/* ─── FIREBASE: actualizar guía ─── */
+async function updateGuiaFS(col, data){
+  try{
+    await db.collection('guias').doc(col).update(data);
+  }catch(e){ toast('Error al actualizar: '+e.message,1); }
+}
+
+/* ─── FIREBASE: escuchar guías en tiempo real ─── */
+function escucharGuias(){
+  let query = db.collection('guias');
+  if(cu.role !== 'admin') query = query.where('userKey','==',cu.user);
+  unsubscribeGuias = query.orderBy('ts','asc')
+    .onSnapshot(snap=>{
+      const todas = snap.docs.map(d=>d.data());
+      // Vista principal: solo guías NO archivadas
+      guias = todas.filter(g=>!g.archivado);
+      document.getElementById('nbadge').textContent=guias.length;
+      updDash(); updCorr();
+      if(document.getElementById('pg-registros').classList.contains('active')) renderReg();
+    }, err=>{
+      let q2 = db.collection('guias');
+      if(cu.role !== 'admin') q2 = q2.where('userKey','==',cu.user);
+      q2.get().then(snap=>{
+        const todas = snap.docs.map(d=>d.data());
+        guias = todas.filter(g=>!g.archivado);
+        guias.sort((a,b)=>a.ts>b.ts?1:-1);
+        document.getElementById('nbadge').textContent=guias.length;
+        updDash(); updCorr();
+      });
+    });
+}
+
+/* ─── MANIFIESTOS ─── */
+let manifiestos = [];
+let currentManifiesto = null;
+
+function escucharManifiestos(){
+  db.collection('manifiestos').orderBy('creadoEn','desc')
+    .onSnapshot(snap=>{
+      manifiestos = snap.docs.map(d=>({id:d.id,...d.data()}));
+      document.getElementById('mnbadge').textContent=manifiestos.length;
+      if(document.getElementById('pg-manifiestos').classList.contains('active')) renderManifiestos();
+    }, err=>{
+      db.collection('manifiestos').get().then(snap=>{
+        manifiestos = snap.docs.map(d=>({id:d.id,...d.data()}));
+        manifiestos.sort((a,b)=>b.creadoEn>a.creadoEn?1:-1);
+        document.getElementById('mnbadge').textContent=manifiestos.length;
+      });
+    });
+}
+
+async function crearManifiesto(){
+  if(seleccionadas.size===0) return toast('Selecciona al menos una guía para crear manifiesto',1);
+  const cols=[...seleccionadas];
+  const nombre=prompt(`Nombre del manifiesto (ej: Semana 17 - Abril):\nSe archivarán ${cols.length} guías.`);
+  if(!nombre) return;
+  const now=new Date();
+  const mId='M-'+now.getFullYear()+String(now.getMonth()+1).padStart(2,'0')+String(now.getDate()).padStart(2,'0')+'-'+String(now.getTime()).slice(-4);
+  const guiasDelManifiesto=guias.filter(g=>cols.includes(g.col));
+  const totalPiezas=guiasDelManifiesto.reduce((s,g)=>s+(parseInt(g.bul)||1),0);
+
+  try{
+    // Guardar manifiesto en Firebase
+    await db.collection('manifiestos').doc(mId).set({
+      id:mId, nombre, fecha:now.toLocaleDateString('es-PE'),
+      creadoEn:now.toISOString(), creadoPor:cu.nombre,
+      totalGuias:cols.length, totalPiezas,
+      guias:guiasDelManifiesto
+    });
+    // Marcar guías como archivadas
+    for(const col of cols){
+      await db.collection('guias').doc(col).update({archivado:true, manifiestoId:mId});
+    }
+    seleccionadas.clear();
+    toast(`✅ Manifiesto "${nombre}" creado con ${cols.length} guías`);
+    goP('manifiestos', document.querySelector('[data-p=manifiestos]'));
+  }catch(e){ toast('Error: '+e.message,1); }
+}
+
+function renderManifiestos(){
+  const q=(document.getElementById('mq')?.value||'').toLowerCase();
+  const data=q?manifiestos.filter(m=>m.nombre?.toLowerCase().includes(q)||m.id?.toLowerCase().includes(q)||m.fecha?.includes(q)):manifiestos;
+  const grid=document.getElementById('mGrid');
+  if(!data.length){
+    grid.innerHTML=`<div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--t3);">
+      <div style="font-size:48px;margin-bottom:12px;">📋</div>
+      <h3 style="font-family:'Space Grotesk',sans-serif;color:var(--navy);margin-bottom:6px;">Sin manifiestos</h3>
+      <p style="font-size:14px;">Selecciona guías en Registros y haz clic en "Crear Manifiesto"</p>
+    </div>`;
+    return;
+  }
+  grid.innerHTML=data.map(m=>`
+    <div onclick="verManifiesto('${m.id}')" style="background:#fff;border:1.5px solid var(--border);border-radius:14px;padding:20px;cursor:pointer;transition:all .2s;box-shadow:var(--sh);" onmouseover="this.style.borderColor='var(--blue)';this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='var(--border)';this.style.transform='none'">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;">
+        <div style="font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:800;color:var(--blue);">${m.id}</div>
+        <span style="background:var(--green2);color:#065F46;font-size:11px;font-weight:700;padding:3px 10px;border-radius:99px;">Cerrado</span>
+      </div>
+      <div style="font-size:15px;font-weight:700;color:var(--navy);margin-bottom:6px;">${m.nombre||'Manifiesto'}</div>
+      <div style="font-size:12px;color:var(--t2);margin-bottom:12px;">Creado por ${m.creadoPor||'Admin'}</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding-top:12px;border-top:1px solid var(--border);">
+        <div style="display:flex;gap:16px;">
+          <div><div style="font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;">Guías</div><div style="font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:800;color:var(--navy);">${m.totalGuias||0}</div></div>
+          <div><div style="font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;">Piezas</div><div style="font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:800;color:var(--navy);">${m.totalPiezas||0}</div></div>
+        </div>
+        <div style="font-size:12px;color:var(--t3);">${m.fecha||''}</div>
+      </div>
+    </div>`).join('');
+}
+
+function verManifiesto(mId){
+  const m=manifiestos.find(x=>x.id===mId);
+  if(!m) return;
+  currentManifiesto=m;
+  document.getElementById('mDetTitle').textContent=`${m.id} — ${m.nombre}`;
+  document.getElementById('mDetSub').textContent=`${m.totalGuias} guías · ${m.totalPiezas} piezas · ${m.fecha} · Creado por ${m.creadoPor}`;
+  const stBdg={'Recogido':'bnv','En almacén':'bnv','En tránsito':'bbl','En reparto':'bam','Entregado':'bgr','Con incidencia':'brd'};
+  const guiasDet=m.guias||[];
+  document.getElementById('mDetBody').innerHTML=guiasDet.map((g,i)=>`
+    <tr>
+      <td><span style="color:var(--t3);font-size:12px;">${i+1}</span></td>
+      <td><small style="color:var(--t3);">${g.fecha}</small></td>
+      <td><span class="bdg bbl">${g.col}</span></td>
+      <td><span class="bdg bam">${g.cjl}</span></td>
+      <td><strong>${g.rN}</strong></td>
+      <td>${g.dN}</td>
+      <td><span style="color:var(--t2);">${g.rC}</span> → <span style="color:var(--blue);font-weight:600;">${g.dC}</span></td>
+      <td><span class="bdg bgr">${g.srv}</span></td>
+      <td>${g.peso} <small>kg</small></td>
+      <td><span class="bdg ${stBdg[g.estado||'En tránsito']||'bbl'}">${g.estado||'En tránsito'}</span></td>
+    </tr>`).join('');
+  // Mostrar página de detalle
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('pg-manifiesto-detalle').classList.add('active');
+}
+
+function exportManifiestoExcel(){
+  if(!currentManifiesto) return;
+  const wb=XLSX.utils.book_new();
+  const rows=[['#','Fecha','COL','CJL','Remitente','Destinatario','Origen','Destino','Servicio','Peso','Estado']];
+  (currentManifiesto.guias||[]).forEach((g,i)=>{
+    rows.push([i+1,g.fecha,g.col,g.cjl,g.rN,g.dN,g.rC,g.dC,g.srv,g.peso,g.estado||'En tránsito']);
+  });
+  const ws=XLSX.utils.aoa_to_sheet(rows);
+  ws['!cols']=[{wch:4},{wch:12},{wch:10},{wch:10},{wch:24},{wch:24},{wch:14},{wch:18},{wch:12},{wch:8},{wch:14}];
+  XLSX.utils.book_append_sheet(wb,ws,`Manifiesto ${currentManifiesto.id}`);
+  XLSX.writeFile(wb,`Manifiesto_${currentManifiesto.id}.xlsx`);
+  toast('Excel exportado ✓');
+}
+
+function nxt(){return guias.length+1+corrOf;}
+function fc(p,n){return `${p}-${String(n).padStart(4,'0')}`;}
+
+/* ─── INIT ─── */
+window.onload=async ()=>{
+  document.getElementById('loginScreen').classList.add('active');
+  await initAdmin(); // asegura que admin existe en Firestore
+  updDate();setInterval(updDate,60000);
+};
+function updDate(){
+  document.getElementById('topDate').textContent=new Date().toLocaleDateString('es-PE',{weekday:'short',day:'2-digit',month:'short',year:'numeric'});
+}
+
+/* ─── AUTH ─── */
+function stab(t,btn){
+  document.querySelectorAll('.seg-b').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));
+  document.getElementById('p'+t[0]).classList.add('active');
+  document.getElementById('fh').textContent=t==='login'?'Bienvenido de vuelta':'Crea tu cuenta';
+  document.getElementById('fs').textContent=t==='login'?'Ingresa tus credenciales para continuar':'Completa el formulario para registrarte';
+}
+function sal(id,msg,type='er'){
+  const el=document.getElementById(id);
+  el.textContent=msg;el.className=`al al-${type} show`;
+  setTimeout(()=>el.classList.remove('show'),4000);
+}
+/* ─── NAV ─── */
+const PTITLES={dashboard:'Dashboard',guia:'Nueva Guía Térmica',registros:'Registro de Guías',usuarios:'Gestión de Usuarios',manifiestos:'Manifiestos'};
+function goP(id,el){
+  document.querySelectorAll('.ni-item').forEach(n=>n.classList.remove('on'));
+  if(el)el.classList.add('on');
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('pg-'+id).classList.add('active');
+  document.getElementById('topTitle').textContent=PTITLES[id]||'';
+  if(id==='registros')renderReg();
+  if(id==='usuarios')renderUsers();
+  if(id==='dashboard')updDash();
+  if(id==='guia')updCorr();
+  if(id==='manifiestos')renderManifiestos();
+}
+
+/* ─── CORRELATIVOS ─── */
+function updCorr(){
+  const n=nxt();
+  document.getElementById('pCOL').textContent=fc('COL',n);
+  document.getElementById('pCJL').textContent=fc('CJL',n);
+  const ci=document.getElementById('ceNum');if(ci)ci.value=n;
+}
+function toggleCE(){
+  const b=document.getElementById('ceBox');b.classList.toggle('open');
+  if(b.classList.contains('open'))document.getElementById('ceNum').value=nxt();
+}
+function previewCE(){
+  const n=parseInt(document.getElementById('ceNum').value)||1;
+  document.getElementById('pCOL').textContent=fc('COL',n);
+  document.getElementById('pCJL').textContent=fc('CJL',n);
+}
+function applyCE(){
+  const n=parseInt(document.getElementById('ceNum').value);
+  if(!n||n<1)return toast('Ingresa un número válido',1);
+  corrOf=n-guias.length-1;saveO();updCorr();
+  document.getElementById('ceBox').classList.remove('open');
+  toast('Correlativo actualizado a '+fc('COL',n));
+}
+
+/* ─── GENERAR GUÍA ─── */
+function v(id){return document.getElementById(id)?document.getElementById(id).value.trim():'';}
+function generarGuia(){
+  if(!v('gRN')||!v('gRC')||!v('gDN')||!v('gDT')||!v('gDC')||!v('gDDir'))
+    return sal('gAlert','Completa los campos obligatorios (*)');
+  const n=nxt(),col=fc('COL',n),cjl=fc('CJL',n);
+  const now=new Date();
+  const alto=v('gAlto'),largo=v('gLargo'),ancho=v('gAncho');
+  const dims=(alto&&largo&&ancho)?`${alto}×${largo}×${ancho} cm`:'—';
+  const g={
+    n,col,cjl,
+    fecha:now.toLocaleDateString('es-PE'),
+    hora:now.toLocaleTimeString('es-PE',{hour:'2-digit',minute:'2-digit'}),
+    ts:now.toISOString(),
+    rN:v('gRN'),rD:v('gRD'),rT:v('gRT'),rC:v('gRC'),rDir:v('gRDir'),
+    dN:v('gDN'),dD:v('gDD'),dT:v('gDT'),dC:v('gDC'),dDir:v('gDDir'),
+    srv:document.getElementById('gSrv').value,
+    peso:v('gPeso')||'—',bul:v('gBul')||'1',
+    alto,largo,ancho,dims,
+    desc:v('gDesc'),
+    pago:document.getElementById('gPago').value,
+    obs:v('gObs'),usr:cu.nombre,
+    userKey:cu.user,
+    estado:'En tránsito'
+  };
+  guias.push(g);saveGuiaFS(g);ag=g;
+  document.getElementById('nbadge').textContent=guias.length;
+  // Abrir modal con navegador de cajas
+  openBoxModal(g);
+  updCorr();updDash();
+  toast('Guía '+col+' generada — '+g.bul+' caja(s) ✓');
+}
+function resetG(){
+  ['gRN','gRD','gRT','gRC','gRDir','gDN','gDD','gDT','gDC','gDDir','gDesc','gObs','gPeso','gAlto','gLargo','gAncho'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('gBul').value='1';
+  document.getElementById('gAlert').classList.remove('show');
+}
+
+/* ─── MULTI-BOX MODAL ─── */
+let currentBoxIdx = 0;
+
+function openBoxModal(g){
+  ag = g;
+  currentBoxIdx = 0;
+  const totalCajas = parseInt(g.bul)||1;
+
+  // Inicializar array de datos por caja si no existe
+  if(!ag.cajas || ag.cajas.length !== totalCajas){
+    ag.cajas = Array.from({length:totalCajas}, (_,i)=>({
+      peso: ag.peso||'—',
+      alto: ag.alto||'', largo: ag.largo||'', ancho: ag.ancho||'',
+      dims: ag.dims||'—'
+    }));
+  }
+
+  const nav = document.getElementById('boxNav');
+  nav.style.display = totalCajas > 1 ? 'flex' : 'none';
+  document.getElementById('boxEditor').style.display = totalCajas > 1 ? 'block' : 'none';
+  document.getElementById('btnPrintAll').style.display = totalCajas > 1 ? 'inline-flex' : 'none';
+  document.getElementById('modalBoxInfo').textContent =
+    totalCajas > 1 ? `${totalCajas} cajas — 100×150 mm` : '100×150 mm';
+
+  renderBox(g, 0);
+  document.getElementById('ovLabel').classList.add('show');
+}
+
+function renderBox(g, idx){
+  const total = parseInt(g.bul)||1;
+  currentBoxIdx = idx;
+
+  document.getElementById('boxNavLabel').textContent = `Caja ${idx+1} de ${total}`;
+  document.getElementById('btnPrev').disabled = idx===0;
+  document.getElementById('btnNext').disabled = idx===total-1;
+  document.getElementById('btnPrev').style.opacity = idx===0?'0.4':'1';
+  document.getElementById('btnNext').style.opacity = idx===total-1?'0.4':'1';
+
+  // Cargar datos de esta caja en los inputs del editor
+  if(total > 1 && g.cajas && g.cajas[idx]){
+    const c = g.cajas[idx];
+    document.getElementById('editCajaPeso').value = c.peso&&c.peso!=='—'?c.peso:'';
+    document.getElementById('editCajaAlto').value = c.alto||'';
+    document.getElementById('editCajaLargo').value = c.largo||'';
+    document.getElementById('editCajaAncho').value = c.ancho||'';
+  }
+
+  // Obtener datos de la caja actual para la etiqueta
+  const cajaData = (g.cajas && g.cajas[idx]) ? g.cajas[idx] : g;
+  buildLabel({...g, peso:cajaData.peso||g.peso, dims:cajaData.dims||g.dims}, 'qrBox', ()=>{}, idx+1, total);
+}
+
+function navBox(dir){
+  if(!ag) return;
+  const total = parseInt(ag.bul)||1;
+  const newIdx = currentBoxIdx + dir;
+  if(newIdx < 0 || newIdx >= total) return;
+  renderBox(ag, newIdx);
+}
+
+/* ─── GUARDAR DATOS DE UNA CAJA ESPECÍFICA ─── */
+async function guardarCajaData(){
+  if(!ag) return;
+  const idx = currentBoxIdx;
+  const peso = document.getElementById('editCajaPeso').value.trim() || '—';
+  const alto = document.getElementById('editCajaAlto').value.trim();
+  const largo = document.getElementById('editCajaLargo').value.trim();
+  const ancho = document.getElementById('editCajaAncho').value.trim();
+  const dims = (alto&&largo&&ancho) ? `${alto}×${largo}×${ancho} cm` : '—';
+
+  if(!ag.cajas) ag.cajas = Array.from({length:parseInt(ag.bul)||1},()=>({peso:ag.peso,dims:ag.dims}));
+  ag.cajas[idx] = {peso, alto, largo, ancho, dims};
+
+  try{
+    await updateGuiaFS(ag.col, {cajas: ag.cajas});
+    // Actualizar en array local también
+    const gi = guias.findIndex(x=>x.col===ag.col);
+    if(gi>=0) guias[gi].cajas = ag.cajas;
+    renderBox(ag, idx);
+    toast(`✅ Caja ${idx+1} actualizada — Peso: ${peso} kg · Medidas: ${dims}`);
+  }catch(e){ toast('Error al guardar: '+e.message,1); }
+}
+
+/* ─── ELIMINAR GUÍA ─── */
+async function eliminarGuia(){
+  if(!ag) return;
+  eliminarGuiaDirecto(ag.col);
+}
+
+async function eliminarGuiaDirecto(col){
+  const g = guias.find(x=>x.col===col);
+  if(!g) return;
+  if(!confirm(`⚠️ ¿Eliminar permanentemente la guía ${col}?\n\nRemitente: ${g.rN}\nDestinatario: ${g.dN}\n\nEsta acción no se puede deshacer.`)) return;
+  try{
+    await db.collection('guias').doc(col).delete();
+    closeOv('ovLabel');
+    toast(`Guía ${col} eliminada ✓`);
+  }catch(e){ toast('Error al eliminar: '+e.message,1); }
+}
+
+/* ─── BUILD LABEL ─── */
+let corrMode = 'COL'; // 'COL' | 'CJL' | 'AMBOS'
+function selCorr(mode){
+  corrMode = mode;
+  document.getElementById('csBtnCOL').classList.toggle('active', mode==='COL');
+  document.getElementById('csBtnCJL').classList.toggle('active', mode==='CJL');
+  document.getElementById('csBtnAMBOS').classList.toggle('active', mode==='AMBOS');
+}
+
+function getDisplayCode(g){
+  if(corrMode==='CJL') return {label:'Código CJL', code: g.cjl};
+  if(corrMode==='AMBOS') return {label:'COL / CJL', code: g.col + ' · ' + g.cjl};
+  return {label:'Código COL', code: g.col};
+}
+
+function buildLabel(g, qrId, cb, cajaNum=1, totalCajas=1){
+  const dc=getDisplayCode(g);
+  const cajaInfo = totalCajas>1 ? `Caja ${cajaNum} de ${totalCajas}` : '';
+  const qrData=encodeURIComponent(`CSJL|${g.col}|${g.cjl}|${g.rN}|${g.rC}|${g.dN}|${g.dC}|${g.fecha}${totalCajas>1?'|Caja '+cajaNum+'/'+totalCajas:''}`);
+  const qrUrl=`https://api.qrserver.com/v1/create-qr-code/?size=100x100&ecc=H&bgcolor=ffffff&color=000000&data=${qrData}`;
+  const html=`
+  <div class="label-wrap">
+  <div class="et" id="glEl">
+    <div class="et-head">
+      <div class="et-logo-block">
+        <div class="et-logo-name">CARGO SERVICES <em>JL</em></div>
+        <div class="et-logo-sub">Guía de Transporte Aéreo</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:4px;align-items:flex-end;">
+        <div class="et-head-srv"><small>Servicio</small><span>${g.srv}</span></div>
+        ${totalCajas>1?`<div style="background:var(--amber);color:var(--navy);font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:800;padding:3px 10px;border-radius:5px;">📦 ${cajaInfo}</div>`:''}
+      </div>
+    </div>
+    <div class="et-code-block">
+      <div class="et-code-label">${dc.label}${totalCajas>1?' · '+cajaInfo:''}</div>
+      <div class="et-code-main">${dc.code}</div>
+      <div class="et-code-sep"></div>
+    </div>
+    <div class="et-dates">
+      <div class="et-date-cell"><small>Fecha de envío</small><strong>${g.fecha} · ${g.hora}</strong></div>
+      <div class="et-date-cell"><small>Forma de pago</small><strong>${g.pago}</strong></div>
+    </div>
+    <div class="et-parties">
+      <div class="et-party">
+        <div class="et-party-hdr">Remitente</div>
+        ${g.rD?`<div class="et-party-doc">${g.rD}</div>`:''}
+        <div class="et-party-name">${g.rN}</div>
+        ${g.rT?`<div class="et-party-tel">📞 ${g.rT}</div>`:''}
+        <div class="et-party-addr">📍 ${g.rC}${g.rDir?' — '+g.rDir:''}</div>
+      </div>
+      <div class="et-party">
+        <div class="et-party-hdr">Destinatario</div>
+        ${g.dD?`<div class="et-party-doc">${g.dD}</div>`:''}
+        <div class="et-party-name">${g.dN}</div>
+        ${g.dT?`<div class="et-party-tel">📞 ${g.dT}</div>`:''}
+        <div class="et-party-addr">📍 ${g.dC} — ${g.dDir}</div>
+      </div>
+    </div>
+    <div class="et-data-row" style="background:#f9f9f9;">
+      <div class="et-data-cell"><div class="et-data-hdr">Descripción</div><div class="et-data-val">${g.desc||'Paquete'}</div></div>
+      <div class="et-data-cell"><div class="et-data-hdr">Cajas</div><div class="et-data-val">${totalCajas>1?`<strong style="color:var(--blue)">${cajaNum}/${totalCajas}</strong>`:g.bul}</div></div>
+      <div class="et-data-cell"><div class="et-data-hdr">Peso (kg)</div><div class="et-data-val">${g.peso}</div></div>
+      <div class="et-data-cell"><div class="et-data-hdr">Medidas</div><div class="et-data-val" style="font-size:10px;">${g.dims||'—'}</div></div>
+    </div>
+    ${g.obs?`<div class="et-obs"><small>Obs.:</small><span>${g.obs}</span></div>`:''}
+    <div class="et-bottom">
+      <div style="flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:3px;">
+        <div style="border:2.5px solid #111;border-radius:5px;padding:3px;background:#fff;">
+          <img src="${qrUrl}" width="96" height="96" style="display:block;" alt="QR">
+        </div>
+        <div style="font-size:7.5px;color:#555;text-align:center;letter-spacing:.5px;text-transform:uppercase;font-weight:700;">Escanear · Rastrear</div>
+      </div>
+      <div class="et-bottom-text">
+        <div class="et-bottom-brand">CARGO SERVICES JL</div>
+        <div class="et-bottom-num"><em>${dc.code}</em></div>
+        <div class="et-bottom-sub">${totalCajas>1?cajaInfo:'Estado: '+(g.estado||'En tránsito')}</div>
+      </div>
+    </div>
+  </div>
+  </div>`;
+  document.getElementById('labelCont').innerHTML=html;
+  if(cb)cb();
+}
+
+/* ─── PRINT ─── */
+function getLabelHTML(g, cajaNum, totalCajas){
+  const dc=getDisplayCode(g);
+  const cajaInfo = totalCajas>1?`Caja ${cajaNum} de ${totalCajas}`:'';
+  const qrData=encodeURIComponent(`CSJL|${g.col}|${g.cjl}|${g.rN}|${g.rC}|${g.dN}|${g.dC}|${g.fecha}${totalCajas>1?'|Caja '+cajaNum+'/'+totalCajas:''}`);
+  const qrUrl=`https://api.qrserver.com/v1/create-qr-code/?size=88x88&ecc=H&bgcolor=ffffff&color=000000&data=${qrData}`;
+  return `<div class="et" style="page-break-after:always;">
+    <div class="et-head">
+      <div><div class="et-logo-name">CARGO SERVICES <em>JL</em></div><div class="et-logo-sub">Guía de Transporte Aéreo</div></div>
+      <div style="display:flex;flex-direction:column;gap:3px;align-items:flex-end;">
+        <div class="et-head-srv"><small>Servicio</small><span>${g.srv}</span></div>
+        ${totalCajas>1?`<div style="background:#F59E0B;color:#0B1F3A;font-size:9pt;font-weight:800;padding:2px 8px;border-radius:4px;">📦 ${cajaInfo}</div>`:''}
+      </div>
+    </div>
+    <div class="et-code-block">
+      <div class="et-code-label">${dc.label}${totalCajas>1?' · '+cajaInfo:''}</div>
+      <div class="et-code-main">${dc.code}</div>
+      <div class="et-code-sep"></div>
+    </div>
+    <div class="et-dates">
+      <div class="et-date-cell"><small>Fecha de envío</small><strong>${g.fecha} · ${g.hora}</strong></div>
+      <div class="et-date-cell"><small>Forma de pago</small><strong>${g.pago}</strong></div>
+    </div>
+    <div class="et-parties">
+      <div class="et-party">
+        <div class="et-party-hdr">Remitente</div>
+        ${g.rD?`<div class="et-party-doc">${g.rD}</div>`:''}
+        <div class="et-party-name">${g.rN}</div>
+        ${g.rT?`<div class="et-party-tel">📞 ${g.rT}</div>`:''}
+        <div class="et-party-addr">📍 ${g.rC}${g.rDir?' — '+g.rDir:''}</div>
+      </div>
+      <div class="et-party">
+        <div class="et-party-hdr">Destinatario</div>
+        ${g.dD?`<div class="et-party-doc">${g.dD}</div>`:''}
+        <div class="et-party-name">${g.dN}</div>
+        ${g.dT?`<div class="et-party-tel">📞 ${g.dT}</div>`:''}
+        <div class="et-party-addr">📍 ${g.dC} — ${g.dDir}</div>
+      </div>
+    </div>
+    <div class="et-data-row">
+      <div class="et-data-cell"><div class="et-data-hdr">Descripción</div><div class="et-data-val">${g.desc||'Paquete'}</div></div>
+      <div class="et-data-cell"><div class="et-data-hdr">Cajas</div><div class="et-data-val">${totalCajas>1?cajaNum+'/'+totalCajas:g.bul}</div></div>
+      <div class="et-data-cell"><div class="et-data-hdr">Peso kg</div><div class="et-data-val">${g.peso}</div></div>
+      <div class="et-data-cell"><div class="et-data-hdr">Medidas</div><div class="et-data-val" style="font-size:7.5pt;">${g.dims||'—'}</div></div>
+    </div>
+    ${g.obs?`<div class="et-obs"><small>Obs.:</small><span>${g.obs}</span></div>`:''}
+    <div class="et-bottom">
+      <div style="flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:3px;">
+        <div style="border:2px solid #111;border-radius:4px;padding:3px;background:#fff;">
+          <img src="${qrUrl}" width="84" height="84" style="display:block;" alt="QR">
+        </div>
+        <div style="font-size:6pt;color:#555;text-align:center;letter-spacing:.5px;text-transform:uppercase;font-weight:700;">Escanear · Rastreo</div>
+      </div>
+      <div class="et-bottom-text">
+        <div class="et-bottom-brand">CARGO SERVICES JL</div>
+        <div class="et-bottom-num"><em>${dc.code}</em></div>
+        <div class="et-bottom-sub">${totalCajas>1?cajaInfo:'Estado: '+(g.estado||'En tránsito')}</div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function getPrintStyles(){
+  return `*{box-sizing:border-box;margin:0;padding:0;}
+  body{background:#fff;font-family:'Plus Jakarta Sans',sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  @page{size:100mm 150mm;margin:0;}
+  @media print{html,body{width:100mm;height:150mm;overflow:hidden;}}
+  .et{font-family:'Plus Jakarta Sans',sans-serif;background:#fff;border:2px solid #111;width:100mm;color:#111;line-height:1.4;}
+  .et-head{border-bottom:2px solid #111;padding:7px 10px;display:flex;align-items:center;justify-content:space-between;gap:8px;}
+  .et-logo-name{font-family:'Space Grotesk',sans-serif;font-size:14pt;font-weight:800;color:#111;}
+  .et-logo-name em{color:#1D5FA8;font-style:normal;}
+  .et-logo-sub{font-size:6.5pt;color:#666;letter-spacing:1px;text-transform:uppercase;margin-top:1px;}
+  .et-head-srv{border:1.5px solid #111;border-radius:4px;padding:3px 9px;text-align:center;}
+  .et-head-srv small{display:block;font-size:6pt;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:.6px;}
+  .et-head-srv span{font-family:'Space Grotesk',sans-serif;font-size:10pt;font-weight:800;color:#111;}
+  .et-code-block{border-bottom:2px solid #111;padding:9px 10px 8px;text-align:center;}
+  .et-code-label{font-size:7pt;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:2px;}
+  .et-code-main{font-family:'Space Grotesk',sans-serif;font-size:28pt;font-weight:800;color:#111;letter-spacing:2px;line-height:1;}
+  .et-code-sep{width:48px;height:2.5px;background:#111;margin:5px auto 0;border-radius:2px;}
+  .et-dates{border-bottom:1px solid #ccc;display:flex;}
+  .et-date-cell{flex:1;padding:4px 8px;}
+  .et-date-cell+.et-date-cell{border-left:1px solid #ccc;}
+  .et-date-cell small{display:block;font-size:6.5pt;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:#666;margin-bottom:1px;}
+  .et-date-cell strong{font-size:9pt;font-weight:700;color:#111;}
+  .et-parties{border-bottom:1.5px solid #111;display:flex;}
+  .et-party{flex:1;padding:5px 8px;}
+  .et-party+.et-party{border-left:1.5px solid #111;}
+  .et-party-hdr{font-size:6.5pt;font-weight:800;text-transform:uppercase;letter-spacing:.7px;color:#111;padding-bottom:3px;border-bottom:1px solid #ddd;margin-bottom:4px;}
+  .et-party-doc{font-size:8.5pt;color:#444;margin-bottom:1px;}
+  .et-party-name{font-size:10pt;font-weight:800;color:#111;margin-bottom:2px;line-height:1.2;}
+  .et-party-tel{font-size:8.5pt;font-weight:600;color:#222;margin-top:2px;}
+  .et-party-addr{font-size:8pt;color:#444;line-height:1.3;margin-top:2px;}
+  .et-data-row{border-bottom:1px solid #ccc;display:flex;background:#f9f9f9;}
+  .et-data-cell{flex:1;padding:4px 7px;text-align:center;}
+  .et-data-cell:first-child{flex:2;text-align:left;}
+  .et-data-cell+.et-data-cell{border-left:1px solid #ccc;}
+  .et-data-hdr{font-size:6.5pt;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:#555;margin-bottom:1px;}
+  .et-data-val{font-size:9.5pt;font-weight:700;color:#111;}
+  .et-obs{border-bottom:1px solid #ccc;padding:3px 8px;display:flex;align-items:baseline;gap:5px;}
+  .et-obs small{font-size:6.5pt;font-weight:800;text-transform:uppercase;color:#555;white-space:nowrap;}
+  .et-obs span{font-size:8.5pt;color:#111;}
+  .et-bottom{padding:7px 10px;display:flex;align-items:center;gap:12px;}
+  .et-bottom-text{flex:1;text-align:center;}
+  .et-bottom-brand{font-family:'Space Grotesk',sans-serif;font-size:8.5pt;font-weight:600;color:#444;letter-spacing:.4px;margin-bottom:2px;}
+  .et-bottom-num{font-family:'Space Grotesk',sans-serif;font-size:15pt;font-weight:800;color:#111;letter-spacing:.8px;line-height:1;}
+  .et-bottom-num em{color:#1D5FA8;font-style:normal;}
+  .et-bottom-sub{font-size:6pt;color:#555;letter-spacing:.6px;margin-top:3px;font-weight:600;}`;
+}
+
+function printLabel(){
+  if(!ag)return;
+  const total=parseInt(ag.bul)||1;
+  const cajaNum=currentBoxIdx+1;
+  // ← CORRECCIÓN: usar datos específicos de esta caja
+  const cajaData=(ag.cajas && ag.cajas[currentBoxIdx]) ? ag.cajas[currentBoxIdx] : ag;
+  const gParaPrint={...ag, peso:cajaData.peso||ag.peso, dims:cajaData.dims||ag.dims};
+  const pw=window.open('','_blank','width=420,height=630');
+  pw.document.write(`<!DOCTYPE html><html><head>
+  <meta charset="UTF-8"><title>Guía ${ag.col} · Caja ${cajaNum}</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
+  <style>${getPrintStyles()}</style></head><body>
+  ${getLabelHTML(gParaPrint, cajaNum, total)}
+  <script>window.addEventListener('load',function(){
+    var imgs=document.querySelectorAll('img');var loaded=0;
+    if(!imgs.length){setTimeout(function(){window.print();},400);return;}
+    imgs.forEach(function(img){
+      if(img.complete){loaded++;if(loaded===imgs.length)setTimeout(function(){window.print();},400);}
+      else{img.onload=img.onerror=function(){loaded++;if(loaded===imgs.length)setTimeout(function(){window.print();},400);};}
+    });
+  });<\/script></body></html>`);
+  pw.document.close();
+  toast('Imprimiendo Caja '+cajaNum+' de '+total+'...');
+}
+
+function printAllLabels(){
+  if(!ag)return;
+  const total=parseInt(ag.bul)||1;
+  let allHTML='';
+  for(let i=1;i<=total;i++){
+    const cajaData = (ag.cajas && ag.cajas[i-1]) ? ag.cajas[i-1] : ag;
+    allHTML+=getLabelHTML({...ag, peso:cajaData.peso||ag.peso, dims:cajaData.dims||ag.dims}, i, total);
+  }
+  const pw=window.open('','_blank','width=420,height=630');
+  pw.document.write(`<!DOCTYPE html><html><head>
+  <meta charset="UTF-8"><title>Guía ${ag.col} · Todas las cajas</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
+  <style>${getPrintStyles()}</style></head><body>
+  ${allHTML}
+  <script>window.addEventListener('load',function(){
+    var imgs=document.querySelectorAll('img');var loaded=0;var total=imgs.length;
+    if(!total){setTimeout(function(){window.print();},600);return;}
+    imgs.forEach(function(img){
+      if(img.complete){loaded++;if(loaded===total)setTimeout(function(){window.print();},600);}
+      else{img.onload=img.onerror=function(){loaded++;if(loaded===total)setTimeout(function(){window.print();},600);};}
+    });
+  });<\/script></body></html>`);
+  pw.document.close();
+  toast('Imprimiendo '+total+' etiquetas...');
+}
+/* ─── DASHBOARD ─── */
+function updDash(){
+  document.getElementById('sG').textContent=guias.length;
+  document.getElementById('sU').textContent=users.length;
+  document.getElementById('nbadge').textContent=guias.length;
+  const dests=new Set(guias.map(g=>g.dC)).size;
+  document.getElementById('sD').textContent=dests;
+  document.getElementById('sC').textContent=guias.length?guias[guias.length-1].col:'—';
+
+  // Mostrar nota de filtro según rol
+  const ph = document.querySelector('#pg-dashboard .ph-l p');
+  if(ph){
+    ph.textContent = cu?.role==='admin'
+      ? '👑 Vista de administrador — mostrando guías de TODOS los usuarios'
+      : `👤 Mostrando solo tus guías (${cu?.nombre})`;
+    ph.style.color = cu?.role==='admin' ? 'var(--amber)' : 'var(--t2)';
+    ph.style.fontWeight = '600';
+  }
+
+  const act=document.getElementById('dashAct');
+  const rec=[...guias].reverse().slice(0,6);
+  if(!rec.length){act.innerHTML='<div class="te" style="padding:40px;"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm-1 7V3.5L18.5 9H13z"/></svg><p>Sin guías aún</p></div>';return;}
+  act.innerHTML=rec.map(g=>`
+    <div class="al-item" onclick="verG('${g.col}')">
+      <div class="al-ic">📦</div>
+      <div class="al-info"><strong>${g.rN} → ${g.dN}</strong><span>${g.rC} → ${g.dC} · ${g.srv} · ${g.peso} kg</span></div>
+      <div class="al-meta"><span class="bdg bbl" style="margin-bottom:3px;display:block;">${g.col}</span><small>${g.fecha}</small></div>
+    </div>`).join('');
+}
+
+/* ══════════════════════════════════════
+   INTEGRACIÓN ZOOM API — AMBIENTE PRUEBAS
+   ══════════════════════════════════════ */
+const ZOOM_CFG = {
+  login: '1',
+  clave: '456789',
+  frase_privada: 'RH0sVTL9za7O6gutqI43',
+  sucursalOrigen: 'MIA',
+  remNombre: 'GLOBAL EXPRESS CARGO',
+  remContacto: 'CARGO SERVICES JL OL',
+  remTel: '902567044',
+  remLocalidad: 'LOS OLIVOS MERCADO LOS OLIVOS',
+  // Netlify Function — proxy confiable
+  fnUrl: '/.netlify/functions/zoom-proxy',
+};
+let zoomToken = null;
+let zoomGuiaNumero = null;
+let zoomCiudades = [];
+
+async function zoomFetch(endpoint, body, token=null){
+  const payload = { endpoint, ...body };
+  const headers = { 'Content-Type': 'application/json' };
+  if(token) headers['Authorization'] = `Bearer ${token}`;
+  try{
+    const r = await fetch(ZOOM_CFG.fnUrl, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(payload)
+    });
+    const txt = await r.text();
+    if(!txt||txt.trim()==='') return {_raw:''};
+    try{ return JSON.parse(txt); }catch{ return {_raw:txt}; }
+  }catch(e){
+    throw new Error('Error de conexión: ' + e.message);
+  }
+}
+
+async function getZoomToken(){
+  // Usar token guardado en sesión si existe (evita llamadas repetidas al proxy)
+  const cached = sessionStorage.getItem('zoomToken');
+  const cachedTime = parseInt(sessionStorage.getItem('zoomTokenTime')||'0');
+  const now = Date.now();
+  // Token válido por 50 minutos
+  if(cached && (now - cachedTime) < 50*60*1000){
+    console.log('ZOOM: usando token cacheado');
+    return cached;
+  }
+
+  // Intentar obtener token hasta 3 veces
+  for(let intento=1; intento<=3; intento++){
+    try{
+      const data = await zoomFetch('token', {
+        login:ZOOM_CFG.login,
+        clave:ZOOM_CFG.clave,
+        frase_privada:ZOOM_CFG.frase_privada
+      });
+      const tok = data.entidadRespuesta?.token ||
+                  data.token || data.Token || data.access_token || null;
+      if(tok){
+        // Guardar en sesión
+        sessionStorage.setItem('zoomToken', tok);
+        sessionStorage.setItem('zoomTokenTime', String(now));
+        console.log('ZOOM: token obtenido en intento', intento);
+        return tok;
+      }
+      // Si vino vacío, esperar 500ms y reintentar
+      if(intento<3) await new Promise(r=>setTimeout(r,500));
+    }catch(e){
+      if(intento===3) throw e;
+      await new Promise(r=>setTimeout(r,500));
+    }
+  }
+  throw new Error('No se pudo conectar con ZOOM después de 3 intentos. Intenta de nuevo.');
+}
+
+async function getZoomCiudades(token){
+  const data = await zoomFetch('ciudades', {token, paisDestino:'VE'}, token);
+  console.log('Ciudades:', JSON.stringify(data).substring(0,200));
+  if(Array.isArray(data)) return data;
+  if(Array.isArray(data.entidadRespuesta)) return data.entidadRespuesta;
+  if(Array.isArray(data.data)) return data.data;
+  // Fallback manual
+  return [
+    {codciudad:19,nombre_ciudad:'CARACAS',nombre_estado:'DISTRITO CAPITAL'},
+    {codciudad:11,nombre_ciudad:'CIUDAD BOLIVAR',nombre_estado:'BOLIVAR'},
+    {codciudad:7,nombre_ciudad:'SAN FELIX',nombre_estado:'BOLIVAR'},
+    {codciudad:44,nombre_ciudad:'BARQUISIMETO',nombre_estado:'LARA'},
+    {codciudad:68,nombre_ciudad:'BARCELONA',nombre_estado:'ANZOATEGUI'},
+    {codciudad:30,nombre_ciudad:'EL TIGRE',nombre_estado:'ANZOATEGUI'},
+    {codciudad:10,nombre_ciudad:'CUMANA',nombre_estado:'SUCRE'},
+    {codciudad:1,nombre_ciudad:'MARACAIBO',nombre_estado:'ZULIA'},
+    {codciudad:29,nombre_ciudad:'CABIMAS',nombre_estado:'ZULIA'},
+    {codciudad:2,nombre_ciudad:'CALABOZO',nombre_estado:'GUARICO'},
+    {codciudad:25,nombre_ciudad:'ACARIGUA',nombre_estado:'PORTUGUESA'},
+    {codciudad:33,nombre_ciudad:'BARINAS',nombre_estado:'BARINAS'},
+    {codciudad:12,nombre_ciudad:'CORO',nombre_estado:'FALCON'},
+    {codciudad:20,nombre_ciudad:'CARUPANO',nombre_estado:'SUCRE'},
+    {codciudad:43,nombre_ciudad:'GUANARE',nombre_estado:'PORTUGUESA'},
+    {codciudad:26,nombre_ciudad:'CHARALLAVE',nombre_estado:'MIRANDA'},
+    {codciudad:8,nombre_ciudad:'GUARENAS',nombre_estado:'MIRANDA'},
+    {codciudad:32,nombre_ciudad:'EL VIGIA',nombre_estado:'MERIDA'},
+    {codciudad:28,nombre_ciudad:'CIUDAD OJEDA',nombre_estado:'ZULIA'},
+  ];
+}
+
+async function getZoomSucursales(token, ciudadId){
+  const data = await zoomFetch('sucursales', {token, ciudad:ciudadId, paisDestino:'VE'}, token);
+  console.log('Sucursales:', JSON.stringify(data).substring(0,200));
+  if(Array.isArray(data)) return data;
+  if(Array.isArray(data.entidadRespuesta)) return data.entidadRespuesta;
+  if(Array.isArray(data.data)) return data.data;
+  return [];
+}
+
+async function abrirZoom(){
+  if(!ag) return;
+  document.getElementById('zoomGuiaRef').textContent=`${ag.col} / ${ag.cjl}`;
+  document.getElementById('zoomDatos').style.display='none';
+  document.getElementById('zoomResultado').style.display='none';
+  document.getElementById('zoomFooter').style.display='flex';
+  document.getElementById('zoomStatus').style.display='block';
+  document.getElementById('zoomStatus').style.background='var(--sky)';
+  document.getElementById('zoomStatus').style.color='var(--blue)';
+  document.getElementById('zoomStatus').textContent='🔄 Conectando con ZOOM...';
+  document.getElementById('zoomAlert').className='al';
+  document.getElementById('ovZoom').classList.add('show');
+
+  try{
+    // Reutilizar token si ya existe
+    if(!zoomToken){
+      zoomToken=await getZoomToken();
+    }
+    document.getElementById('zoomStatus').textContent='🔄 Cargando ciudades...';
+
+    // Reutilizar ciudades si ya existen
+    if(!zoomCiudades||zoomCiudades.length===0){
+      zoomCiudades=await getZoomCiudades(zoomToken);
+    }
+
+    // Buscador de ciudades
+    const cidWrap=document.getElementById('zCiudadWrap');
+    cidWrap.innerHTML=`
+      <input type="text" id="zCiudad" placeholder="Escribe la ciudad..." autocomplete="off"
+        style="width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-family:'Plus Jakarta Sans',sans-serif;"
+        oninput="filtrarCiudades(this.value)">
+      <div id="zCiudadList" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1.5px solid var(--blue);border-radius:8px;max-height:200px;overflow-y:auto;z-index:999;box-shadow:0 8px 24px rgba(0,0,0,.15);"></div>`;
+
+    window.filtrarCiudades=function(q){
+      const list=document.getElementById('zCiudadList');
+      if(!q||q.length<2){list.style.display='none';return;}
+      const f=zoomCiudades.filter(c=>(c.nombre_ciudad||'').toUpperCase().includes(q.toUpperCase())||(c.nombre_estado||'').toUpperCase().includes(q.toUpperCase())).slice(0,10);
+      if(!f.length){list.style.display='none';return;}
+      list.innerHTML=f.map(c=>`
+        <div onclick="seleccionarCiudad(${c.codciudad},'${c.nombre_ciudad} (${c.nombre_estado})')"
+          style="padding:10px 14px;cursor:pointer;font-size:13px;border-bottom:1px solid #f0f0f0;"
+          onmouseover="this.style.background='var(--sky)'" onmouseout="this.style.background='#fff'">
+          <strong>${c.nombre_ciudad}</strong> <span style="color:var(--t2);font-size:12px;">${c.nombre_estado}</span>
+        </div>`).join('');
+      list.style.display='block';
+    };
+
+    window.seleccionarCiudad=async function(codciudad,nombre){
+      document.getElementById('zCiudad').value=nombre;
+      document.getElementById('zCiudad').dataset.codciudad=codciudad;
+      document.getElementById('zCiudadList').style.display='none';
+      const selSuc=document.getElementById('zSucursal');
+      selSuc.innerHTML='<option>Cargando sucursales...</option>';
+      try{
+        const suc=await getZoomSucursales(zoomToken,codciudad);
+        if(!suc.length){selSuc.innerHTML='<option value="">Sin sucursales disponibles</option>';return;}
+        selSuc.innerHTML='<option value="">Selecciona sucursal</option>';
+        // Guardar datos completos de sucursales para usarlos al seleccionar
+        window._zoomSucursales=suc;
+        suc.forEach(s=>{
+          const id=s.codsucursal||s.id||s.codigo||'';
+          const nom=s.nombre_sucursal||s.nombre||s.name||id;
+          const dir=s.direccion||s.address||'';
+          selSuc.innerHTML+=`<option value="${id}" data-dir="${dir}" data-nom="${nom}">${nom}${dir?' — '+dir:''}</option>`;
+        });
+        // Al seleccionar sucursal → llenar dirección automáticamente
+        selSuc.onchange=function(){
+          const opt=this.options[this.selectedIndex];
+          if(!opt||!opt.value) return;
+          const dir=opt.dataset.dir||'';
+          const nom=opt.dataset.nom||opt.textContent||'';
+          if(dir){
+            document.getElementById('zDDir').value=`ZOOM ${nom} — ${dir}`;
+          }
+        };
+      }catch(e){selSuc.innerHTML='<option value="">Error cargando sucursales</option>';}
+    };
+
+    // Llenar campos
+    document.getElementById('zRef').value=ag.col;
+    document.getElementById('zDN').value=ag.dN||'';
+    document.getElementById('zDD').value=ag.dD||'';
+    document.getElementById('zDT').value=ag.dT||'';
+    document.getElementById('zDCel').value=ag.dT||'';
+    document.getElementById('zDDir').value=ag.dDir||ag.dC||'';
+    document.getElementById('zPeso').value=ag.peso&&ag.peso!=='—'?ag.peso:'';
+    document.getElementById('zDesc').value=ag.desc||'Paquete';
+    document.getElementById('zAlto').value=ag.alto||'';
+    document.getElementById('zAncho').value=ag.ancho||'';
+    document.getElementById('zLargo').value=ag.largo||'';
+    document.getElementById('zValor').value='0';
+    document.getElementById('zCiudad').value=ag.dC||'';
+    document.getElementById('zSucursal').innerHTML='<option value="">Selecciona ciudad primero</option>';
+
+    document.getElementById('zoomStatus').style.display='none';
+    document.getElementById('zoomDatos').style.display='block';
+
+  }catch(e){
+    // Limpiar token cacheado si hubo error
+    sessionStorage.removeItem('zoomToken');
+    sessionStorage.removeItem('zoomTokenTime');
+    zoomToken=null;
+    document.getElementById('zoomDatos').style.display='none';
+    document.getElementById('zoomStatus').style.display='block';
+    document.getElementById('zoomStatus').style.background='var(--red2)';
+    document.getElementById('zoomStatus').style.color='#991B1B';
+    document.getElementById('zoomStatus').innerHTML=`❌ Error de conexión con ZOOM. <button onclick="abrirZoom()" style="margin-left:10px;padding:4px 12px;background:#fff;color:#991B1B;border:1px solid #991B1B;border-radius:6px;cursor:pointer;font-weight:700;">🔄 Reintentar</button>`;
+  }
+}
+
+
+
+async function enviarAZoom(){
+  const dN = document.getElementById('zDN').value.trim();
+  const dDir = document.getElementById('zDDir').value.trim();
+  const ciudadEl = document.getElementById('zCiudad');
+  const ciudad = ciudadEl?.dataset?.codciudad || ciudadEl?.value;
+  const peso = document.getElementById('zPeso').value;
+  const desc = document.getElementById('zDesc').value.trim();
+  const alEl = document.getElementById('zoomAlert');
+
+  if(!dN||!dDir||!ciudad||!peso||!desc){
+    alEl.textContent='Completa los campos obligatorios (*)';
+    alEl.className='al al-er show'; return;
+  }
+
+  alEl.className='al';
+  document.getElementById('zoomFooter').style.display='none';
+  document.getElementById('zoomStatus').style.display='block';
+  document.getElementById('zoomStatus').style.background='var(--sky)';
+  document.getElementById('zoomStatus').style.color='var(--blue)';
+  document.getElementById('zoomStatus').textContent='🔄 Creando guía en ZOOM...';
+
+  const sucVal = document.getElementById('zSucursal').value;
+  const alto = document.getElementById('zAlto').value||'0';
+  const ancho = document.getElementById('zAncho').value||'0';
+  const largo = document.getElementById('zLargo').value||'0';
+  const valor = document.getElementById('zValor').value||'0';
+
+  const payload = {
+    token: zoomToken,
+    referencia: ag.col,
+    tipoEnvio: document.getElementById('zTipo').value,
+    sucursalOrigen: ZOOM_CFG.sucursalOrigen,
+    remitente: {
+      nombre: ZOOM_CFG.remNombre,
+      personaContacto: ZOOM_CFG.remContacto,
+      telefono: ZOOM_CFG.remTel,
+      localidad: ZOOM_CFG.remLocalidad
+    },
+    destinatario: {
+      nombre: dN,
+      identificacion: document.getElementById('zDD').value.trim(),
+      telefono: document.getElementById('zDT').value.trim(),
+      celular: document.getElementById('zDCel').value.trim(),
+      localidad: dDir
+    },
+    paisDestino: 'VE',
+    ciudadDestino: ciudad,
+    sucursalDestino: sucVal,
+    piezas: [{
+      descripcion: desc,
+      pesoRef: parseFloat(peso),
+      alto: parseFloat(alto),
+      ancho: parseFloat(ancho),
+      largo: parseFloat(largo),
+      valorMercancia: parseFloat(valor)
+    }]
+  };
+
+  try{
+    console.log('ZOOM Payload enviado:', JSON.stringify(payload, null, 2));
+    const resp = await zoomFetch('guia', payload, zoomToken);
+    console.log('ZOOM Respuesta completa:', JSON.stringify(resp, null, 2));
+
+    // ── MODO DIAGNÓSTICO — muestra respuesta completa ──
+    document.getElementById('zoomStatus').style.display='none';
+    document.getElementById('zoomDatos').style.display='none';
+    document.getElementById('zoomResultado').style.display='block';
+    document.getElementById('zoomResultado').innerHTML=`
+      <div style="text-align:left;">
+        <div style="font-size:13px;font-weight:700;color:var(--navy);margin-bottom:8px;">📋 Respuesta completa de ZOOM:</div>
+        <pre style="background:#f4f4f4;border:1px solid #ddd;border-radius:8px;padding:14px;font-size:11px;overflow-x:auto;white-space:pre-wrap;word-break:break-all;max-height:300px;overflow-y:auto;">${JSON.stringify(resp, null, 2)}</pre>
+        <div style="font-size:12px;color:var(--t2);margin-top:10px;">📤 Payload enviado:</div>
+        <pre style="background:#f0f6ff;border:1px solid var(--border);border-radius:8px;padding:14px;font-size:11px;overflow-x:auto;white-space:pre-wrap;word-break:break-all;max-height:200px;overflow-y:auto;">${JSON.stringify(payload, null, 2)}</pre>
+        <div style="display:flex;gap:10px;margin-top:14px;">
+          <button class="btn bg sm" onclick="closeOv('ovZoom')">Cerrar</button>
+          <button class="btn bs sm" onclick="document.getElementById('zoomFooter').style.display='flex';document.getElementById('zoomDatos').style.display='block';document.getElementById('zoomResultado').style.display='none';">🔄 Reintentar</button>
+        </div>
+      </div>`;
+    document.getElementById('zoomFooter').style.display='none';
+
+  }catch(e){
+    document.getElementById('zoomStatus').textContent=`❌ Error: ${e.message}`;
+    document.getElementById('zoomStatus').style.background='var(--red2)';
+    document.getElementById('zoomStatus').style.color='#991B1B';
+    document.getElementById('zoomFooter').style.display='flex';
+  }
+}
+
+async function imprimirEtiquetaZoom(){
+  if(!zoomGuiaNumero||!zoomToken) return toast('Sin número de guía ZOOM',1);
+  try {
+    const data = await zoomFetch('etiqueta',
+      {token:zoomToken, numeroGuia:zoomGuiaNumero}, zoomToken);
+    console.log('ZOOM Etiqueta response:', data);
+    const pdfBase64 = data.pdf || data.etiqueta || data.data?.pdf || data.label || null;
+    if(pdfBase64){
+      const byteChars = atob(pdfBase64);
+      const byteNums = new Array(byteChars.length).fill(0).map((_,i)=>byteChars.charCodeAt(i));
+      const blob = new Blob([new Uint8Array(byteNums)], {type:'application/pdf'});
+      window.open(URL.createObjectURL(blob), '_blank');
+    } else {
+      toast('Respuesta etiqueta ZOOM: '+JSON.stringify(data).substring(0,100),1);
+    }
+  } catch(e){ toast('Error etiqueta ZOOM: '+e.message,1); }
+}
+
+/* ─── SELECCIÓN MÚLTIPLE ─── */
+let seleccionadas = new Set();
+
+function toggleAll(chk){
+  const q=(document.getElementById('sq')?.value||'').toLowerCase();
+  const data=q?guias.filter(g=>[g.col,g.cjl,g.rN,g.dN,g.rC,g.dC,g.srv].some(x=>x&&x.toLowerCase().includes(q))):guias;
+  if(chk.checked) data.forEach(g=>seleccionadas.add(g.col));
+  else seleccionadas.clear();
+  renderReg();
+}
+function selAll(){ toggleAll({checked:true}); }
+function deselAll(){ seleccionadas.clear(); renderReg(); }
+
+function toggleSel(col, e){
+  e.stopPropagation();
+  if(seleccionadas.has(col)) seleccionadas.delete(col);
+  else seleccionadas.add(col);
+  updSelBar();
+}
+function updSelBar(){
+  const n=seleccionadas.size;
+  const bar=document.getElementById('multiBar');
+  bar.style.display=n>0?'flex':'none';
+  document.getElementById('selCount').textContent=n;
+  document.getElementById('chkAll').indeterminate=false;
+}
+
+function abrirMultiEstatus(){
+  if(seleccionadas.size===0) return toast('Selecciona al menos una guía',1);
+  document.getElementById('multiCount').textContent=seleccionadas.size;
+  document.getElementById('multiNota').value='';
+  document.getElementById('multiTrans').value='';
+  document.getElementById('ovMultiStatus').classList.add('show');
+}
+
+async function aplicarMultiEstatus(){
+  const nuevoEstado=document.getElementById('multiSelect').value;
+  const trans=document.getElementById('multiTrans').value.trim();
+  const nota=document.getElementById('multiNota').value.trim();
+  const now=new Date();
+  const entrada={
+    estado:nuevoEstado, transportista:trans, nota,
+    fecha:now.toLocaleDateString('es-PE'),
+    hora:now.toLocaleTimeString('es-PE',{hour:'2-digit',minute:'2-digit'}),
+    usr:cu.nombre
+  };
+  const cols=[...seleccionadas];
+  closeOv('ovMultiStatus');
+  toast(`Actualizando ${cols.length} guías...`);
+  for(const col of cols){
+    const idx=guias.findIndex(x=>x.col===col);
+    if(idx<0) continue;
+    if(!guias[idx].historial) guias[idx].historial=[];
+    guias[idx].historial.push(entrada);
+    guias[idx].estado=nuevoEstado;
+    if(trans) guias[idx].transportista=trans;
+    await updateGuiaFS(col,{estado:nuevoEstado,transportista:trans||guias[idx].transportista||'',historial:guias[idx].historial});
+  }
+  seleccionadas.clear();
+  renderReg();
+  toast(`✅ ${cols.length} guías actualizadas a "${nuevoEstado}"`);
+}
+
+/* ─── EDITAR GUÍA ─── */
+let editTargetCol=null;
+function abrirEditar(col){
+  const g=guias.find(x=>x.col===col);if(!g)return;
+  editTargetCol=col;
+  document.getElementById('editGuiaRef').textContent=`${g.col} / ${g.cjl}`;
+  document.getElementById('eRN').value=g.rN||'';
+  document.getElementById('eRD').value=g.rD||'';
+  document.getElementById('eRT').value=g.rT||'';
+  document.getElementById('eRC').value=g.rC||'';
+  document.getElementById('eRDir').value=g.rDir||'';
+  document.getElementById('eDN').value=g.dN||'';
+  document.getElementById('eDD').value=g.dD||'';
+  document.getElementById('eDT').value=g.dT||'';
+  document.getElementById('eDC').value=g.dC||'';
+  document.getElementById('eDDir').value=g.dDir||'';
+  document.getElementById('eSrv').value=g.srv||'Estándar';
+  document.getElementById('ePago').value=g.pago||'Contado';
+  document.getElementById('eBul').value=g.bul||'1';
+  document.getElementById('ePeso').value=g.peso&&g.peso!=='—'?g.peso:'';
+  document.getElementById('eAlto').value=g.alto||'';
+  document.getElementById('eLargo').value=g.largo||'';
+  document.getElementById('eAncho').value=g.ancho||'';
+  document.getElementById('eDesc').value=g.desc||'';
+  document.getElementById('eObs').value=g.obs||'';
+  document.getElementById('editAlert').className='al';
+  document.getElementById('ovEditar').classList.add('show');
+}
+
+async function guardarEdicion(){
+  if(!editTargetCol) return;
+  const rN=document.getElementById('eRN').value.trim();
+  const rC=document.getElementById('eRC').value.trim();
+  const dN=document.getElementById('eDN').value.trim();
+  const dC=document.getElementById('eDC').value.trim();
+  const dDir=document.getElementById('eDDir').value.trim();
+  const alEl=document.getElementById('editAlert');
+  if(!rN||!rC||!dN||!dC||!dDir){
+    alEl.textContent='Completa los campos obligatorios (*)'; alEl.className='al al-er show'; return;
+  }
+  const alto=document.getElementById('eAlto').value.trim();
+  const largo=document.getElementById('eLargo').value.trim();
+  const ancho=document.getElementById('eAncho').value.trim();
+  const dims=(alto&&largo&&ancho)?`${alto}×${largo}×${ancho} cm`:'—';
+  const updates={
+    rN, rD:document.getElementById('eRD').value.trim(),
+    rT:document.getElementById('eRT').value.trim(), rC,
+    rDir:document.getElementById('eRDir').value.trim(),
+    dN, dD:document.getElementById('eDD').value.trim(),
+    dT:document.getElementById('eDT').value.trim(), dC, dDir,
+    srv:document.getElementById('eSrv').value,
+    pago:document.getElementById('ePago').value,
+    bul:document.getElementById('eBul').value||'1',
+    peso:document.getElementById('ePeso').value.trim()||'—',
+    alto, largo, ancho, dims,
+    desc:document.getElementById('eDesc').value.trim(),
+    obs:document.getElementById('eObs').value.trim(),
+  };
+  try{
+    await updateGuiaFS(editTargetCol, updates);
+    closeOv('ovEditar');
+    toast(`Guía ${editTargetCol} editada ✓`);
+  }catch(e){ alEl.textContent='Error: '+e.message; alEl.className='al al-er show'; }
+}
+
+/* ─── REGISTROS ─── */
+function renderReg(){
+  const q=(document.getElementById('sq')?.value||'').toLowerCase();
+  const data=q?guias.filter(g=>[g.col,g.cjl,g.rN,g.dN,g.rC,g.dC,g.srv].some(x=>x&&x.toLowerCase().includes(q))):guias;
+  const tb=document.getElementById('rTbody');
+  if(!data.length){tb.innerHTML=`<tr><td colspan="12"><div class="te"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm-1 7V3.5L18.5 9H13z"/></svg><p>Sin resultados</p></div></td></tr>`;return;}
+  const stBdg={'Recogido':'bnv','En almacén':'bnv','En tránsito':'bbl','En reparto':'bam','Entregado':'bgr','Con incidencia':'brd'};
+  tb.innerHTML=[...data].reverse().map((g,i)=>`
+    <tr style="cursor:pointer;${seleccionadas.has(g.col)?'background:var(--blue3);':''}" onclick="verG('${g.col}')">
+      <td onclick="event.stopPropagation()">
+        <input type="checkbox" ${seleccionadas.has(g.col)?'checked':''} onclick="toggleSel('${g.col}',event)" style="cursor:pointer;width:15px;height:15px;">
+      </td>
+      <td><span style="color:var(--t3);font-size:12px;">${data.length-i}</span></td>
+      <td><small style="color:var(--t3);">${g.fecha}</small></td>
+      <td><span class="bdg bbl">${g.col}</span>${g.guiaZoom?`<br><span style="font-size:10px;color:#1565C0;font-weight:700;">✈️ ${g.guiaZoom}</span>`:''}</td>
+      <td><span class="bdg bam">${g.cjl}</span></td>
+      <td><strong>${g.rN}</strong></td>
+      <td>${g.dN}</td>
+      <td><span style="color:var(--t2);">${g.rC}</span> <span style="color:var(--t3);">→</span> <span style="color:var(--blue);font-weight:600;">${g.dC}</span></td>
+      <td><span class="bdg bgr">${g.srv}</span></td>
+      <td>${g.peso} <small>kg</small></td>
+      <td onclick="event.stopPropagation()"><span class="bdg ${stBdg[g.estado||'En tránsito']||'bbl'}">${g.estado||'En tránsito'}</span></td>
+      <td onclick="event.stopPropagation()" style="display:flex;gap:5px;align-items:center;">
+        <button class="btn bp xs" onclick="verG('${g.col}')">Ver</button>
+        <button class="btn ba xs" onclick="abrirEstatus('${g.col}')">Estado</button>
+        <button class="btn bn xs" onclick="abrirEditar('${g.col}')" title="Editar">
+          <svg viewBox="0 0 24 24" fill="currentColor" style="width:13px;height:13px;"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+        </button>
+        <button class="btn bd xs" onclick="eliminarGuiaDirecto('${g.col}')" title="Eliminar">
+          <svg viewBox="0 0 24 24" fill="currentColor" style="width:13px;height:13px;"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+        </button>
+      </td>
+    </tr>`).join('');
+  updSelBar();
+}
+function verG(col){
+  const g=guias.find(x=>x.col===col);if(!g)return;
+  openBoxModal(g);
+}
+
+/* ─── CAMBIAR CONTRASEÑA ─── */
+function abrirCambioPass(){
+  document.getElementById('passUserRef').textContent = `(@${cu.user})`;
+  document.getElementById('passActual').value='';
+  document.getElementById('passNueva').value='';
+  document.getElementById('passConfirm').value='';
+  document.getElementById('passAlert').className='al';
+  document.getElementById('passAlert').textContent='';
+  document.getElementById('ovPass').classList.add('show');
+}
+async function guardarNuevaPass(){
+  const actual = document.getElementById('passActual').value;
+  const nueva  = document.getElementById('passNueva').value;
+  const confirm= document.getElementById('passConfirm').value;
+  const alEl   = document.getElementById('passAlert');
+
+  if(!actual||!nueva||!confirm){
+    alEl.textContent='Completa todos los campos'; alEl.className='al al-er show'; return;
+  }
+  if(actual !== cu.pass){
+    alEl.textContent='La contraseña actual no es correcta'; alEl.className='al al-er show'; return;
+  }
+  if(nueva.length < 4){
+    alEl.textContent='La nueva contraseña debe tener mínimo 4 caracteres'; alEl.className='al al-er show'; return;
+  }
+  if(nueva !== confirm){
+    alEl.textContent='Las contraseñas nuevas no coinciden'; alEl.className='al al-er show'; return;
+  }
+  try{
+    await db.collection('usuarios').doc(cu.user).update({pass: nueva});
+    cu.pass = nueva; // actualizar sesión actual
+    alEl.textContent='✅ Contraseña actualizada correctamente'; alEl.className='al al-ok show';
+    setTimeout(()=>closeOv('ovPass'), 1800);
+    toast('Contraseña actualizada ✓');
+  }catch(e){ alEl.textContent='Error: '+e.message; alEl.className='al al-er show'; }
+}
+
+/* ─── CAMBIAR ESTATUS ─── */
+let statusTargetCol=null;
+function abrirEstatus(col){
+  const g=guias.find(x=>x.col===col);if(!g)return;
+  statusTargetCol=col;
+  document.getElementById('stGuiaRef').textContent=`${g.col} / ${g.cjl} · ${g.rN} → ${g.dN}`;
+  document.getElementById('stSelect').value=g.estado||'En tránsito';
+  document.getElementById('stTransportista').value=g.transportista||'';
+  document.getElementById('stNota').value='';
+  document.getElementById('ovStatus').classList.add('show');
+}
+function aplicarEstatus(){
+  if(!statusTargetCol)return;
+  const idx=guias.findIndex(x=>x.col===statusTargetCol);if(idx<0)return;
+  const nuevoEstado=document.getElementById('stSelect').value;
+  const trans=document.getElementById('stTransportista').value.trim();
+  const nota=document.getElementById('stNota').value.trim();
+  const now=new Date();
+  const entrada={
+    estado:nuevoEstado,
+    transportista:trans,
+    nota,
+    fecha:now.toLocaleDateString('es-PE'),
+    hora:now.toLocaleTimeString('es-PE',{hour:'2-digit',minute:'2-digit'}),
+    usr:cu.nombre
+  };
+  if(!guias[idx].historial)guias[idx].historial=[];
+  guias[idx].historial.push(entrada);
+  guias[idx].estado=nuevoEstado;
+  guias[idx].transportista=trans;
+  // Guardar en Firestore
+  updateGuiaFS(statusTargetCol, {
+    estado: nuevoEstado,
+    transportista: trans,
+    historial: guias[idx].historial
+  });
+  closeOv('ovStatus');
+  renderReg();
+  toast(`Estado actualizado a "${nuevoEstado}" ✓`);
+}
+
+/* ─── USUARIOS ─── */
+function renderUsers(){
+  const isAdmin = cu?.role==='admin';
+  document.getElementById('uGrid').innerHTML = users.length ? users.map((u)=>`
+    <div class="uc">
+      <div class="ua" style="background:${u.role==='admin'?'linear-gradient(135deg,#D97706,#F59E0B)':'linear-gradient(135deg,var(--blue),var(--blue2))'}">
+        ${u.nombre[0].toUpperCase()}
+      </div>
+      <div class="ui">
+        <h4>${u.nombre}</h4>
+        <small>@${u.user} · ${u.role==='admin'?'👑 Admin':'👤 Operador'} · ${u.activo!==false?'<span style="color:var(--green)">Activo</span>':'<span style="color:var(--red)">Inactivo</span>'}</small>
+      </div>
+      <div class="uu">
+        ${isAdmin && u.role!=='admin' ? `
+          <button class="btn ba xs" title="${u.activo!==false?'Desactivar':'Activar'}" onclick="toggleUserActivo('${u.user}',${u.activo!==false})">
+            ${u.activo!==false?'🔒':'🔓'}
+          </button>
+          <button class="btn bd xs" onclick="delUser('${u.user}')">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+          </button>` : '<span class="bdg bam">Admin</span>'}
+      </div>
+    </div>`).join('')
+  : '<div style="padding:32px;text-align:center;color:var(--t3);">No hay usuarios registrados</div>';
+}
+
+async function toggleUserActivo(userKey, currentActivo){
+  if(!confirm(`¿${currentActivo?'Desactivar':'Activar'} al usuario "${userKey}"?`)) return;
+  try{
+    await db.collection('usuarios').doc(userKey).update({activo: !currentActivo});
+    toast(`Usuario ${!currentActivo?'activado':'desactivado'} ✓`);
+    renderUsers();
+  }catch(e){ toast('Error: '+e.message,1); }
+}
+
+async function delUser(userKey){
+  if(userKey===cu.user) return toast('No puedes eliminarte a ti mismo',1);
+  if(!confirm(`¿Eliminar permanentemente al usuario "${userKey}"?`)) return;
+  try{
+    await db.collection('usuarios').doc(userKey).delete();
+    toast('Usuario eliminado ✓');
+  }catch(e){ toast('Error: '+e.message,1); }
+}
+
+/* ─── EXCEL PRO — CORTE SEMANAL ─── */
+function exportExcel(){
+  if(!guias.length)return toast('No hay registros para exportar',1);
+  const wb=XLSX.utils.book_new();
+  const now=new Date();
+
+  // ── helpers ──────────────────────────────────────────
+  function getWeekKey(ts){
+    const d=new Date(ts);
+    const day=d.getDay();
+    const mon=new Date(d); mon.setDate(d.getDate()-(day===0?6:day-1));
+    const sun=new Date(mon); sun.setDate(mon.getDate()+6);
+    const fmt=dt=>`${String(dt.getDate()).padStart(2,'0')}/${String(dt.getMonth()+1).padStart(2,'0')}/${dt.getFullYear()}`;
+    return `${fmt(mon)} — ${fmt(sun)}`;
+  }
+  function getWeekNum(ts){
+    const d=new Date(ts);
+    const start=new Date(d.getFullYear(),0,1);
+    return Math.ceil(((d-start)/86400000+start.getDay()+1)/7);
+  }
+  function cellRef(r,c){return XLSX.utils.encode_cell({r,c});}
+
+  // ── pre-process ──────────────────────────────────────
+  const srvCount={},cityCount={},remCount={};
+  const weekMap={};
+  guias.forEach(g=>{
+    srvCount[g.srv]=(srvCount[g.srv]||0)+1;
+    cityCount[g.dC]=(cityCount[g.dC]||0)+1;
+    remCount[g.rN]=(remCount[g.rN]||0)+1;
+    const wk=getWeekKey(g.ts||now.toISOString());
+    if(!weekMap[wk])weekMap[wk]={label:wk,guias:[],count:0,peso:0,bultos:0};
+    weekMap[wk].guias.push(g);weekMap[wk].count++;
+    if(g.peso!=='—')weekMap[wk].peso+=parseFloat(g.peso)||0;
+    weekMap[wk].bultos+=parseInt(g.bul)||1;
+  });
+  const weeks=Object.values(weekMap).sort((a,b)=>a.label.localeCompare(b.label));
+
+  // ═══════════════════════════════════════════════════
+  // HOJA 1 — BASE DE DATOS COMPLETA (todas las guías)
+  // ═══════════════════════════════════════════════════
+  const H=['N°','Fecha','Hora','Semana','Código COL','Código CJL',
+    'REMITENTE','Doc. Remitente','Tel. Remitente','Ciudad Origen','Dirección Origen',
+    'DESTINATARIO','Doc. Destinatario','Tel. Destinatario','Ciudad Destino','Dirección Destino',
+    'Servicio','Peso (kg)','Cajas','Alto (cm)','Largo (cm)','Ancho (cm)','Medidas',
+    'Descripción','Forma de Pago','Observaciones','Estado','Operador'];
+
+  const dataRows=guias.map((g,i)=>[
+    i+1, g.fecha, g.hora||'', getWeekKey(g.ts||now.toISOString()),
+    g.col, g.cjl,
+    g.rN, g.rD||'', g.rT||'', g.rC, g.rDir||'',
+    g.dN, g.dD||'', g.dT, g.dC, g.dDir,
+    g.srv,
+    g.peso==='—'?'':parseFloat(g.peso)||'',
+    parseInt(g.bul)||1,
+    g.alto?parseFloat(g.alto):'', g.largo?parseFloat(g.largo):'', g.ancho?parseFloat(g.ancho):'',
+    g.dims||'',
+    g.desc||'', g.pago, g.obs||'', g.estado||'En tránsito', g.usr
+  ]);
+
+  const wsDB=XLSX.utils.aoa_to_sheet([H,...dataRows]);
+  // Totales
+  const tr=dataRows.length+2;
+  wsDB[cellRef(tr-1,0)]={v:'TOTALES',t:'s'};
+  wsDB[cellRef(tr-1,17)]={f:`=SUM(R2:R${tr-1})`,t:'n'};
+  wsDB[cellRef(tr-1,18)]={f:`=SUM(S2:S${tr-1})`,t:'n'};
+  wsDB['!ref']=XLSX.utils.encode_range({s:{r:0,c:0},e:{r:tr,c:27}});
+  wsDB['!cols']=[
+    {wch:4},{wch:11},{wch:7},{wch:26},{wch:11},{wch:11},
+    {wch:24},{wch:13},{wch:13},{wch:15},{wch:28},
+    {wch:24},{wch:13},{wch:13},{wch:15},{wch:28},
+    {wch:12},{wch:10},{wch:7},{wch:9},{wch:9},{wch:9},{wch:16},
+    {wch:26},{wch:13},{wch:26},{wch:13},{wch:18}
+  ];
+  // Freeze top row
+  wsDB['!freeze']={xSplit:0,ySplit:1};
+  XLSX.utils.book_append_sheet(wb,wsDB,'📋 Base de Datos');
+
+  // ═══════════════════════════════════════════════════
+  // HOJA 2 — CORTE SEMANAL (una sección por semana)
+  // ═══════════════════════════════════════════════════
+  const semRows=[];
+  semRows.push(['CARGO SERVICES JL — REPORTE POR CORTE SEMANAL']);
+  semRows.push([`Generado: ${now.toLocaleString('es-PE')}   |   Total guías: ${guias.length}   |   Operador: ${cu.nombre}`]);
+  semRows.push([]);
+
+  weeks.forEach((wk,wi)=>{
+    // Encabezado de semana
+    semRows.push([`SEMANA ${wi+1}`,`📅 ${wk.label}`,``,`Total guías: ${wk.count}`,`Peso total: ${wk.peso.toFixed(2)} kg`,`Cajas: ${wk.cajas}`]);
+    // Cabeceras columna
+    semRows.push(['N°','Fecha','COL','CJL','Remitente','Tel. Rem.','Destinatario','Tel. Dest.','Origen','Destino','Servicio','Peso kg','Cajas','Medidas','Descripción','Pago','Obs.']);
+    // Datos
+    wk.guias.forEach((g,i)=>{
+      semRows.push([
+        i+1, g.fecha, g.col, g.cjl,
+        g.rN, g.rT||'', g.dN, g.dT,
+        g.rC, g.dC, g.srv,
+        g.peso==='—'?'':parseFloat(g.peso)||'',
+        parseInt(g.bul)||1,
+        g.dims||'',
+        g.desc||'', g.pago, g.obs||''
+      ]);
+    });
+    // Subtotales de la semana
+    const startRow=semRows.length-wk.count+1;
+    semRows.push(['','','','','','','','','','','SUBTOTAL',`${wk.peso.toFixed(2)} kg`,`${wk.cajas} cajas`,'','','','']);
+    semRows.push([]); // línea separadora
+  });
+
+  // Totales finales
+  semRows.push(['TOTALES GENERALES','','','','','',`${guias.length} guías`,``,``,``,``,`${guias.reduce((a,g)=>a+(g.peso!=='—'?parseFloat(g.peso)||0:0),0).toFixed(2)} kg`,`${guias.reduce((a,g)=>a+(parseInt(g.bul)||1),0)} cajas`]);
+
+  const wsSem=XLSX.utils.aoa_to_sheet(semRows);
+  wsSem['!cols']=[
+    {wch:4},{wch:11},{wch:11},{wch:11},{wch:24},{wch:13},
+    {wch:24},{wch:13},{wch:15},{wch:15},{wch:12},{wch:10},
+    {wch:8},{wch:16},{wch:26},{wch:13},{wch:24}
+  ];
+  XLSX.utils.book_append_sheet(wb,wsSem,'📅 Corte Semanal');
+
+  // ═══════════════════════════════════════════════════
+  // HOJA 3 — RESUMEN EJECUTIVO
+  // ═══════════════════════════════════════════════════
+  const resRows=[
+    ['CARGO SERVICES JL — RESUMEN EJECUTIVO'],
+    [`Exportado: ${now.toLocaleString('es-PE')}`],
+    [],
+    ['INDICADORES CLAVE',''],
+    ['Total de guías emitidas', guias.length],
+    ['Semanas con actividad', weeks.length],
+    ['Promedio guías por semana', weeks.length ? +(guias.length/weeks.length).toFixed(1) : 0],
+    ['Total peso registrado (kg)', +guias.reduce((a,g)=>a+(g.peso!=='—'?parseFloat(g.peso)||0:0),0).toFixed(2)],
+    ['Total cajas', guias.reduce((a,g)=>a+(parseInt(g.bul)||1),0)],
+    ['Ciudades destino únicas', Object.keys(cityCount).length],
+    ['Guías hoy', guias.filter(g=>g.fecha===now.toLocaleDateString('es-PE')).length],
+    [],
+    ['RESUMEN POR SEMANA','Guías','Peso (kg)','Cajas'],
+    ...weeks.map(wk=>[wk.label, wk.count, +wk.peso.toFixed(2), wk.bultos]),
+    [],
+    ['POR TIPO DE SERVICIO','Cantidad','%'],
+    ...Object.entries(srvCount).sort((a,b)=>b[1]-a[1]).map(([s,c])=>[s,c,+(c/guias.length*100).toFixed(1)+'%']),
+    [],
+    ['TOP 10 CIUDADES DESTINO','Envíos',''],
+    ...Object.entries(cityCount).sort((a,b)=>b[1]-a[1]).slice(0,10).map(([c,n])=>[c,n,'']),
+    [],
+    ['TOP 10 REMITENTES','Guías',''],
+    ...Object.entries(remCount).sort((a,b)=>b[1]-a[1]).slice(0,10).map(([n,c])=>[n,c,'']),
+  ];
+  const wsRes=XLSX.utils.aoa_to_sheet(resRows);
+  wsRes['!cols']=[{wch:36},{wch:20},{wch:14},{wch:12}];
+  XLSX.utils.book_append_sheet(wb,wsRes,'📊 Resumen Ejecutivo');
+
+  const fecha=now.toISOString().slice(0,10);
+  XLSX.writeFile(wb,`CargoServicesJL_${fecha}.xlsx`);
+  toast(`Excel exportado · ${guias.length} guías · ${weeks.length} semanas ✓`);
+}
+
+/* ─── UTILS ─── */
+function closeOv(id){document.getElementById(id).classList.remove('show');}
+function toast(msg,err=0){
+  const c=document.getElementById('toastC');
+  const t=document.createElement('div');
+  t.className='toast'+(err?' te':'');
+  t.innerHTML=`<div class="ti">${err?'⚠':'✓'}</div><span>${msg}</span>`;
+  c.appendChild(t);
+  setTimeout(()=>{t.style.animation='tsO .3s ease forwards';setTimeout(()=>t.remove(),300);},3500);
+}
+</script>
+</body>
+</html>

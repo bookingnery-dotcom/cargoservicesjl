@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rastreo — CARGO SERVICES JL</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#0B1F3A;--blue:#1D5FA8;--blue2:#3B82C4;--sky:#EBF4FF;
+  --amber:#F59E0B;--amber2:#FEF3C7;
+  --green:#10B981;--green2:#D1FAE5;
+  --orange:#F97316;--orange2:#FFEDD5;
+  --red:#EF4444;--red2:#FEE2E2;
+  --purple:#7C3AED;--purple2:#EDE9FE;
+  --gray:#6B7280;--bg:#F0F6FF;
+  --white:#fff;--border:#DDE8F5;
+  --sh:0 2px 12px rgba(11,31,58,.08);--sh2:0 8px 32px rgba(11,31,58,.14);
+  --r:14px;--r2:10px;--r3:7px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--navy);min-height:100vh;-webkit-font-smoothing:antialiased;}
+
+/* ── NAV ── */
+.nav{background:#fff;border-bottom:1px solid var(--border);padding:0 clamp(16px,5vw,48px);height:64px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:var(--sh);}
+.nav-brand{display:flex;align-items:center;gap:12px;}
+.nav-icon{width:40px;height:40px;background:linear-gradient(135deg,var(--blue),var(--blue2));border-radius:11px;display:flex;align-items:center;justify-content:center;}
+.nav-icon svg{width:22px;height:22px;fill:#fff;}
+.nav-name{font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:800;color:var(--navy);}
+.nav-name em{color:var(--blue);font-style:normal;}
+.nav-sub{font-size:11px;color:var(--gray);}
+.nav-wa{display:flex;gap:8px;}
+.wa-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;background:#25D366;color:#fff;border:none;border-radius:var(--r3);font-family:'Plus Jakarta Sans',sans-serif;font-size:12.5px;font-weight:700;cursor:pointer;transition:all .2s;text-decoration:none;white-space:nowrap;}
+.wa-btn:hover{background:#1EBE59;transform:translateY(-1px);}
+.wa-btn svg{width:15px;height:15px;fill:#fff;flex-shrink:0;}
+
+/* ── HERO ── */
+.hero{background:linear-gradient(145deg,var(--navy) 0%,#1a3a6b 55%,var(--blue) 100%);padding:56px clamp(16px,6vw,60px) 76px;text-align:center;position:relative;overflow:hidden;}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(59,130,196,.22) 0%,transparent 70%);}
+.hero::after{content:'';position:absolute;bottom:-40px;left:50%;transform:translateX(-50%);width:120%;height:80px;background:var(--bg);border-radius:50% 50% 0 0;}
+.hero-inner{position:relative;z-index:1;max-width:620px;margin:0 auto;}
+.hero-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(245,158,11,.15);border:1px solid rgba(245,158,11,.3);border-radius:99px;padding:5px 14px;font-size:12px;font-weight:700;color:var(--amber);letter-spacing:.5px;text-transform:uppercase;margin-bottom:16px;}
+.hero h1{font-family:'Space Grotesk',sans-serif;font-size:clamp(24px,5vw,40px);font-weight:800;color:#fff;line-height:1.15;margin-bottom:10px;}
+.hero h1 em{color:var(--amber);font-style:normal;}
+.hero p{font-size:15px;color:rgba(255,255,255,.65);line-height:1.6;margin-bottom:28px;}
+
+/* ── SEARCH CARD ── */
+.scard{background:#fff;border-radius:var(--r);box-shadow:var(--sh2);padding:24px;max-width:580px;margin:0 auto;border:1px solid var(--border);}
+.scard-title{font-size:13px;font-weight:700;color:var(--navy);margin-bottom:14px;}
+.srow{display:flex;gap:10px;}
+.sinp{flex:1;padding:13px 16px;border:2px solid var(--border);border-radius:var(--r3);font-family:'Plus Jakarta Sans',sans-serif;font-size:15px;color:var(--navy);background:#fff;outline:none;transition:border-color .2s;letter-spacing:.5px;}
+.sinp:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(29,95,168,.1);}
+.sinp::placeholder{color:#aab4c4;font-size:14px;letter-spacing:0;}
+.sbtn{padding:13px 24px;background:linear-gradient(135deg,var(--blue),var(--blue2));color:#fff;border:none;border-radius:var(--r3);font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:8px;white-space:nowrap;}
+.sbtn:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(29,95,168,.4);}
+.sbtn svg{width:16px;height:16px;}
+.shint{margin-top:10px;font-size:12px;color:var(--gray);text-align:center;}
+.shint strong{color:var(--blue);}
+.serr{margin-top:10px;padding:10px 14px;background:var(--red2);border:1px solid #FCA5A5;border-radius:var(--r3);font-size:13px;color:#991B1B;font-weight:500;display:none;}
+.serr.show{display:block;}
+
+/* ── MAIN ── */
+.wrap{max-width:880px;margin:0 auto;padding:36px clamp(16px,4vw,32px) 60px;}
+.result{display:none;}
+.result.show{display:block;}
+
+/* STATUS BANNER */
+.stbanner{border-radius:var(--r);padding:18px 22px;margin-bottom:20px;display:flex;align-items:center;gap:14px;}
+.stb-icon{width:50px;height:50px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;}
+.stb-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;opacity:.7;margin-bottom:3px;}
+.stb-val{font-family:'Space Grotesk',sans-serif;font-size:19px;font-weight:800;line-height:1.1;}
+.stb-date{font-size:12.5px;opacity:.75;margin-top:3px;}
+.s-transit{background:linear-gradient(135deg,#DBEAFE,#EFF6FF);border:1.5px solid #93C5FD;color:var(--blue);}
+.s-delivered{background:linear-gradient(135deg,var(--green2),#ECFDF5);border:1.5px solid #6EE7B7;color:#065F46;}
+.s-pending{background:linear-gradient(135deg,var(--orange2),#FFF7ED);border:1.5px solid #FDB06A;color:#92400E;}
+.s-issue{background:linear-gradient(135deg,var(--red2),#FFF5F5);border:1.5px solid #FCA5A5;color:#991B1B;}
+.s-warehouse{background:linear-gradient(135deg,var(--purple2),#F5F3FF);border:1.5px solid #C4B5FD;color:var(--purple);}
+
+/* CODES ROW */
+.codes{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;}
+.chip{flex:1;min-width:120px;background:#fff;border:1.5px solid var(--border);border-radius:var(--r2);padding:12px;text-align:center;box-shadow:var(--sh);}
+.chip small{display:block;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--gray);margin-bottom:4px;}
+.chip strong{font-family:'Space Grotesk',sans-serif;font-size:17px;font-weight:800;color:var(--navy);}
+.chip.hi{border-color:var(--blue);background:var(--sky);}
+.chip.hi strong{color:var(--blue);}
+
+/* INFO GRID */
+.igrid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px;}
+@media(max-width:580px){.igrid{grid-template-columns:1fr;}}
+.icard{background:#fff;border-radius:var(--r);border:1px solid var(--border);box-shadow:var(--sh);overflow:hidden;}
+.ichead{padding:11px 16px;background:var(--bg);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;}
+.ichead h4{font-size:11.5px;font-weight:800;text-transform:uppercase;letter-spacing:.7px;color:var(--navy);}
+.icbody{padding:13px 16px;display:flex;flex-direction:column;gap:8px;}
+.ifield small{display:block;font-size:10px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px;}
+.ifield span{font-size:13.5px;font-weight:600;color:var(--navy);}
+
+/* PKG ROW */
+.pkgrow{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;}
+.pkgbox{flex:1;min-width:90px;background:#fff;border:1px solid var(--border);border-radius:var(--r2);padding:12px;text-align:center;box-shadow:var(--sh);}
+.pkgbox .pb-ic{font-size:20px;margin-bottom:5px;}
+.pkgbox small{display:block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--gray);margin-bottom:2px;}
+.pkgbox strong{font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:700;color:var(--navy);}
+
+/* ── TIMELINE ── */
+.tlcard{background:#fff;border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--sh);margin-bottom:20px;}
+.tlhead{padding:14px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.tlhead h4{font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:var(--navy);}
+.tlbody{padding:20px 20px 10px;}
+.tl{display:flex;flex-direction:column;}
+.tl-item{display:flex;gap:14px;position:relative;}
+.tl-item:not(:last-child)::after{content:'';position:absolute;left:18px;top:40px;bottom:0;width:2px;background:var(--border);}
+.tl-item.done::after{background:var(--green);}
+.tl-item.active::after{background:linear-gradient(to bottom,var(--blue),var(--border));}
+.tl-dot{width:38px;height:38px;border-radius:50%;border:2px solid var(--border);background:#fff;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;z-index:1;}
+.tl-item.done .tl-dot{background:var(--green2);border-color:var(--green);}
+.tl-item.active .tl-dot{background:var(--sky);border-color:var(--blue);box-shadow:0 0 0 4px rgba(29,95,168,.12);}
+.tl-item.pending .tl-dot{background:var(--bg);border-color:var(--border);font-size:14px;color:var(--gray);}
+.tl-info{flex:1;padding:8px 0 22px;}
+.tl-item:last-child .tl-info{padding-bottom:0;}
+.tl-info strong{font-size:14px;font-weight:700;color:var(--navy);}
+.tl-info p{font-size:12.5px;color:var(--gray);margin-top:2px;line-height:1.4;}
+.tl-time{font-size:11.5px;color:var(--gray);font-weight:500;margin-top:4px;}
+.tl-badge{display:inline-block;padding:2px 9px;border-radius:99px;font-size:10.5px;font-weight:700;margin-top:4px;}
+.tb-done{background:var(--green2);color:#065F46;}
+.tb-active{background:var(--sky);color:var(--blue);}
+.tb-pending{background:var(--bg);color:var(--gray);}
+
+/* TRANS INFO */
+.trans-note{margin-top:6px;padding:8px 12px;background:var(--sky);border-radius:6px;font-size:12px;color:var(--blue);font-weight:500;}
+
+/* ── CONTACT ── */
+.cstrip{background:linear-gradient(135deg,var(--navy),#1a3a6b);border-radius:var(--r);padding:22px 24px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;}
+.cs-left h4{font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:700;color:#fff;}
+.cs-left p{font-size:12.5px;color:rgba(255,255,255,.6);margin-top:3px;}
+.cs-btns{display:flex;gap:8px;flex-wrap:wrap;}
+.csbtn{padding:10px 18px;border:none;border-radius:var(--r3);font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:7px;}
+.csbtn:hover{transform:translateY(-1px);}
+.csbtn-wa{background:#25D366;color:#fff;}
+.csbtn-wa:hover{background:#1EBE59;}
+.csbtn svg{width:15px;height:15px;fill:currentColor;}
+
+/* NO RESULT */
+.nores{display:none;text-align:center;padding:60px 20px;}
+.nores.show{display:block;}
+.nores .icon{font-size:52px;margin-bottom:14px;}
+.nores h3{font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:700;color:var(--navy);margin-bottom:6px;}
+.nores p{font-size:14px;color:var(--gray);max-width:360px;margin:0 auto;}
+
+/* ── ADMIN PANEL (password protected) ── */
+.admin-bar{background:#fff;border:1px solid var(--border);border-radius:var(--r);padding:14px 18px;margin-bottom:20px;display:flex;align-items:center;gap:12px;box-shadow:var(--sh);}
+.admin-bar h4{font-size:13px;font-weight:700;color:var(--navy);flex:1;}
+.admin-bar select{padding:8px 12px;border:1.5px solid var(--border);border-radius:var(--r3);font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;color:var(--navy);outline:none;cursor:pointer;}
+.admin-bar select:focus{border-color:var(--blue);}
+.admin-bar input{flex:1;padding:8px 12px;border:1.5px solid var(--border);border-radius:var(--r3);font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;color:var(--navy);outline:none;}
+.admin-bar input:focus{border-color:var(--blue);}
+.updBtn{padding:9px 18px;background:linear-gradient(135deg,var(--blue),var(--blue2));color:#fff;border:none;border-radius:var(--r3);font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.updBtn:hover{transform:translateY(-1px);}
+.admin-pin-wrap{display:flex;align-items:center;gap:8px;}
+.admin-toggle{padding:7px 14px;background:var(--bg);border:1.5px solid var(--border);border-radius:var(--r3);font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;color:var(--navy);display:flex;align-items:center;gap:6px;}
+.admin-toggle:hover{border-color:var(--blue);color:var(--blue);}
+.admin-panel{display:none;}
+.admin-panel.open{display:flex;flex-wrap:wrap;gap:10px;align-items:center;}
+
+/* FOOTER */
+.footer{background:var(--navy);padding:28px clamp(16px,5vw,48px);text-align:center;}
+.footer-brand{font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:700;color:#fff;margin-bottom:5px;}
+.footer-brand em{color:var(--amber);font-style:normal;}
+.footer-copy{font-size:11.5px;color:rgba(255,255,255,.35);}
+.footer-wa{display:flex;justify-content:center;gap:10px;margin-top:12px;}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-brand">
+    <div class="nav-icon">
+      <svg viewBox="0 0 24 24"><path d="M20 8h-3V4H3c-1.1 0-2 .9-2 2v11h2c0 1.66 1.34 3 3 3s3-1.34 3-3h6c0 1.66 1.34 3 3 3s3-1.34 3-3h2v-5l-3-4zm-.5 1.5 1.96 2.5H17V9.5h2.5zM6 18c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm2.22-3c-.55-.61-1.36-1-2.22-1H3V6h12v9H8.22zM18 18c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1z"/></svg>
+    </div>
+    <div>
+      <div class="nav-name">CARGO SERVICES <em>JL</em></div>
+      <div class="nav-sub">🔍 Rastreo de paquetes</div>
+    </div>
+  </div>
+  <div class="nav-wa">
+    <a class="wa-btn" href="https://wa.me/51902567044" target="_blank">
+      <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+      902 567 044
+    </a>
+    <a class="wa-btn" href="https://wa.me/51903245854" target="_blank">
+      <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+      903 245 854
+    </a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-badge">🚚 Rastreo en tiempo real</div>
+    <h1>Rastrea tu <em>paquete</em></h1>
+    <p>Ingresa tu número de guía COL o CJL para ver el estado de tu envío.</p>
+    <div class="scard">
+      <div class="scard-title">Número de guía</div>
+      <div class="srow">
+        <input class="sinp" type="text" id="tInput" placeholder="Ej: COL-0001 o CJL-0001"
+          oninput="this.value=this.value.toUpperCase()"
+          onkeydown="if(event.key==='Enter')buscar()">
+        <button class="sbtn" onclick="buscar()">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+          Rastrear
+        </button>
+      </div>
+      <div class="shint">Ejemplo: <strong>COL-0001</strong> o <strong>CJL-0001</strong></div>
+      <div class="serr" id="sErr">⚠️ No encontramos ninguna guía con ese código. Verifica e intenta de nuevo.</div>
+    </div>
+  </div>
+</div>
+
+<!-- CONTAINER -->
+<div class="wrap">
+  <div class="nores" id="noRes">
+    <div class="icon">📦</div>
+    <h3>Guía no encontrada</h3>
+    <p>No encontramos ninguna guía con ese número. Verifica el código o contáctanos por WhatsApp.</p>
+  </div>
+
+  <div class="result" id="result">
+
+    <!-- STATUS BANNER -->
+    <div id="stBanner" class="stbanner"></div>
+
+    <!-- ADMIN PANEL (operadores) -->
+    <div class="admin-bar" id="adminBar" style="display:none;">
+      <h4>⚙️ Actualizar estado del paquete</h4>
+      <div class="admin-panel open" id="adminPanel">
+        <select id="adminStatus">
+          <option value="Recogido">📦 Recogido</option>
+          <option value="En almacén">🏬 En almacén</option>
+          <option value="En tránsito">🚚 En tránsito</option>
+          <option value="En reparto">🛵 En reparto local</option>
+          <option value="Entregado">✅ Entregado</option>
+          <option value="Con incidencia">⚠️ Con incidencia</option>
+        </select>
+        <input type="text" id="adminTrans" placeholder="Transportista / agencia (ej: ZOOM)">
+        <input type="text" id="adminNota" placeholder="Nota de seguimiento...">
+        <button class="updBtn" onclick="actualizarEstado()">Actualizar estado</button>
+      </div>
+    </div>
+
+    <!-- CODES -->
+    <div class="codes">
+      <div class="chip hi"><small>Código COL</small><strong id="rCOL">—</strong></div>
+      <div class="chip"><small>Código CJL</small><strong id="rCJL">—</strong></div>
+      <div class="chip"><small>Servicio</small><strong id="rSrv">—</strong></div>
+      <div class="chip"><small>Fecha</small><strong id="rFecha" style="font-size:13px;">—</strong></div>
+    </div>
+
+    <!-- INFO GRID -->
+    <div class="igrid">
+      <div class="icard">
+        <div class="ichead"><span>📤</span><h4>Remitente · Origen</h4></div>
+        <div class="icbody">
+          <div class="ifield"><small>Nombre</small><span id="rRN">—</span></div>
+          <div class="ifield"><small>Documento</small><span id="rRD">—</span></div>
+          <div class="ifield"><small>Teléfono</small><span id="rRT">—</span></div>
+          <div class="ifield"><small>Ciudad de origen</small><span id="rRC">—</span></div>
+          <div class="ifield" id="rRDirField" style="display:none;"><small>Dirección</small><span id="rRDir">—</span></div>
+        </div>
+      </div>
+      <div class="icard">
+        <div class="ichead"><span>📥</span><h4>Destinatario · Destino</h4></div>
+        <div class="icbody">
+          <div class="ifield"><small>Nombre</small><span id="rDN">—</span></div>
+          <div class="ifield"><small>Documento</small><span id="rDD">—</span></div>
+          <div class="ifield"><small>Teléfono</small><span id="rDT">—</span></div>
+          <div class="ifield"><small>Ciudad de destino</small><span id="rDC">—</span></div>
+          <div class="ifield"><small>Dirección de entrega</small><span id="rDDir">—</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PKG ROW -->
+    <div class="pkgrow" id="pkgRow"></div>
+
+    <!-- TIMELINE -->
+    <div class="tlcard">
+      <div class="tlhead">
+        <h4>📍 Historial de seguimiento</h4>
+      </div>
+      <div class="tlbody">
+        <div class="tl" id="tlList"></div>
+      </div>
+    </div>
+
+    <!-- CONTACT -->
+    <div class="cstrip">
+      <div class="cs-left">
+        <h4>¿Consultas sobre tu envío?</h4>
+        <p>Escríbenos directamente por WhatsApp, te atendemos al instante</p>
+      </div>
+      <div class="cs-btns">
+        <button class="csbtn csbtn-wa" id="waBtn1">
+          <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+          902 567 044
+        </button>
+        <button class="csbtn csbtn-wa" id="waBtn2">
+          <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+          903 245 854
+        </button>
+      </div>
+    </div>
+
+  </div><!-- /result -->
+</div>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer-brand">CARGO SERVICES <em>JL</em></div>
+  <div class="footer-wa">
+    <a class="wa-btn" href="https://wa.me/51902567044" target="_blank">
+      <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+      902 567 044
+    </a>
+    <a class="wa-btn" href="https://wa.me/51903245854" target="_blank">
+      <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+      903 245 854
+    </a>
+  </div>
+  <div class="footer-copy" style="margin-top:10px;">© 2025 Cargo Services JL · Todos los derechos reservados</div>
+</footer>
+
+<script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore-compat.js"></script>
+<script>
+// Inicializar Firebase
+const firebaseConfig = {
+  apiKey: "AIzaSyCMj0Nfy8t0sngkw8oSsk9SZbJjd7eGmzc",
+  authDomain: "cargoservicesjl-d30b5.firebaseapp.com",
+  projectId: "cargoservicesjl-d30b5",
+  storageBucket: "cargoservicesjl-d30b5.firebasestorage.app",
+  messagingSenderId: "440373882533",
+  appId: "1:440373882533:web:1de8d71ea4c099c93de74c"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+const WA1='51902567044', WA2='51903245854';
+let currentGuia=null;
+let unsubGuia=null;
+
+// ─── BUSCAR EN FIRESTORE ───
+async function buscar(){
+  const q=document.getElementById('tInput').value.trim().toUpperCase();
+  document.getElementById('sErr').classList.remove('show');
+  document.getElementById('noRes').classList.remove('show');
+  document.getElementById('result').classList.remove('show');
+
+  if(!q){
+    document.getElementById('sErr').textContent='⚠️ Ingresa un número de guía.';
+    document.getElementById('sErr').classList.add('show');
+    return;
+  }
+
+  // Mostrar loading
+  document.getElementById('sErr').textContent='🔍 Buscando...';
+  document.getElementById('sErr').style.background='var(--sky)';
+  document.getElementById('sErr').style.color='var(--blue)';
+  document.getElementById('sErr').style.border='1px solid var(--border2)';
+  document.getElementById('sErr').classList.add('show');
+
+  try{
+    // Detener listener anterior si existe
+    if(unsubGuia){unsubGuia();unsubGuia=null;}
+
+    // Buscar por COL (doc ID)
+    let docRef = db.collection('guias').doc(q);
+    let docSnap = await docRef.get();
+
+    if(!docSnap.exists){
+      // Buscar por CJL
+      const snapCJL = await db.collection('guias').where('cjl','==',q).limit(1).get();
+      if(!snapCJL.empty){
+        docRef = db.collection('guias').doc(snapCJL.docs[0].id);
+        docSnap = snapCJL.docs[0];
+      } else {
+        // Buscar parcial por COL
+        const snapPartial = await db.collection('guias')
+          .orderBy('col').startAt(q).endAt(q+'\uf8ff').limit(1).get();
+        if(!snapPartial.empty){
+          docRef = db.collection('guias').doc(snapPartial.docs[0].id);
+          docSnap = snapPartial.docs[0];
+        } else {
+          document.getElementById('sErr').textContent='⚠️ No encontramos ninguna guía con ese código.';
+          document.getElementById('sErr').style.background='var(--red2)';
+          document.getElementById('sErr').style.color='#991B1B';
+          document.getElementById('sErr').style.border='1px solid #FCA5A5';
+          document.getElementById('noRes').classList.add('show');
+          return;
+        }
+      }
+    }
+
+    document.getElementById('sErr').classList.remove('show');
+    currentGuia = docSnap.data();
+    render(currentGuia);
+
+    // Escuchar cambios en tiempo real
+    unsubGuia = docRef.onSnapshot(snap=>{
+      if(snap.exists){
+        currentGuia=snap.data();
+        render(currentGuia);
+      }
+    });
+
+  }catch(err){
+    document.getElementById('sErr').textContent='⚠️ Error de conexión. Intenta de nuevo.';
+    document.getElementById('sErr').style.background='var(--red2)';
+    document.getElementById('sErr').style.color='#991B1B';
+    console.error(err);
+  }
+}
+
+// ─── ACTUALIZAR ESTADO (admin) ───
+async function actualizarEstado(){
+  if(!currentGuia)return;
+  const nuevoEstado=document.getElementById('adminStatus').value;
+  const trans=document.getElementById('adminTrans').value.trim();
+  const nota=document.getElementById('adminNota').value.trim();
+  const now=new Date();
+  const entrada={
+    estado:nuevoEstado,transportista:trans,nota,
+    fecha:now.toLocaleDateString('es-PE'),
+    hora:now.toLocaleTimeString('es-PE',{hour:'2-digit',minute:'2-digit'})
+  };
+  const hist=[...(currentGuia.historial||[]),entrada];
+  try{
+    await db.collection('guias').doc(currentGuia.col).update({
+      estado:nuevoEstado,
+      transportista:trans||currentGuia.transportista||'',
+      historial:hist
+    });
+    document.getElementById('adminNota').value='';
+    alert(`✅ Estado actualizado a "${nuevoEstado}"`);
+  }catch(e){alert('Error: '+e.message);}
+}
+
+function render(g){
+  const cfg=getCfg(g.estado);
+  document.getElementById('stBanner').className='stbanner '+cfg.cls;
+  document.getElementById('stBanner').innerHTML=`
+    <div class="stb-icon">${cfg.icon}</div>
+    <div><div class="stb-label">Estado del envío</div>
+    <div class="stb-val">${cfg.label}</div>
+    <div class="stb-date">Actualizado: ${g.fecha} ${g.hora||''}</div></div>`;
+
+  const isAdmin=sessionStorage.getItem('csjl_admin')==='1';
+  document.getElementById('adminBar').style.display=isAdmin?'flex':'none';
+  if(isAdmin){
+    document.getElementById('adminStatus').value=g.estado||'En tránsito';
+    document.getElementById('adminTrans').value=g.transportista||'';
+  }
+
+  document.getElementById('rCOL').textContent=g.col;
+  document.getElementById('rCJL').textContent=g.cjl;
+  document.getElementById('rSrv').textContent=g.srv;
+  document.getElementById('rFecha').textContent=g.fecha;
+  document.getElementById('rRN').textContent=g.rN||'—';
+  document.getElementById('rRD').textContent=g.rD||'—';
+  document.getElementById('rRT').textContent=g.rT||'—';
+  document.getElementById('rRC').textContent=g.rC||'—';
+  if(g.rDir){document.getElementById('rRDirField').style.display='block';document.getElementById('rRDir').textContent=g.rDir;}
+  else{document.getElementById('rRDirField').style.display='none';}
+  document.getElementById('rDN').textContent=g.dN||'—';
+  document.getElementById('rDD').textContent=g.dD||'—';
+  document.getElementById('rDT').textContent=g.dT||'—';
+  document.getElementById('rDC').textContent=g.dC||'—';
+  document.getElementById('rDDir').textContent=g.dDir||'—';
+
+  document.getElementById('pkgRow').innerHTML=`
+    <div class="pkgbox"><div class="pb-ic">⚖️</div><small>Peso total</small><strong>${g.peso||'—'} kg</strong></div>
+    <div class="pkgbox"><div class="pb-ic">📦</div><small>Cajas</small><strong>${g.bul||'1'}</strong></div>
+    <div class="pkgbox"><div class="pb-ic">📐</div><small>Medidas</small><strong style="font-size:12px;">${g.dims||'—'}</strong></div>
+    <div class="pkgbox"><div class="pb-ic">💳</div><small>Pago</small><strong>${g.pago||'—'}</strong></div>
+    ${g.desc?`<div class="pkgbox" style="flex:2;"><div class="pb-ic">📝</div><small>Contenido</small><strong>${g.desc}</strong></div>`:''}
+    ${(parseInt(g.bul)||1)>1 && g.cajas && g.cajas.length>1 ? `
+    <div style="flex-basis:100%;background:#fff;border:1px solid var(--border);border-radius:var(--r2);overflow:hidden;box-shadow:var(--sh);">
+      <div style="padding:10px 16px;background:var(--bg);border-bottom:1px solid var(--border);font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.7px;color:var(--navy);">
+        📦 Detalle por caja
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:0;">
+        ${g.cajas.map((c,i)=>`
+          <div style="padding:10px 14px;border-right:1px solid var(--border);border-bottom:1px solid var(--border);">
+            <div style="font-size:10px;font-weight:800;color:var(--blue);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;">Caja ${i+1} de ${g.bul}</div>
+            <div style="font-size:12.5px;font-weight:600;color:var(--navy);">⚖️ ${c.peso&&c.peso!=='—'?c.peso+' kg':'—'}</div>
+            <div style="font-size:11.5px;color:var(--t2);margin-top:2px;">📐 ${c.dims&&c.dims!=='—'?c.dims:'—'}</div>
+          </div>`).join('')}
+      </div>
+    </div>` : ''}`;
+
+  document.getElementById('tlList').innerHTML=buildTimeline(g);
+
+  const msg=encodeURIComponent(`Hola Cargo Services JL, consulto sobre mi guía *${g.col}* / *${g.cjl}* de ${g.rC} hacia ${g.dC}. Estado: ${g.estado||'En tránsito'}`);
+  document.getElementById('waBtn1').onclick=()=>window.open(`https://wa.me/${WA1}?text=${msg}`,'_blank');
+  document.getElementById('waBtn2').onclick=()=>window.open(`https://wa.me/${WA2}?text=${msg}`,'_blank');
+
+  document.getElementById('result').classList.add('show');
+  document.getElementById('result').scrollIntoView({behavior:'smooth',block:'start'});
+}
+// ─── STATUS CONFIG ───
+const SC={
+  'Recogido'      :{cls:'s-pending',   icon:'📦', label:'Recogido'},
+  'En almacén'    :{cls:'s-warehouse', icon:'🏬', label:'En almacén'},
+  'En tránsito'   :{cls:'s-transit',   icon:'🚚', label:'En tránsito'},
+  'En reparto'    :{cls:'s-transit',   icon:'🛵', label:'En reparto'},
+  'Entregado'     :{cls:'s-delivered', icon:'✅', label:'Entregado'},
+  'Con incidencia':{cls:'s-issue',     icon:'⚠️', label:'Con incidencia'},
+};
+function getCfg(e){return SC[e]||{cls:'s-transit',icon:'🚚',label:e||'En tránsito'};}
+
+// ─── TIMELINE STEPS ───
+// Cada paso del sistema de envío:
+const STEPS=[
+  {key:'Recogido',    icon:'📦', label:'Guía generada y paquete recogido',   sub:(g)=>`${g.rC} · ${g.fecha} ${g.hora||''}`},
+  {key:'En almacén',  icon:'🏬', label:'Ingresado a almacén de despacho',    sub:(g)=>`${g.rC}`},
+  {key:'En tránsito', icon:'🚚', label:`En camino a ciudad de destino`,       sub:(g)=>`${g.rC} → ${g.dC}`},
+  {key:'En reparto',  icon:'🛵', label:'En despacho / reparto local',         sub:(g)=>`${g.dC}`},
+  {key:'Entregado',   icon:'✅', label:'Entregado al destinatario',           sub:(g)=>`${g.dC} · ${g.dDir}`},
+];
+const ORDER=STEPS.map(s=>s.key);
+
+function buildTimeline(g){
+  const estado=g.estado||'En tránsito';
+  const curIdx=ORDER.indexOf(estado);
+  const historial=g.historial||[];
+
+  return STEPS.map((s,i)=>{
+    const si=ORDER.indexOf(s.key);
+    let cls='pending', badge='', timeInfo='Pendiente';
+
+    if(si<curIdx){cls='done';badge=`<span class="tl-badge tb-done">Completado</span>`;}
+    else if(si===curIdx){cls='active';badge=`<span class="tl-badge tb-active">Estado actual</span>`;timeInfo='Estado actual';}
+
+    // Find matching historial entry
+    const hist=[...historial].reverse().find(h=>h.estado===s.key);
+
+    // Transportista info
+    let transNote='';
+    if((cls==='done'||cls==='active') && g.transportista && si===curIdx){
+      transNote=`<div class="trans-note">🚛 Transportista: <strong>${g.transportista}</strong></div>`;
+    }
+    if(hist&&hist.nota){
+      transNote+=`<div class="trans-note" style="margin-top:4px;background:#FEF3C7;color:#92400E;">📝 ${hist.nota}</div>`;
+    }
+
+    const timeStr = hist ? `${hist.fecha} ${hist.hora}` : (si===0?`${g.fecha} ${g.hora||''}`:'');
+
+    return `<div class="tl-item ${cls}">
+      <div class="tl-dot">${cls==='pending'?'○':s.icon}</div>
+      <div class="tl-info">
+        <strong>${s.label}</strong>
+        <p>${typeof s.sub==='function'?s.sub(g):s.sub}</p>
+        ${timeStr?`<div class="tl-time">${timeStr}</div>`:''}
+        ${badge}
+        ${transNote}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ─── ADMIN ACCESS via teclado secreto ───
+document.getElementById('tInput').addEventListener('keyup',function(){
+  if(this.value.trim()==='ADMIN'){
+    const pin=prompt('PIN de operador:');
+    if(pin==='csjl2025'){sessionStorage.setItem('csjl_admin','1');this.value='';alert('✅ Modo operador activado');}
+    else if(pin!==null){alert('PIN incorrecto');}
+  }
+});
+
+// ─── URL AUTO ───
+window.onload=()=>{
+  const p=new URLSearchParams(window.location.search);
+  const guia=p.get('guia')||p.get('cjl')||p.get('col');
+  if(guia){document.getElementById('tInput').value=guia.toUpperCase();buscar();}
+};
+</script>
+</body>
+</html>
