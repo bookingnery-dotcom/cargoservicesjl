@@ -54,11 +54,12 @@ exports.handler = async (event) => {
     const payload = { ...body };
     delete payload.endpoint;
 
-    // Si es token, usar credenciales de variables de entorno
-    if (endpoint === 'token') {
+    // Inyectar credenciales desde variables de entorno
+    if (endpoint === 'token' || endpoint === 'guia' || endpoint === 'etiqueta') {
       payload.login = process.env.ZOOM_LOGIN;
       payload.clave = process.env.ZOOM_CLAVE;
       payload.frase_privada = process.env.ZOOM_FRASE;
+      payload.certificado = process.env.ZOOM_FRASE;
     }
 
     let targetUrl = cfg.url;
