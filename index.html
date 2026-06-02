@@ -1693,15 +1693,20 @@ async function zoomFetch(endpoint, body, token=null){
   const headers = { 'Content-Type': 'application/json' };
   if(token) headers['Authorization'] = `Bearer ${token}`;
   try{
+    const controller = new AbortController();
+    const timeout = setTimeout(()=>controller.abort(), 15000);
     const r = await fetch(ZOOM_CFG.fnUrl, {
       method: 'POST',
       headers,
-      body: JSON.stringify(payload)
+      body: JSON.stringify(payload),
+      signal: controller.signal
     });
+    clearTimeout(timeout);
     const txt = await r.text();
     if(!txt||txt.trim()==='') return {_raw:''};
     try{ return JSON.parse(txt); }catch{ return {_raw:txt}; }
   }catch(e){
+    if(e.name==='AbortError') throw new Error('Timeout — ZOOM tardó más de 15 segundos');
     throw new Error('Error de conexión: ' + e.message);
   }
 }
