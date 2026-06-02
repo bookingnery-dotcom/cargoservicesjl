@@ -54,6 +54,13 @@ exports.handler = async (event) => {
     const payload = { ...body };
     delete payload.endpoint;
 
+    // Si es token, usar credenciales de variables de entorno
+    if (endpoint === 'token') {
+      payload.login = process.env.ZOOM_LOGIN;
+      payload.clave = process.env.ZOOM_CLAVE;
+      payload.frase_privada = process.env.ZOOM_FRASE;
+    }
+
     let targetUrl = cfg.url;
     let bodyStr = null;
     const reqHeaders = { 'Content-Type': 'application/json', 'Accept': 'application/json' };
@@ -88,4 +95,3 @@ exports.handler = async (event) => {
     };
   }
 };
-
