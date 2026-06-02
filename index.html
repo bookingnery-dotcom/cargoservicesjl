@@ -1922,11 +1922,18 @@ async function enviarAZoom(){
   const largo = document.getElementById('zLargo').value||'0';
   const valor = document.getElementById('zValor').value||'0';
 
+  const tipoVal = document.getElementById('zTipo').value; // M o D
+
   const payload = {
     token: zoomToken,
     referencia: ag.col,
-    tipoEnvio: document.getElementById('zTipo').value,
+    tipoEnvio: tipoVal,
+    tipo_envio: tipoVal,
+    tipo: tipoVal,
+    servicio: tipoVal,
+    codigoServicio: tipoVal,
     sucursalOrigen: ZOOM_CFG.sucursalOrigen,
+    codigoOrigen: ZOOM_CFG.sucursalOrigen,
     remitente: {
       nombre: ZOOM_CFG.remNombre,
       personaContacto: ZOOM_CFG.remContacto,
