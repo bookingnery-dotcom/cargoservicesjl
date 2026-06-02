@@ -1775,7 +1775,7 @@ async function getZoomCiudades(token){
 }
 
 async function getZoomSucursales(token, ciudadId){
-  const data = await zoomFetch('sucursales', {token, ciudad:ciudadId, paisDestino:'VE'}, token);
+  const data = await zoomFetch('sucursales', {token, codciudad:ciudadId, ciudad:ciudadId, paisDestino:'VE'}, token);
   console.log('Sucursales:', JSON.stringify(data).substring(0,200));
   if(Array.isArray(data)) return data;
   if(Array.isArray(data.entidadRespuesta)) return data.entidadRespuesta;
