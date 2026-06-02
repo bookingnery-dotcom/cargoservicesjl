@@ -1840,12 +1840,13 @@ async function abrirZoom(){
         const suc=await getZoomSucursales(zoomToken,codciudad);
         if(!suc.length){selSuc.innerHTML='<option value="">Sin sucursales disponibles</option>';return;}
         selSuc.innerHTML='<option value="">Selecciona sucursal</option>';
-        // Guardar datos completos de sucursales para usarlos al seleccionar
         window._zoomSucursales=suc;
+        console.log('SUCURSAL RAW[0]:', JSON.stringify(suc[0]));
         suc.forEach(s=>{
-          const id=s.codsucursal||s.id||s.codigo||'';
-          const nom=s.nombre_sucursal||s.nombre||s.name||id;
-          const dir=s.direccion||s.address||'';
+          const id=s.codsucursal||s.cod_sucursal||s.codigoSucursal||s.codigo||s.id||s.idSucursal||s.sucursalId||'';
+          const nom=s.nombre_sucursal||s.nombreSucursal||s.nombre||s.name||String(id);
+          const dir=s.direccion||s.address||s.localidad||'';
+          console.log(`SUC: id="${id}" nom="${nom}" keys:`, Object.keys(s).join(','));
           selSuc.innerHTML+=`<option value="${id}" data-dir="${dir}" data-nom="${nom}">${nom}${dir?' — '+dir:''}</option>`;
         });
         // Al seleccionar sucursal → llenar dirección automáticamente
