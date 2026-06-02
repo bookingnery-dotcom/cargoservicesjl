@@ -1,6 +1,9 @@
 const https = require('https');
 const { URL } = require('url');
 
+// Netlify function config — increase timeout
+exports.config = { timeout: 26 };
+
 const ENDPOINTS = {
   token:      { url: 'https://miws.zoom.red/api/crearToken', method: 'POST' },
   guia:       { url: 'https://serviciosbd.zoom.red/api/guiaelectronica/createShipmentInternacional', method: 'POST' },
