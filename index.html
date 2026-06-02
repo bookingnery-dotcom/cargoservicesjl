@@ -1923,18 +1923,26 @@ async function enviarAZoom(){
   const largo = document.getElementById('zLargo').value||'0';
   const valor = document.getElementById('zValor').value||'0';
 
-  const tipoVal = document.getElementById('zTipo').value; // M o D
+  const tipoVal = document.getElementById('zTipo').value;
 
   const payload = {
     token: zoomToken,
     referencia: ag.col,
     tipoEnvio: tipoVal,
     tipo_envio: tipoVal,
-    tipo: tipoVal,
-    servicio: tipoVal,
-    codigoServicio: tipoVal,
+    servicio: '3',
+    codigoServicio: '3',
+    codServicio: '3',
+    codservicio: '3',
+    codservicioweb: '111538',
+    codigoservicio: '3',
     sucursalOrigen: ZOOM_CFG.sucursalOrigen,
     codigoOrigen: ZOOM_CFG.sucursalOrigen,
+    codoficinaori: '2633',
+    codigooficinaori: '2633',
+    codoficinacliente: '253',
+    unidadpeso: '2',
+    unidaddimensiones: '3',
     remitente: {
       nombre: ZOOM_CFG.remNombre,
       personaContacto: ZOOM_CFG.remContacto,
