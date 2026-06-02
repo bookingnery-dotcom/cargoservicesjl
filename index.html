@@ -1924,48 +1924,68 @@ async function enviarAZoom(){
   const valor = document.getElementById('zValor').value||'0';
 
   const tipoVal = document.getElementById('zTipo').value;
+  const sucOpt = document.getElementById('zSucursal').options[document.getElementById('zSucursal').selectedIndex];
+  const sucNom = sucOpt?.dataset?.nom || '';
+  const sucDir = sucOpt?.dataset?.dir || '';
+  const dirFinal = dDir || (sucDir ? `ZOOM ${sucNom} — ${sucDir}` : '');
 
   const payload = {
     token: zoomToken,
+    login: ZOOM_CFG.login,
+    clave: ZOOM_CFG.clave,
+    frase_privada: ZOOM_CFG.frase_privada,
+    certificado: ZOOM_CFG.frase_privada,
     referencia: ag.col,
+    // Tipo y servicio
     tipoEnvio: tipoVal,
-    tipo_envio: tipoVal,
     servicio: '3',
-    codigoServicio: '3',
-    codServicio: '3',
     codservicio: '3',
     codservicioweb: '111538',
     codigoservicio: '3',
+    // Oficina origen
     sucursalOrigen: ZOOM_CFG.sucursalOrigen,
-    codigoOrigen: ZOOM_CFG.sucursalOrigen,
     codoficinaori: '2633',
     codigooficinaori: '2633',
     codoficinacliente: '253',
+    oficinaori1: '(MIA)  ZOOM MIAMI',
+    // Remitente — campos exactos
+    remitente: ZOOM_CFG.remNombre,
+    contacto_remitente: ZOOM_CFG.remContacto,
+    telefono_remitente: ZOOM_CFG.remTel,
+    direccion_remitente: ZOOM_CFG.remLocalidad,
+    // Destinatario — campos exactos
+    destinatario: dN,
+    contacto_destino: dN,
+    rifcides: document.getElementById('zDD').value.trim(),
+    telefono_destino: document.getElementById('zDT').value.trim(),
+    direcciondes: dirFinal,
+    // Destino
+    codpaisdes: '124',
+    paisDestino: 'VE',
+    ciudaddes: ciudadNombre || ciudad,
+    ciudadDestino: ciudad,
+    codciudaddes: ciudad,
+    sucursalDestino: sucVal,
+    codestaciondes: sucVal,
+    // Paquete
+    numero_piezas: '1',
+    peso_bruto: peso,
+    pesobru: peso,
+    valor_declarado: valor || '0',
+    mercancia: valor || '0',
+    seguro: '0',
+    descripcion_contenido: desc,
+    observacionref: ag.obs || '',
     unidadpeso: '2',
     unidaddimensiones: '3',
-    remitente: {
-      nombre: ZOOM_CFG.remNombre,
-      personaContacto: ZOOM_CFG.remContacto,
-      telefono: ZOOM_CFG.remTel,
-      localidad: ZOOM_CFG.remLocalidad
-    },
-    destinatario: {
-      nombre: dN,
-      identificacion: document.getElementById('zDD').value.trim(),
-      telefono: document.getElementById('zDT').value.trim(),
-      celular: document.getElementById('zDCel').value.trim(),
-      localidad: dDir
-    },
-    paisDestino: 'VE',
-    ciudadDestino: ciudad,
-    sucursalDestino: sucVal,
+    // Piezas formato array
     piezas: [{
       descripcion: desc,
       pesoRef: parseFloat(peso),
       alto: parseFloat(alto),
       ancho: parseFloat(ancho),
       largo: parseFloat(largo),
-      valorMercancia: parseFloat(valor)
+      valorMercancia: parseFloat(valor||'0')
     }]
   };
 
