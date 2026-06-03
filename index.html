@@ -1848,7 +1848,7 @@ async function abrirZoom(){
         window._zoomSucursales=suc;
         console.log('SUCURSAL RAW[0]:', JSON.stringify(suc[0]));
         suc.forEach(s=>{
-          const id=s.codsucursal||s.cod_sucursal||s.codigoSucursal||s.codigo||s.id||s.idSucursal||s.sucursalId||'';
+          const id=s.codoficina||s.codsucursal||s.cod_sucursal||s.codigo||s.id||'';
           const nom=s.nombre_sucursal||s.nombreSucursal||s.nombre||s.name||String(id);
           const dir=s.direccion||s.address||s.localidad||'';
           console.log(`SUC: id="${id}" nom="${nom}" keys:`, Object.keys(s).join(','));
@@ -1949,7 +1949,7 @@ async function enviarAZoom(){
     correoremitente: '',
     codpaisdes: '124',
     ciudaddes: ciudadNombre || ciudad,
-    codoficinades: sucVal,
+    codoficinades: parseInt(sucVal)||0,
     retira_oficina: 0,
     destinatario: dN,
     contacto_destino: dN,
