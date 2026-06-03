@@ -1906,6 +1906,7 @@ async function enviarAZoom(){
   const dDir = document.getElementById('zDDir').value.trim();
   const ciudadEl = document.getElementById('zCiudad');
   const ciudad = ciudadEl?.dataset?.codciudad || ciudadEl?.value;
+  const ciudadNombre = ciudadEl?.value || '';
   const peso = document.getElementById('zPeso').value;
   const desc = document.getElementById('zDesc').value.trim();
   const alEl = document.getElementById('zoomAlert');
