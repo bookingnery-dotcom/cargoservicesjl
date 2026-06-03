@@ -1948,7 +1948,7 @@ async function enviarAZoom(){
     direccion_remitente: ZOOM_CFG.remLocalidad,
     correoremitente: '',
     codpaisdes: '124',
-    ciudaddes: ciudadNombre || ciudad,
+    ciudaddes: (ciudadNombre||ciudad).replace(/\s*\(.*?\)\s*/g,'').trim(),
     codoficinades: parseInt(sucVal)||0,
     retira_oficina: 0,
     destinatario: dN,
