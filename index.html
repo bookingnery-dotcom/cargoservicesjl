@@ -1928,95 +1928,80 @@ async function enviarAZoom(){
   const largo = document.getElementById('zLargo').value||'0';
   const valor = document.getElementById('zValor').value||'0';
 
-  const tipoVal = document.getElementById('zTipo').value;
+  const tipoVal = document.getElementById('zTipo').value || 'M';
   const sucOpt = document.getElementById('zSucursal').options[document.getElementById('zSucursal').selectedIndex];
-  const sucNom = sucOpt?.dataset?.nom || '';
   const sucDir = sucOpt?.dataset?.dir || '';
-  const dirFinal = dDir || (sucDir ? `ZOOM ${sucNom} — ${sucDir}` : '');
+  const telDest = document.getElementById('zDT').value.trim();
+  const codCel = telDest.length>=4 ? telDest.substring(0,4) : '0414';
+  const numCel = telDest.length>=4 ? telDest.substring(4) : telDest;
+  const dirFinal = sucDir || dDir || ag.dDir || '';
 
   const payload = {
-    token: zoomToken,
     login: ZOOM_CFG.login,
     clave: ZOOM_CFG.clave,
-    frase_privada: ZOOM_CFG.frase_privada,
-    certificado: ZOOM_CFG.frase_privada,
-    referencia: ag.col,
-    // Tipo y servicio
-    tipoEnvio: tipoVal,
-    servicio: '3',
-    codservicio: '3',
-    codservicioweb: '111538',
-    codigoservicio: '3',
-    // Oficina origen
-    sucursalOrigen: ZOOM_CFG.sucursalOrigen,
-    codoficinaori: '2633',
-    codigooficinaori: '2633',
-    codoficinacliente: '253',
-    oficinaori1: '(MIA)  ZOOM MIAMI',
-    // Remitente — campos exactos
+    codservicio: 3,
+    codoficinaori: 253,
     remitente: ZOOM_CFG.remNombre,
     contacto_remitente: ZOOM_CFG.remContacto,
     telefono_remitente: ZOOM_CFG.remTel,
     direccion_remitente: ZOOM_CFG.remLocalidad,
-    // Destinatario — campos exactos
+    correoremitente: '',
+    codpaisdes: '124',
+    ciudaddes: ciudadNombre || ciudad,
+    codoficinades: sucVal,
+    retira_oficina: 0,
     destinatario: dN,
     contacto_destino: dN,
-    rifcides: document.getElementById('zDD').value.trim(),
-    telefono_destino: document.getElementById('zDT').value.trim(),
+    rif_ci_destinatario: document.getElementById('zDD').value.trim(),
+    telefono_destino: telDest,
+    codceludest: codCel,
+    celular: numCel,
     direcciondes: dirFinal,
-    // Destino
-    codpaisdes: '124',
-    paisDestino: 'VE',
-    ciudadesds: ciudad,
-    ciudadDestino: ciudad,
-    codciudaddes: ciudad,
-    sucursalDestino: sucVal,
-    codestaciondes: sucVal,
-    retira_oficina: '0',
-tipo_envio: 'M',
-    // Paquete
-    numero_piezas: '1',
-    peso_bruto: peso,
-    pesobru: peso,
-    valor_declarado: valor || '1000',
-    mercancia: valor || '1000',
-    seguro: '0',
+    correodestinatario: '',
+    tipo_envio: tipoVal,
+    numero_piezas: 1,
+    peso_bruto: parseFloat(peso)||1,
+    valor_declarado: parseFloat(valor)||10,
+    alto: parseFloat(alto)||10,
+    ancho: parseFloat(ancho)||10,
+    largo: parseFloat(largo)||10,
     descripcion_contenido: desc,
-    observacionref: ag.obs || '',
-    unidadpeso: '2',
-    unidaddimensiones: '3',
-    // Piezas formato array
-    piezas: [{
-      descripcion: desc,
-      pesoRef: parseFloat(peso),
-      alto: parseFloat(alto),
-      ancho: parseFloat(ancho),
-      largo: parseFloat(largo),
-      valorMercancia: parseFloat(valor||'0')
-    }]
+    referencia: ag.col,
+    seguro: 0,
+    adicional: '',
+    web_services: '0',
+    activacionzoom: '0',
+    tipoPeso: '2',
+    tipoMedidas: '2',
+    ge: '0'
   };
 
   try{
-    console.log('ZOOM Payload enviado:', JSON.stringify(payload, null, 2));
+    console.log('ZOOM Payload:', JSON.stringify(payload));
     const resp = await zoomFetch('guia', payload, zoomToken);
-    console.log('ZOOM Respuesta completa:', JSON.stringify(resp, null, 2));
+    console.log('ZOOM Respuesta:', JSON.stringify(resp));
 
-    // ── MODO DIAGNÓSTICO — muestra respuesta completa ──
-    document.getElementById('zoomStatus').style.display='none';
-    document.getElementById('zoomDatos').style.display='none';
-    document.getElementById('zoomResultado').style.display='block';
-    document.getElementById('zoomResultado').innerHTML=`
-      <div style="text-align:left;">
-        <div style="font-size:13px;font-weight:700;color:var(--navy);margin-bottom:8px;">📋 Respuesta completa de ZOOM:</div>
-        <pre style="background:#f4f4f4;border:1px solid #ddd;border-radius:8px;padding:14px;font-size:11px;overflow-x:auto;white-space:pre-wrap;word-break:break-all;max-height:300px;overflow-y:auto;">${JSON.stringify(resp, null, 2)}</pre>
-        <div style="font-size:12px;color:var(--t2);margin-top:10px;">📤 Payload enviado:</div>
-        <pre style="background:#f0f6ff;border:1px solid var(--border);border-radius:8px;padding:14px;font-size:11px;overflow-x:auto;white-space:pre-wrap;word-break:break-all;max-height:200px;overflow-y:auto;">${JSON.stringify(payload, null, 2)}</pre>
-        <div style="display:flex;gap:10px;margin-top:14px;">
-          <button class="btn bg sm" onclick="closeOv('ovZoom')">Cerrar</button>
-          <button class="btn bs sm" onclick="document.getElementById('zoomFooter').style.display='flex';document.getElementById('zoomDatos').style.display='block';document.getElementById('zoomResultado').style.display='none';">🔄 Reintentar</button>
-        </div>
-      </div>`;
-    document.getElementById('zoomFooter').style.display='none';
+    // Extraer número de guía
+    zoomGuiaNumero = resp.entidadRespuesta?.numguia ||
+                     resp.entidadRespuesta?.guia ||
+                     resp.numguia || resp.guia || null;
+
+    if(resp.codrespuesta === 'COD_001' || zoomGuiaNumero){
+      // Guardar en Firebase
+      if(zoomGuiaNumero){
+        await updateGuiaFS(ag.col, {guiaZoom: String(zoomGuiaNumero)});
+        const gi = guias.findIndex(x=>x.col===ag.col);
+        if(gi>=0) guias[gi].guiaZoom = String(zoomGuiaNumero);
+      }
+      document.getElementById('zoomStatus').style.display='none';
+      document.getElementById('zoomDatos').style.display='none';
+      document.getElementById('zoomResultado').style.display='block';
+      document.getElementById('zoomNumero').textContent = zoomGuiaNumero || '✅ Creada';
+      renderReg();
+      toast('¡Guía ZOOM creada exitosamente! ✓');
+    } else {
+      throw new Error(resp.mensaje || JSON.stringify(resp).substring(0,200));
+    }
 
   }catch(e){
     document.getElementById('zoomStatus').textContent=`❌ Error: ${e.message}`;
