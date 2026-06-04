@@ -713,6 +713,12 @@ tbody tr:hover{background:#FAFCFF;}
       <button class="btn sm" style="background:#1565C0;color:#fff;font-weight:700;" onclick="abrirZoom()" id="btnZoom">
         ✈️ Crear Guía ZOOM
       </button>
+      <button class="btn sm" style="background:#0D47A1;color:#fff;font-weight:700;display:none;" onclick="descargarPDFZoom()" id="btnDownloadZoom">
+        📥 Descargar PDF ZOOM
+      </button>
+      <button class="btn sm" style="background:#1B5E20;color:#fff;font-weight:700;" onclick="exportExcelTiempoReal()">
+        📊 Excel Tiempo Real
+      </button>
       <button class="btn bs sm" id="btnPrintAll" onclick="printAllLabels()" style="display:none;">
         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z"/></svg>
         Imprimir todas
@@ -1317,6 +1323,14 @@ function openBoxModal(g){
   nav.style.display = totalCajas > 1 ? 'flex' : 'none';
   document.getElementById('boxEditor').style.display = totalCajas > 1 ? 'block' : 'none';
   document.getElementById('btnPrintAll').style.display = totalCajas > 1 ? 'inline-flex' : 'none';
+  // Mostrar botón descarga ZOOM si ya tiene guía ZOOM
+  const btnDL = document.getElementById('btnDownloadZoom');
+  if(g.guiaZoom){
+    btnDL.style.display='inline-flex';
+    btnDL.textContent=`📥 PDF ZOOM (${g.guiaZoom})`;
+  } else {
+    btnDL.style.display='none';
+  }
   document.getElementById('modalBoxInfo').textContent =
     totalCajas > 1 ? `${totalCajas} cajas — 100×150 mm` : '100×150 mm';
 
@@ -1941,7 +1955,7 @@ async function enviarAZoom(){
     login: ZOOM_CFG.login,
     clave: ZOOM_CFG.clave,
     codservicio: 3,
-    codoficinaori: 253,
+    codoficinaori: 2633,
     remitente: ZOOM_CFG.remNombre,
     contacto_remitente: ZOOM_CFG.remContacto,
     telefono_remitente: ZOOM_CFG.remTel,
@@ -2015,29 +2029,84 @@ async function enviarAZoom(){
 async function imprimirEtiquetaZoom(){
   if(!zoomGuiaNumero||!zoomToken) return toast('Sin número de guía ZOOM',1);
   try{
-    // Etiqueta usa form-data no JSON
-    const formData = new FormData();
-    formData.append('codguia[]', String(zoomGuiaNumero));
-    formData.append('termicaPdf', '1');
-    formData.append('terminos', '1');
-    formData.append('token', zoomToken);
-
-    const r = await fetch('/.netlify/functions/zoom-etiqueta', {
-      method: 'POST',
-      body: formData
-    });
-    const blob = await r.blob();
-    if(blob.type === 'application/pdf'){
+    const data = await zoomFetch('etiqueta',
+      {token:zoomToken, codguia:String(zoomGuiaNumero), termicaPdf:'1', terminos:'1'}, zoomToken);
+    console.log('Etiqueta resp:', JSON.stringify(data).substring(0,200));
+    const pdfBase64 = data.entidadRespuesta?.guiaPDF ||
+                      data.entidadRespuesta?.pdf ||
+                      data.guiaPDF || data.pdf || null;
+    if(pdfBase64){
+      const byteChars = atob(pdfBase64);
+      const byteNums = new Uint8Array(byteChars.length);
+      for(let i=0;i<byteChars.length;i++) byteNums[i]=byteChars.charCodeAt(i);
+      const blob = new Blob([byteNums], {type:'application/pdf'});
       const url = URL.createObjectURL(blob);
-      window.open(url, '_blank');
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `GuiaZOOM_${zoomGuiaNumero}.pdf`;
+      a.click();
+      URL.revokeObjectURL(url);
+      toast('✅ Etiqueta ZOOM descargada');
     } else {
-      const txt = await blob.text();
-      toast('Respuesta etiqueta: '+txt.substring(0,100), 1);
+      toast('Respuesta: '+JSON.stringify(data).substring(0,150), 1);
     }
-  }catch(e){ toast('Error etiqueta ZOOM: '+e.message,1); }
+  }catch(e){ toast('Error etiqueta: '+e.message,1); }
 }
 
-/* ─── SELECCIÓN MÚLTIPLE ─── */
+async function descargarPDFZoom(){
+  const guiaNum = ag?.guiaZoom || zoomGuiaNumero;
+  if(!guiaNum) return toast('Esta guía no tiene número ZOOM registrado',1);
+  toast('🔄 Descargando etiqueta ZOOM...');
+  try{
+    // Obtener token si no existe
+    if(!zoomToken) zoomToken = await getZoomToken();
+    const data = await zoomFetch('etiqueta',
+      {token:zoomToken, codguia:String(guiaNum), termicaPdf:'1', terminos:'1'}, zoomToken);
+    const pdfBase64 = data.entidadRespuesta?.guiaPDF ||
+                      data.entidadRespuesta?.pdf ||
+                      data.guiaPDF || data.pdf || null;
+    if(pdfBase64){
+      const byteChars = atob(pdfBase64);
+      const byteNums = new Uint8Array(byteChars.length);
+      for(let i=0;i<byteChars.length;i++) byteNums[i]=byteChars.charCodeAt(i);
+      const blob = new Blob([byteNums], {type:'application/pdf'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `GuiaZOOM_${guiaNum}.pdf`;
+      a.click();
+      URL.revokeObjectURL(url);
+      toast('✅ PDF ZOOM descargado');
+    } else {
+      toast('Sin PDF en respuesta: '+JSON.stringify(data).substring(0,100),1);
+    }
+  }catch(e){ toast('Error: '+e.message,1); }
+}
+
+function exportExcelTiempoReal(){
+  const wb = XLSX.utils.book_new();
+  const rows = [['#','Fecha','COL','CJL','Remitente','Doc Rem.','Tel Rem.',
+    'Destinatario','Doc Des.','Tel Des.','Origen','Destino','Dirección',
+    'Servicio','Pago','Cajas','Peso','Alto','Largo','Ancho','Descripción',
+    'Estado','Guía ZOOM','Obs']];
+  guias.forEach((g,i)=>{
+    rows.push([
+      i+1, g.fecha, g.col, g.cjl, g.rN, g.rD||'', g.rT||'',
+      g.dN, g.dD||'', g.dT||'', g.rC, g.dC, g.dDir||'',
+      g.srv, g.pago||'', g.bul||1, g.peso, g.alto||'', g.largo||'', g.ancho||'',
+      g.desc||'', g.estado||'En tránsito', g.guiaZoom||'', g.obs||''
+    ]);
+  });
+  const ws = XLSX.utils.aoa_to_sheet(rows);
+  ws['!cols']=[{wch:4},{wch:12},{wch:10},{wch:10},{wch:22},{wch:12},{wch:12},
+    {wch:22},{wch:12},{wch:12},{wch:14},{wch:18},{wch:30},
+    {wch:12},{wch:12},{wch:6},{wch:8},{wch:6},{wch:6},{wch:6},{wch:20},
+    {wch:14},{wch:14},{wch:20}];
+  XLSX.utils.book_append_sheet(wb, ws, 'Guías Activas');
+  const fecha = new Date().toLocaleDateString('es-PE').replace(/\//g,'-');
+  XLSX.writeFile(wb, `CargoServicesJL_${fecha}.xlsx`);
+  toast('Excel exportado ✓');
+}
 let seleccionadas = new Set();
 
 function toggleAll(chk){
