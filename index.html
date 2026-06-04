@@ -2227,18 +2227,18 @@ function renderReg(){
       <td><span class="bdg bgr">${g.srv}</span></td>
       <td>${g.peso} <small>kg</small></td>
       <td onclick="event.stopPropagation()"><span class="bdg ${stBdg[g.estado||'En tránsito']||'bbl'}">${g.estado||'En tránsito'}</span></td>
-      <td onclick="event.stopPropagation()" style="display:flex;gap:5px;align-items:center;">
-        <button class="btn bp xs" onclick="verG('${g.col}')">Ver</button>
-        <button class="btn ba xs" onclick="abrirEstatus('${g.col}')">Estado</button>
-        <button class="btn bn xs" onclick="abrirEditar('${g.col}')" title="Editar">
-          <svg viewBox="0 0 24 24" fill="currentColor" style="width:13px;height:13px;"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
-        </button>
-        <button class="btn xs" style="background:linear-gradient(135deg,#7C3AED,#9F67FA);color:#fff;" onclick="abrirMenuDocs('${g.col}')" title="Documentos">
-          📄
-        </button>
-        <button class="btn bd xs" onclick="eliminarGuiaDirecto('${g.col}')" title="Eliminar">
-          <svg viewBox="0 0 24 24" fill="currentColor" style="width:13px;height:13px;"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
-        </button>
+      <td onclick="event.stopPropagation()" style="position:relative;">
+        <div style="display:flex;gap:5px;align-items:center;">
+          <button class="btn bp xs" onclick="verG('${g.col}')">Ver</button>
+          <button class="btn xs" style="background:linear-gradient(135deg,#7C3AED,#9F67FA);color:#fff;" onclick="abrirMenuDocs('${g.col}')" title="Documentos">📄</button>
+          <button class="btn bg xs" onclick="toggleRowMenu('${g.col}',event)" title="Más opciones" style="padding:5px 8px;font-size:15px;line-height:1;">⋮</button>
+        </div>
+        <div id="rowMenu_${g.col}" style="display:none;position:absolute;right:0;top:100%;background:#fff;border:1.5px solid var(--border2);border-radius:var(--r2);box-shadow:var(--sh2);z-index:300;min-width:160px;">
+          <div onclick="abrirEstatus('${g.col}');closeRowMenus()" style="padding:9px 14px;cursor:pointer;font-size:13px;border-bottom:1px solid var(--border);" onmouseover="this.style.background='var(--blue3)'" onmouseout="this.style.background='#fff'">📦 Cambiar estado</div>
+          <div onclick="abrirEditar('${g.col}');closeRowMenus()" style="padding:9px 14px;cursor:pointer;font-size:13px;border-bottom:1px solid var(--border);" onmouseover="this.style.background='var(--blue3)'" onmouseout="this.style.background='#fff'">✏️ Editar guía</div>
+          <div onclick="abrirZoom();closeRowMenus()" style="padding:9px 14px;cursor:pointer;font-size:13px;border-bottom:1px solid var(--border);color:#1565C0;" onmouseover="this.style.background='var(--blue3)'" onmouseout="this.style.background='#fff'">✈️ Crear Guía ZOOM</div>
+          <div onclick="eliminarGuiaDirecto('${g.col}');closeRowMenus()" style="padding:9px 14px;cursor:pointer;font-size:13px;color:var(--red);" onmouseover="this.style.background='var(--red2)'" onmouseout="this.style.background='#fff'">🗑️ Eliminar</div>
+        </div>
       </td>
     </tr>`).join('');
   updSelBar();
@@ -2601,7 +2601,7 @@ function imprimirDoc(tipo, g){
       + 'por medio de la presente hago constar que estoy realizando la exportaci&#243;n de '
       + '<span class="campo-xs">' + (g.bul||'1') + '</span> ( <span class="campo-xs">&nbsp;&nbsp;</span> ) bultos, '
       + 'los cuales ser&#225;n embarcados bajo la Gu&#237;a A&#233;rea N.&#186; '
-      + '<span class="campo-xs">' + (g.col||'') + '</span> <span class="campo">' + (g.cjl||'') + '</span>, '
+      + '<span class="campo">' + (corrMode==='CJL' ? (g.cjl||'') : (corrMode==='AMBOS' ? (g.col+' / '+g.cjl) : (g.col||''))) + '</span>, '
       + 'con destino a <span class="campo">' + (g.dC||'') + '</span> '
       + 'en el vuelo ( <span class="campo-xs">&nbsp;&nbsp;</span> ) de la empresa.'
       + '</div>'
@@ -2665,7 +2665,6 @@ function imprimirDoc(tipo, g){
       + '.firma-line{border-bottom:1.5px solid #000;height:26px;width:260px;display:inline-block;}'
       + '@media print{body{padding:15mm 18mm 12mm 18mm;}@page{size:A4 portrait;margin:0;}}'
       + '</style></head><body>'
-      + '<img class="logo" src="data:image/png;base64,' + LOGO_B64 + '" alt="Cargo JL">'
       + '<div class="doc-title">DECLARACI&#211;N JURADA DE VALOR</div>'
       + '<div class="cuerpo">'
       + 'Yo, <span class="campo">' + (g.rN||'') + '</span>, '
@@ -2710,6 +2709,18 @@ function imprimirDoc(tipo, g){
   win.document.close();
 }
 /* ═══════════════════════════════════════════════════════ */
+
+/* ─── MENÚ ⋮ POR FILA ─── */
+function toggleRowMenu(col, e){
+  e.stopPropagation();
+  closeRowMenus();
+  const m = document.getElementById('rowMenu_'+col);
+  if(m) m.style.display = m.style.display==='none' ? 'block' : 'none';
+}
+function closeRowMenus(){
+  document.querySelectorAll('[id^="rowMenu_"]').forEach(m=>m.style.display='none');
+}
+document.addEventListener('click', function(){ closeRowMenus(); });
 /* ─── UTILS ─── */
 function closeOv(id){document.getElementById(id).classList.remove('show');}
 function toast(msg,err=0){
