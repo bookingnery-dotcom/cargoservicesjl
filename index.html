@@ -2014,20 +2014,27 @@ async function enviarAZoom(){
 
 async function imprimirEtiquetaZoom(){
   if(!zoomGuiaNumero||!zoomToken) return toast('Sin número de guía ZOOM',1);
-  try {
-    const data = await zoomFetch('etiqueta',
-      {token:zoomToken, numeroGuia:zoomGuiaNumero}, zoomToken);
-    console.log('ZOOM Etiqueta response:', data);
-    const pdfBase64 = data.pdf || data.etiqueta || data.data?.pdf || data.label || null;
-    if(pdfBase64){
-      const byteChars = atob(pdfBase64);
-      const byteNums = new Array(byteChars.length).fill(0).map((_,i)=>byteChars.charCodeAt(i));
-      const blob = new Blob([new Uint8Array(byteNums)], {type:'application/pdf'});
-      window.open(URL.createObjectURL(blob), '_blank');
+  try{
+    // Etiqueta usa form-data no JSON
+    const formData = new FormData();
+    formData.append('codguia[]', String(zoomGuiaNumero));
+    formData.append('termicaPdf', '1');
+    formData.append('terminos', '1');
+    formData.append('token', zoomToken);
+
+    const r = await fetch('/.netlify/functions/zoom-etiqueta', {
+      method: 'POST',
+      body: formData
+    });
+    const blob = await r.blob();
+    if(blob.type === 'application/pdf'){
+      const url = URL.createObjectURL(blob);
+      window.open(url, '_blank');
     } else {
-      toast('Respuesta etiqueta ZOOM: '+JSON.stringify(data).substring(0,100),1);
+      const txt = await blob.text();
+      toast('Respuesta etiqueta: '+txt.substring(0,100), 1);
     }
-  } catch(e){ toast('Error etiqueta ZOOM: '+e.message,1); }
+  }catch(e){ toast('Error etiqueta ZOOM: '+e.message,1); }
 }
 
 /* ─── SELECCIÓN MÚLTIPLE ─── */
