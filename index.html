@@ -532,13 +532,34 @@ tbody tr:hover{background:#FAFCFF;}
           </div>
 
           <hr class="dvd">
-          <div class="stitle"><span class="dot"></span>Datos del destinatario</div>
+          <div class="stitle"><span class="dot" style="background:var(--amber);"></span>Datos del destinatario
+            <span style="margin-left:12px;font-size:12px;font-weight:600;color:var(--blue);cursor:pointer;" onclick="abrirBuscadorCliente()">🔍 Buscar cliente</span>
+          </div>
           <div class="g g3" style="margin-bottom:16px;">
             <div class="fi ni"><label>Nombre completo *</label><div class="fi-w"><input id="gDN" type="text" placeholder="Nombre del destinatario"></div></div>
-            <div class="fi ni"><label>RUC / DNI</label><div class="fi-w"><input id="gDD" type="text" placeholder="Documento de identidad"></div></div>
+            <div class="fi ni"><label>RUC / DNI</label><div class="fi-w">
+              <input id="gDD" type="text" placeholder="Documento de identidad" oninput="buscarClientePorDoc(this.value)">
+            </div></div>
             <div class="fi ni"><label>Teléfono *</label><div class="fi-w"><input id="gDT" type="text" placeholder="Número de contacto"></div></div>
             <div class="fi ni"><label>Ciudad de destino *</label><div class="fi-w"><input id="gDC" type="text" placeholder="Ciudad"></div></div>
             <div class="fi ni s2"><label>Dirección de entrega *</label><div class="fi-w"><input id="gDDir" type="text" placeholder="Dirección completa de entrega"></div></div>
+          </div>
+
+          <hr class="dvd">
+          <div class="stitle"><span class="dot" style="background:var(--green);"></span>Contenido del paquete <span style="font-size:12px;font-weight:400;color:var(--t3);">(para declaraciones juradas)</span></div>
+          <div id="itemsTable" style="margin-bottom:12px;">
+            <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:8px;margin-bottom:6px;padding:0 4px;">
+              <span style="font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;">Descripción</span>
+              <span style="font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;">Cantidad</span>
+              <span style="font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;">Marca</span>
+              <span style="font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;">Valor USD</span>
+              <span></span>
+            </div>
+            <div id="itemsRows"></div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;">
+              <button type="button" class="btn ba xs" onclick="addItem()">+ Agregar ítem</button>
+              <div style="font-size:13px;font-weight:700;color:var(--navy);">Total: <span id="itemsTotal" style="color:var(--blue);">$0.00</span></div>
+            </div>
           </div>
 
           <hr class="dvd">
@@ -763,6 +784,58 @@ tbody tr:hover{background:#FAFCFF;}
         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
         Guardar contraseña
       </button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL DOCUMENTOS -->
+<div class="ov" id="ovDocs">
+  <div class="modal" style="max-width:480px;">
+    <div class="mh" style="background:linear-gradient(135deg,#1B5E20,#2E7D32);">
+      <h4 style="color:#fff;">📄 Documentos — <span id="docsGuiaRef" style="color:#A5D6A7;"></span></h4>
+      <button class="mcl" style="color:#fff;" onclick="closeOv('ovDocs')"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg></button>
+    </div>
+    <div class="mb">
+      <p style="font-size:13px;color:var(--t2);margin-bottom:20px;">Selecciona el documento que deseas descargar en PDF.</p>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <button onclick="generarDeclaracionValor()" style="padding:16px 20px;background:#fff;border:1.5px solid var(--border);border-radius:10px;cursor:pointer;text-align:left;display:flex;align-items:center;gap:12px;font-family:'Plus Jakarta Sans',sans-serif;transition:all .2s;" onmouseover="this.style.borderColor='var(--blue)';this.style.background='var(--blue3)'" onmouseout="this.style.borderColor='var(--border)';this.style.background='#fff'">
+          <span style="font-size:28px;">📋</span>
+          <div>
+            <div style="font-weight:700;font-size:14px;color:var(--navy);">Declaración Jurada de Valor</div>
+            <div style="font-size:12px;color:var(--t2);">Declara el valor de la mercancía enviada</div>
+          </div>
+        </button>
+        <button onclick="generarDeclaracionExportacion()" style="padding:16px 20px;background:#fff;border:1.5px solid var(--border);border-radius:10px;cursor:pointer;text-align:left;display:flex;align-items:center;gap:12px;font-family:'Plus Jakarta Sans',sans-serif;transition:all .2s;" onmouseover="this.style.borderColor='var(--blue)';this.style.background='var(--blue3)'" onmouseout="this.style.borderColor='var(--border)';this.style.background='#fff'">
+          <span style="font-size:28px;">📦</span>
+          <div>
+            <div style="font-weight:700;font-size:14px;color:var(--navy);">Declaración Jurada de Exportación</div>
+            <div style="font-size:12px;color:var(--t2);">Declara los ítems exportados al exterior</div>
+          </div>
+        </button>
+      </div>
+    </div>
+    <div class="mf">
+      <button class="btn bg sm" onclick="closeOv('ovDocs')">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL BUSCADOR CLIENTES -->
+<div class="ov" id="ovBuscadorCliente">
+  <div class="modal" style="max-width:500px;">
+    <div class="mh">
+      <h4>🔍 Buscar cliente</h4>
+      <button class="mcl" onclick="closeOv('ovBuscadorCliente')"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg></button>
+    </div>
+    <div class="mb">
+      <div class="srch" style="margin-bottom:14px;">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+        <input type="text" id="clienteBusq" placeholder="Buscar por nombre, documento o teléfono..." oninput="buscarClienteModal(this.value)">
+      </div>
+      <div id="clienteResultados" style="max-height:300px;overflow-y:auto;"></div>
+    </div>
+    <div class="mf">
+      <button class="btn bg sm" onclick="closeOv('ovBuscadorCliente')">Cancelar</button>
     </div>
   </div>
 </div>
@@ -1014,6 +1087,10 @@ async function doLogin(){
     escucharGuias();
     escucharUsuarios();
     escucharManifiestos();
+    escucharClientes();
+    // Iniciar tabla de ítems vacía
+    items = [];
+    renderItems();
     updDate();
   }catch(e){ sal('laAlert','Error de conexión: '+e.message); }
 }
@@ -1293,9 +1370,15 @@ function generarGuia(){
     pago:document.getElementById('gPago').value,
     obs:v('gObs'),usr:cu.nombre,
     userKey:cu.user,
-    estado:'En tránsito'
+    estado:'En tránsito',
+    items:[...items]
   };
   guias.push(g);saveGuiaFS(g);ag=g;
+  // Guardar cliente en BD automáticamente
+  guardarClienteEnBD(g);
+  // Reset items
+  items=[];
+  renderItems();
   document.getElementById('nbadge').textContent=guias.length;
   // Abrir modal con navegador de cajas
   openBoxModal(g);
@@ -1306,6 +1389,7 @@ function resetG(){
   ['gRN','gRD','gRT','gRC','gRDir','gDN','gDD','gDT','gDC','gDDir','gDesc','gObs','gPeso','gAlto','gLargo','gAncho'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   document.getElementById('gBul').value='1';
   document.getElementById('gAlert').classList.remove('show');
+  items=[];renderItems();
 }
 
 /* ─── MULTI-BOX MODAL ─── */
@@ -1689,7 +1773,324 @@ function updDash(){
     </div>`).join('');
 }
 
-/* ══════════════════════════════════════
+/* ══════════════════════════════
+   MENÚ 3 PUNTOS
+   ══════════════════════════════ */
+function toggleMenu(col, e){
+  e.stopPropagation();
+  closeAllMenus();
+  const m = document.getElementById('menu_'+col);
+  if(m) m.style.display = m.style.display==='block'?'none':'block';
+  document.addEventListener('click', closeAllMenus, {once:true});
+}
+function closeAllMenus(){
+  document.querySelectorAll('[id^="menu_"]').forEach(m=>m.style.display='none');
+}
+
+function crearZoomDesdeTabla(col){
+  const g = guias.find(x=>x.col===col);
+  if(!g) return;
+  ag = g;
+  abrirZoom();
+}
+
+async function descargarPDFZoomDirecto(col){
+  const g = guias.find(x=>x.col===col);
+  if(!g||!g.guiaZoom) return toast('Sin número ZOOM',1);
+  ag = g;
+  zoomGuiaNumero = g.guiaZoom;
+  await descargarPDFZoom();
+}
+
+let docGuia = null;
+function abrirDocumentos(col){
+  const g = guias.find(x=>x.col===col);
+  if(!g) return;
+  docGuia = g;
+  document.getElementById('docsGuiaRef').textContent = `${g.col} / ${g.cjl}`;
+  document.getElementById('ovDocs').classList.add('show');
+}
+
+/* ══════════════════════════════
+   TABLA DE ÍTEMS
+   ══════════════════════════════ */
+let items = [];
+
+function addItem(){
+  const id = Date.now();
+  items.push({id, desc:'', cant:1, marca:'', valor:0});
+  renderItems();
+}
+
+function removeItem(id){
+  items = items.filter(x=>x.id!==id);
+  renderItems();
+}
+
+function renderItems(){
+  const cont = document.getElementById('itemsRows');
+  if(!cont) return;
+  if(!items.length){
+    cont.innerHTML = `<div style="padding:10px;text-align:center;color:var(--t3);font-size:13px;">Sin ítems — haz clic en "+ Agregar ítem"</div>`;
+    calcTotal(); return;
+  }
+  cont.innerHTML = items.map(it=>`
+    <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:8px;margin-bottom:6px;">
+      <input type="text" value="${it.desc}" placeholder="Descripción" oninput="updItem(${it.id},'desc',this.value)"
+        style="padding:8px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:13px;font-family:'Plus Jakarta Sans',sans-serif;">
+      <input type="number" value="${it.cant}" min="1" placeholder="Cant" oninput="updItem(${it.id},'cant',this.value)"
+        style="padding:8px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:13px;font-family:'Plus Jakarta Sans',sans-serif;">
+      <input type="text" value="${it.marca}" placeholder="Marca" oninput="updItem(${it.id},'marca',this.value)"
+        style="padding:8px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:13px;font-family:'Plus Jakarta Sans',sans-serif;">
+      <input type="number" value="${it.valor}" min="0" step="0.01" placeholder="$" oninput="updItem(${it.id},'valor',this.value)"
+        style="padding:8px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:13px;font-family:'Plus Jakarta Sans',sans-serif;">
+      <button onclick="removeItem(${it.id})" style="background:var(--red2);border:none;border-radius:7px;padding:6px 10px;cursor:pointer;color:var(--red);font-weight:700;">✕</button>
+    </div>`).join('');
+  calcTotal();
+}
+
+function updItem(id, field, val){
+  const it = items.find(x=>x.id===id);
+  if(it) it[field] = field==='cant'||field==='valor' ? parseFloat(val)||0 : val;
+  calcTotal();
+}
+
+function calcTotal(){
+  const total = items.reduce((s,it)=>s+(parseFloat(it.valor)||0),0);
+  const el = document.getElementById('itemsTotal');
+  if(el) el.textContent = '$'+total.toFixed(2);
+}
+
+/* ══════════════════════════════
+   BASE DE DATOS DE CLIENTES
+   ══════════════════════════════ */
+let clientes = [];
+
+function escucharClientes(){
+  db.collection('clientes').orderBy('nombre','asc').onSnapshot(snap=>{
+    clientes = snap.docs.map(d=>({id:d.id,...d.data()}));
+  }, ()=>{
+    db.collection('clientes').get().then(snap=>{
+      clientes = snap.docs.map(d=>({id:d.id,...d.data()}));
+    });
+  });
+}
+
+function buscarClientePorDoc(doc){
+  if(!doc||doc.length<3) return;
+  const found = clientes.find(c=>c.doc&&c.doc.toLowerCase().includes(doc.toLowerCase()));
+  if(found) autoFillCliente(found);
+}
+
+function autoFillCliente(c){
+  if(c.nombre) document.getElementById('gDN').value = c.nombre;
+  if(c.doc) document.getElementById('gDD').value = c.doc;
+  if(c.tel) document.getElementById('gDT').value = c.tel;
+  if(c.ciudad) document.getElementById('gDC').value = c.ciudad;
+  if(c.dir) document.getElementById('gDDir').value = c.dir;
+  toast('✅ Cliente encontrado: '+c.nombre);
+}
+
+function abrirBuscadorCliente(){
+  document.getElementById('clienteBusq').value='';
+  document.getElementById('clienteResultados').innerHTML='';
+  document.getElementById('ovBuscadorCliente').classList.add('show');
+  setTimeout(()=>document.getElementById('clienteBusq').focus(),200);
+}
+
+function buscarClienteModal(q){
+  const res = document.getElementById('clienteResultados');
+  if(!q||q.length<2){ res.innerHTML=''; return; }
+  const found = clientes.filter(c=>
+    (c.nombre||'').toLowerCase().includes(q.toLowerCase())||
+    (c.doc||'').toLowerCase().includes(q.toLowerCase())||
+    (c.tel||'').toLowerCase().includes(q.toLowerCase())
+  ).slice(0,10);
+  if(!found.length){ res.innerHTML='<p style="text-align:center;color:var(--t3);padding:20px;font-size:13px;">Sin resultados</p>'; return; }
+  res.innerHTML = found.map(c=>`
+    <div onclick="seleccionarCliente('${c.id}')" style="padding:12px 16px;border-radius:8px;cursor:pointer;border-bottom:1px solid var(--border);" onmouseover="this.style.background='var(--blue3)'" onmouseout="this.style.background='#fff'">
+      <div style="font-weight:700;font-size:14px;">${c.nombre||'—'}</div>
+      <div style="font-size:12px;color:var(--t2);">${c.doc||''} ${c.tel?'· '+c.tel:''} ${c.ciudad?'· '+c.ciudad:''}</div>
+    </div>`).join('');
+}
+
+function seleccionarCliente(id){
+  const c = clientes.find(x=>x.id===id);
+  if(c){ autoFillCliente(c); closeOv('ovBuscadorCliente'); }
+}
+
+async function guardarClienteEnBD(g){
+  if(!g.dN||!g.dD) return;
+  const existing = clientes.find(c=>c.doc===g.dD);
+  if(!existing){
+    try{
+      await db.collection('clientes').add({
+        nombre:g.dN, doc:g.dD, tel:g.dT||'',
+        ciudad:g.dC||'', dir:g.dDir||'',
+        creadoEn:new Date().toISOString()
+      });
+    }catch(e){ console.log('Error guardando cliente:', e.message); }
+  }
+}
+
+/* ══════════════════════════════
+   DECLARACIONES JURADAS
+   ══════════════════════════════ */
+function generarDeclaracionValor(){
+  if(!docGuia) return;
+  const g = docGuia;
+  const gItems = g.items||[];
+  const total = gItems.reduce((s,it)=>s+(parseFloat(it.valor)||0),0);
+  const fecha = new Date().toLocaleDateString('es-PE',{day:'2-digit',month:'long',year:'numeric'});
+
+  const html = `<!DOCTYPE html><html><head><meta charset="UTF-8">
+  <style>
+    body{font-family:Arial,sans-serif;font-size:12px;margin:0;padding:20px;color:#000;}
+    .header{text-align:center;margin-bottom:20px;}
+    .title{font-size:16px;font-weight:bold;text-transform:uppercase;margin-bottom:4px;}
+    .subtitle{font-size:13px;font-weight:bold;margin-bottom:16px;}
+    table{width:100%;border-collapse:collapse;margin:10px 0;}
+    th,td{border:1px solid #000;padding:6px 8px;font-size:11px;}
+    th{background:#f0f0f0;font-weight:bold;text-align:center;}
+    .datos{margin:10px 0;}
+    .dato-row{display:flex;gap:20px;margin-bottom:6px;}
+    .dato-label{font-weight:bold;min-width:120px;}
+    .firma{margin-top:40px;display:flex;justify-content:space-around;}
+    .firma-box{text-align:center;border-top:1px solid #000;padding-top:6px;min-width:160px;}
+    .legal{margin-top:20px;font-size:10px;border-top:1px solid #ccc;padding-top:10px;color:#555;}
+  </style></head><body>
+  <div class="header">
+    <div class="title">DECLARACIÓN JURADA DE VALOR</div>
+    <div class="subtitle">CARGO SERVICES JL</div>
+    <div>Lima, ${fecha}</div>
+  </div>
+  <div class="datos">
+    <div class="dato-row"><span class="dato-label">N° Guía:</span><span>${g.col} / ${g.cjl}</span></div>
+    <div class="dato-row"><span class="dato-label">Remitente:</span><span>${g.rN||''} — ${g.rD||''}</span></div>
+    <div class="dato-row"><span class="dato-label">Destinatario:</span><span>${g.dN||''} — ${g.dD||''}</span></div>
+    <div class="dato-row"><span class="dato-label">Origen:</span><span>${g.rC||''}</span></div>
+    <div class="dato-row"><span class="dato-label">Destino:</span><span>${g.dC||''} — ${g.dDir||''}</span></div>
+    <div class="dato-row"><span class="dato-label">Teléfono dest.:</span><span>${g.dT||''}</span></div>
+  </div>
+  <p><strong>Yo, ${g.rN||'_______________'}</strong>, identificado(a) con documento ${g.rD||'_______________'}, declaro bajo juramento que el valor de la mercancía enviada es el siguiente:</p>
+  <table>
+    <thead><tr><th>#</th><th>Descripción</th><th>Cantidad</th><th>Marca</th><th>Valor USD</th></tr></thead>
+    <tbody>
+      ${gItems.length ? gItems.map((it,i)=>`<tr><td style="text-align:center;">${i+1}</td><td>${it.desc||''}</td><td style="text-align:center;">${it.cant||1}</td><td>${it.marca||''}</td><td style="text-align:right;">$${parseFloat(it.valor||0).toFixed(2)}</td></tr>`).join('') : `<tr><td colspan="5" style="text-align:center;">${g.desc||'Sin detalle de ítems'}</td></tr>`}
+      <tr><td colspan="4" style="text-align:right;font-weight:bold;">TOTAL:</td><td style="text-align:right;font-weight:bold;">$${total.toFixed(2)}</td></tr>
+    </tbody>
+  </table>
+  <p>Declaro que la información proporcionada es verídica y me hago responsable de su contenido.</p>
+  <div class="firma">
+    <div class="firma-box">
+      <div style="height:50px;"></div>
+      <div><strong>${g.rN||'Remitente'}</strong></div>
+      <div>Doc: ${g.rD||'_______________'}</div>
+    </div>
+    <div class="firma-box">
+      <div style="height:50px;"></div>
+      <div><strong>CARGO SERVICES JL</strong></div>
+      <div>Sello y firma</div>
+    </div>
+  </div>
+  <div class="legal">Documento emitido por CARGO SERVICES JL. Lima, Perú. Tel: 902567044 / 903245854</div>
+  </body></html>`;
+
+  const win = window.open('','_blank');
+  win.document.write(html);
+  win.document.close();
+  setTimeout(()=>win.print(), 500);
+}
+
+function generarDeclaracionExportacion(){
+  if(!docGuia) return;
+  const g = docGuia;
+  const gItems = g.items||[];
+  const total = gItems.reduce((s,it)=>s+(parseFloat(it.valor)||0),0);
+  const fecha = new Date().toLocaleDateString('es-PE',{day:'2-digit',month:'long',year:'numeric'});
+
+  const html = `<!DOCTYPE html><html><head><meta charset="UTF-8">
+  <style>
+    body{font-family:Arial,sans-serif;font-size:12px;margin:0;padding:20px;color:#000;}
+    .header{text-align:center;margin-bottom:20px;border-bottom:2px solid #000;padding-bottom:10px;}
+    .title{font-size:16px;font-weight:bold;text-transform:uppercase;margin-bottom:4px;}
+    .subtitle{font-size:13px;margin-bottom:4px;}
+    table{width:100%;border-collapse:collapse;margin:12px 0;}
+    th,td{border:1px solid #000;padding:6px 8px;font-size:11px;}
+    th{background:#e8e8e8;font-weight:bold;text-align:center;}
+    .section-title{font-weight:bold;font-size:13px;margin:12px 0 6px;border-bottom:1px solid #ccc;padding-bottom:3px;}
+    .info-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px;}
+    .info-item{font-size:11px;}<br>.info-label{font-weight:bold;}
+    .firma{margin-top:40px;display:flex;justify-content:space-around;}
+    .firma-box{text-align:center;border-top:1px solid #000;padding-top:6px;min-width:160px;}
+  </style></head><body>
+  <div class="header">
+    <div class="title">DECLARACIÓN JURADA DE EXPORTACIÓN</div>
+    <div class="subtitle">CARGO SERVICES JL — Envíos Perú → Venezuela</div>
+    <div>Lima, ${fecha}</div>
+  </div>
+
+  <div class="section-title">1. DATOS DEL ENVÍO</div>
+  <div class="info-grid">
+    <div class="info-item"><span class="info-label">N° Guía CJL:</span> ${g.cjl||''}</div>
+    <div class="info-item"><span class="info-label">N° Guía COL:</span> ${g.col||''}</div>
+    <div class="info-item"><span class="info-label">Fecha:</span> ${g.fecha||''}</div>
+    <div class="info-item"><span class="info-label">Guía ZOOM:</span> ${g.guiaZoom||'Pendiente'}</div>
+    <div class="info-item"><span class="info-label">País origen:</span> PERÚ</div>
+    <div class="info-item"><span class="info-label">País destino:</span> VENEZUELA</div>
+  </div>
+
+  <div class="section-title">2. DATOS DEL REMITENTE (EXPORTADOR)</div>
+  <div class="info-grid">
+    <div class="info-item"><span class="info-label">Nombre:</span> ${g.rN||''}</div>
+    <div class="info-item"><span class="info-label">Documento:</span> ${g.rD||''}</div>
+    <div class="info-item"><span class="info-label">Teléfono:</span> ${g.rT||''}</div>
+    <div class="info-item"><span class="info-label">Ciudad:</span> ${g.rC||''}</div>
+    <div class="info-item" style="grid-column:span 2"><span class="info-label">Dirección:</span> ${g.rDir||''}</div>
+  </div>
+
+  <div class="section-title">3. DATOS DEL DESTINATARIO (IMPORTADOR)</div>
+  <div class="info-grid">
+    <div class="info-item"><span class="info-label">Nombre:</span> ${g.dN||''}</div>
+    <div class="info-item"><span class="info-label">Documento:</span> ${g.dD||''}</div>
+    <div class="info-item"><span class="info-label">Teléfono:</span> ${g.dT||''}</div>
+    <div class="info-item"><span class="info-label">Ciudad:</span> ${g.dC||''}</div>
+    <div class="info-item" style="grid-column:span 2"><span class="info-label">Dirección:</span> ${g.dDir||''}</div>
+  </div>
+
+  <div class="section-title">4. DESCRIPCIÓN DE LA MERCANCÍA EXPORTADA</div>
+  <table>
+    <thead><tr><th>#</th><th>Descripción del producto</th><th>Cantidad</th><th>Marca</th><th>Valor USD</th><th>Uso</th></tr></thead>
+    <tbody>
+      ${gItems.length ? gItems.map((it,i)=>`<tr><td style="text-align:center;">${i+1}</td><td>${it.desc||''}</td><td style="text-align:center;">${it.cant||1}</td><td>${it.marca||''}</td><td style="text-align:right;">$${parseFloat(it.valor||0).toFixed(2)}</td><td>Uso personal</td></tr>`).join('') : `<tr><td colspan="6" style="text-align:center;">${g.desc||'Sin detalle de ítems'}</td></tr>`}
+      <tr><td colspan="4" style="text-align:right;font-weight:bold;">VALOR TOTAL DECLARADO:</td><td style="text-align:right;font-weight:bold;">$${total.toFixed(2)}</td><td></td></tr>
+    </tbody>
+  </table>
+
+  <div class="section-title">5. DECLARACIÓN</div>
+  <p>Yo, <strong>${g.rN||'_______________'}</strong>, identificado(a) con documento <strong>${g.rD||'_______________'}</strong>, declaro bajo juramento que los bienes descritos en este documento son de uso personal/familiar, que su valor es el declarado y que no contienen materiales prohibidos o restringidos por la legislación peruana ni venezolana.</p>
+
+  <div class="firma">
+    <div class="firma-box">
+      <div style="height:50px;"></div>
+      <div><strong>${g.rN||'Remitente'}</strong></div>
+      <div>Exportador — Doc: ${g.rD||'___'}</div>
+    </div>
+    <div class="firma-box">
+      <div style="height:50px;"></div>
+      <div><strong>CARGO SERVICES JL</strong></div>
+      <div>Operador Logístico</div>
+    </div>
+  </div>
+  </body></html>`;
+
+  const win = window.open('','_blank');
+  win.document.write(html);
+  win.document.close();
+  setTimeout(()=>win.print(), 500);
+}
+
+/* ══════════════════════════════
    INTEGRACIÓN ZOOM API — AMBIENTE PRUEBAS
    ══════════════════════════════════════ */
 const ZOOM_CFG = {
@@ -1967,7 +2368,10 @@ async function enviarAZoom(){
   const largo = document.getElementById('zLargo').value||'0';
   const valor = document.getElementById('zValor').value||'0';
 
-  const tipoVal = document.getElementById('zTipo').value || 'M';
+  // Detectar tienda: COL = Los Olivos, CJL = Chorrillos
+  const esChorrillos = ag.col && ag.col.toUpperCase().startsWith('CJL');
+  const contactoRem = esChorrillos ? 'CARGO SERVICES JL CH' : 'CARGO SERVICES JL OL';
+  const refCodigo = ag.col;
   const sucOpt = document.getElementById('zSucursal').options[document.getElementById('zSucursal').selectedIndex];
   const sucDir = sucOpt?.dataset?.dir || '';
   const telDest = document.getElementById('zDT').value.trim();
@@ -1981,7 +2385,7 @@ async function enviarAZoom(){
     codservicio: 3,
     codoficinaori: 2633,
     remitente: ZOOM_CFG.remNombre,
-    contacto_remitente: ZOOM_CFG.remContacto,
+    contacto_remitente: contactoRem,
     telefono_remitente: ZOOM_CFG.remTel,
     direccion_remitente: ZOOM_CFG.remLocalidad,
     correoremitente: '',
@@ -2005,7 +2409,7 @@ async function enviarAZoom(){
     ancho: parseFloat(ancho)||10,
     largo: parseFloat(largo)||10,
     descripcion_contenido: desc,
-    referencia: ag.col,
+    referencia: refCodigo,
     seguro: 0,
     adicional: '',
     web_services: '0',
@@ -2082,27 +2486,34 @@ async function descargarPDFZoom(){
   if(!guiaNum) return toast('Esta guía no tiene número ZOOM registrado',1);
   toast('🔄 Descargando etiqueta ZOOM...');
   try{
-    // Obtener token si no existe
-    if(!zoomToken) zoomToken = await getZoomToken();
-    const data = await zoomFetch('etiqueta',
-      {token:zoomToken, codguia:String(guiaNum), termicaPdf:'1', terminos:'1'}, zoomToken);
+    // Etiqueta no necesita token según documentación ZOOM
+    const data = await zoomFetch('etiqueta', {codguia: String(guiaNum)}, null);
+    console.log('Etiqueta resp:', JSON.stringify(data).substring(0,400));
+
     const pdfBase64 = data.entidadRespuesta?.guiaPDF ||
                       data.entidadRespuesta?.pdf ||
-                      data.guiaPDF || data.pdf || null;
-    if(pdfBase64){
-      const byteChars = atob(pdfBase64);
-      const byteNums = new Uint8Array(byteChars.length);
-      for(let i=0;i<byteChars.length;i++) byteNums[i]=byteChars.charCodeAt(i);
-      const blob = new Blob([byteNums], {type:'application/pdf'});
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `GuiaZOOM_${guiaNum}.pdf`;
-      a.click();
-      URL.revokeObjectURL(url);
-      toast('✅ PDF ZOOM descargado');
+                      data.guiaPDF || data.pdf ||
+                      (typeof data.entidadRespuesta === 'string' ? data.entidadRespuesta : null);
+
+    if(pdfBase64 && pdfBase64.length > 100){
+      try{
+        const byteChars = atob(pdfBase64);
+        const byteNums = new Uint8Array(byteChars.length);
+        for(let i=0;i<byteChars.length;i++) byteNums[i]=byteChars.charCodeAt(i);
+        const blob = new Blob([byteNums], {type:'application/pdf'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `GuiaZOOM_${guiaNum}.pdf`;
+        a.click();
+        URL.revokeObjectURL(url);
+        toast('✅ PDF ZOOM descargado');
+      }catch(b64err){
+        // Intentar abrir como URL directa si no es base64
+        toast('Error PDF: '+b64err.message,1);
+      }
     } else {
-      toast('Sin PDF en respuesta: '+JSON.stringify(data).substring(0,100),1);
+      toast('Resp ZOOM: '+JSON.stringify(data).substring(0,200),1);
     }
   }catch(e){ toast('Error: '+e.message,1); }
 }
@@ -2280,15 +2691,18 @@ function renderReg(){
       <td><span class="bdg bgr">${g.srv}</span></td>
       <td>${g.peso} <small>kg</small></td>
       <td onclick="event.stopPropagation()"><span class="bdg ${stBdg[g.estado||'En tránsito']||'bbl'}">${g.estado||'En tránsito'}</span></td>
-      <td onclick="event.stopPropagation()" style="display:flex;gap:5px;align-items:center;">
-        <button class="btn bp xs" onclick="verG('${g.col}')">Ver</button>
-        <button class="btn ba xs" onclick="abrirEstatus('${g.col}')">Estado</button>
-        <button class="btn bn xs" onclick="abrirEditar('${g.col}')" title="Editar">
-          <svg viewBox="0 0 24 24" fill="currentColor" style="width:13px;height:13px;"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
-        </button>
-        <button class="btn bd xs" onclick="eliminarGuiaDirecto('${g.col}')" title="Eliminar">
-          <svg viewBox="0 0 24 24" fill="currentColor" style="width:13px;height:13px;"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
-        </button>
+      <td onclick="event.stopPropagation()" style="position:relative;">
+        <button class="btn bg xs" onclick="toggleMenu('${g.col}',event)" style="font-size:18px;padding:2px 8px;line-height:1;">⋮</button>
+        <div id="menu_${g.col}" style="display:none;position:absolute;right:0;top:100%;background:#fff;border:1.5px solid var(--border);border-radius:10px;box-shadow:var(--sh2);z-index:999;min-width:200px;overflow:hidden;">
+          <div onclick="verG('${g.col}');closeAllMenus()" style="padding:10px 16px;cursor:pointer;font-size:13px;display:flex;align-items:center;gap:8px;" onmouseover="this.style.background='var(--blue3)'" onmouseout="this.style.background='#fff'">🏷️ Ver etiqueta Cargo JL</div>
+          <div onclick="abrirEstatus('${g.col}');closeAllMenus()" style="padding:10px 16px;cursor:pointer;font-size:13px;display:flex;align-items:center;gap:8px;" onmouseover="this.style.background='var(--blue3)'" onmouseout="this.style.background='#fff'">📦 Cambiar estado</div>
+          <div onclick="abrirEditar('${g.col}');closeAllMenus()" style="padding:10px 16px;cursor:pointer;font-size:13px;display:flex;align-items:center;gap:8px;" onmouseover="this.style.background='var(--blue3)'" onmouseout="this.style.background='#fff'">✏️ Editar guía</div>
+          <hr style="border:none;border-top:1px solid var(--border);margin:2px 0;">
+          ${g.guiaZoom ? `<div onclick="descargarPDFZoomDirecto('${g.col}');closeAllMenus()" style="padding:10px 16px;cursor:pointer;font-size:13px;display:flex;align-items:center;gap:8px;" onmouseover="this.style.background='#E3F2FD'" onmouseout="this.style.background='#fff'">✈️ Descargar Guía ZOOM PDF</div>` : `<div onclick="crearZoomDesdeTabla('${g.col}');closeAllMenus()" style="padding:10px 16px;cursor:pointer;font-size:13px;display:flex;align-items:center;gap:8px;" onmouseover="this.style.background='#E3F2FD'" onmouseout="this.style.background='#fff'">✈️ Crear Guía ZOOM</div>`}
+          <div onclick="abrirDocumentos('${g.col}');closeAllMenus()" style="padding:10px 16px;cursor:pointer;font-size:13px;display:flex;align-items:center;gap:8px;" onmouseover="this.style.background='var(--green2)'" onmouseout="this.style.background='#fff'">📄 Documentos</div>
+          <hr style="border:none;border-top:1px solid var(--border);margin:2px 0;">
+          <div onclick="eliminarGuiaDirecto('${g.col}');closeAllMenus()" style="padding:10px 16px;cursor:pointer;font-size:13px;color:var(--red);display:flex;align-items:center;gap:8px;" onmouseover="this.style.background='var(--red2)'" onmouseout="this.style.background='#fff'">🗑️ Eliminar guía</div>
+        </div>
       </td>
     </tr>`).join('');
   updSelBar();
