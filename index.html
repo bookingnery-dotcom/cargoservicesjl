@@ -2037,20 +2037,20 @@ function generarDeclaracionExportacion(){
   const html = '<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Declaracion Jurada de Exportacion</title>'
     +'<style>'
     +'*{margin:0;padding:0;box-sizing:border-box;}'
-    +'body{font-family:Arial,Helvetica,sans-serif;font-size:10pt;padding:16mm 18mm 12mm 18mm;color:#000;}'
-    +'@media print{@page{size:A4 portrait;margin:0;}body{padding:16mm 18mm 12mm 18mm;}}'
-    +'.logo{width:110px;height:auto;}'
-    +'.aviso-title{font-size:11.5pt;font-weight:bold;text-align:center;margin:10px 0 5px 0;text-transform:uppercase;}'
-    +'.aviso-sub{font-size:10pt;font-weight:bold;margin-bottom:5px;}'
-    +'.aviso-body{font-size:9.5pt;line-height:1.55;margin-bottom:5px;}'
-    +'.check-row{display:flex;align-items:center;gap:8px;margin:4px 0;font-size:9.5pt;}'
-    +'.check-box{width:15px;height:15px;border:2px solid #2d7a2d;background:#e8f5e9;display:inline-flex;align-items:center;justify-content:center;color:#2d7a2d;font-weight:bold;flex-shrink:0;}'
-    +'.decl-title{font-size:10.5pt;font-weight:bold;margin:12px 0 5px 0;}'
-    +'.cuerpo{font-size:9.5pt;line-height:1.9;margin-bottom:5px;}'
-    +'.uf{border-bottom:1px solid #000;display:inline-block;min-width:60px;}'
-    +'.juramento{font-size:9.5pt;line-height:1.55;margin:10px 0;}'
-    +'.firmas{margin-top:12px;font-size:9.5pt;}'
-    +'.frow{margin-bottom:4px;}'
+    +'body{font-family:Arial,Helvetica,sans-serif;font-size:11pt;padding:18mm 20mm 14mm 20mm;color:#000;}'
+    +'@media print{@page{size:A4 portrait;margin:0;}body{padding:18mm 20mm 14mm 20mm;}}'
+    +'.logo{width:120px;height:auto;}'
+    +'.aviso-title{font-size:13pt;font-weight:bold;text-align:center;margin:16px 0 8px 0;text-transform:uppercase;letter-spacing:.5px;}'
+    +'.aviso-sub{font-size:11pt;font-weight:bold;margin-bottom:8px;}'
+    +'.aviso-body{font-size:10.5pt;line-height:1.65;margin-bottom:8px;}'
+    +'.check-row{display:flex;align-items:center;gap:10px;margin:7px 0;font-size:10.5pt;}'
+    +'.check-box{width:17px;height:17px;border:2px solid #2d7a2d;background:#e8f5e9;display:inline-flex;align-items:center;justify-content:center;color:#2d7a2d;font-weight:bold;flex-shrink:0;font-size:12pt;}'
+    +'.decl-title{font-size:12pt;font-weight:bold;margin:20px 0 10px 0;letter-spacing:.3px;}'
+    +'.cuerpo{font-size:10.5pt;line-height:2.1;margin-bottom:8px;}'
+    +'.uf{border-bottom:1.5px solid #000;display:inline-block;min-width:60px;}'
+    +'.juramento{font-size:10.5pt;line-height:1.75;margin:18px 0;}'
+    +'.firmas{margin-top:20px;font-size:10.5pt;line-height:2.2;}'
+    +'.frow{margin-bottom:8px;}'
     +'</style></head><body>'
     +'<img class="logo" src="'+LOGO+'" alt="Cargo JL">'
     +'<div class="aviso-title">AVISO IMPORTANTE</div>'
@@ -2069,13 +2069,11 @@ function generarDeclaracionExportacion(){
     +'</div>'
     +'<div class="juramento">BAJO JURAMENTO, declaro que dicho embarque no contiene ning&uacute;n tipo de sustancia estupefaciente ni psicotr&oacute;pica, conforme a las leyes y regulaciones nacionales e internacionales vigentes. Asumo completa responsabilidad por el contenido del env&iacute;o, as&iacute; como por cualquier consecuencia legal, administrativa o aduanera que pudiera derivarse de la tramitaci&oacute;n, transporte o inspecci&oacute;n de los bienes, art&iacute;culos y materiales contenidos en este embarque. Sin otro particular, y en se&ntilde;al de conformidad con lo declarado, firmo la presente en lugar y fecha indicados.</div>'
     +'<div class="firmas">'
-    +'<div class="frow">Apellidos y Nombres: <span class="uf" style="min-width:260px;">&nbsp;'+(g.rN||'')+'&nbsp;</span>&nbsp;&nbsp;Documento</div>'
-    +'<div class="frow">de Identidad (DNI/CE/PTP/PAS): <span class="uf" style="min-width:120px;">&nbsp;'+(g.rD||'')+'&nbsp;</span>&nbsp;&nbsp;Direcci&oacute;n:</div>'
-    +'<div class="frow"><span class="uf" style="min-width:320px;">&nbsp;'+(g.rDir||'')+'&nbsp;</span></div>'
-    +'<br>'
-    +'<div class="frow">Fecha: <span class="uf" style="min-width:160px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></div>'
-    +'<br>'
-    +'<div class="frow">Firma: <span class="uf" style="min-width:160px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></div>'
+    +'<div class="frow">Apellidos y Nombres: <span class="uf" style="min-width:300px;">&nbsp;'+(g.rN||'')+'&nbsp;</span>&nbsp;&nbsp;&nbsp;&nbsp;Documento</div>'
+    +'<div class="frow">de Identidad (DNI/CE/PTP/PAS): <span class="uf" style="min-width:140px;">&nbsp;'+(g.rD||'')+'&nbsp;</span>&nbsp;&nbsp;&nbsp;&nbsp;Direcci&oacute;n:</div>'
+    +'<div class="frow"><span class="uf" style="min-width:380px;">&nbsp;'+(g.rDir||'')+'&nbsp;</span></div>'
+    +'<div style="margin-top:28px;"><div class="frow">Fecha: <span class="uf" style="min-width:200px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></div></div>'
+    +'<div style="margin-top:36px;"><div class="frow">Firma y sello: <span class="uf" style="min-width:260px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></div></div>'
     +'</div>'
     +'<'+'script>window.onload=function(){setTimeout(function(){window.print();},350);}<'+'/script>'
     +'</body></html>';
@@ -2166,10 +2164,20 @@ async function getZoomToken(){
 async function getZoomCiudades(token){
   const data = await zoomFetch('ciudades', {token, paisDestino:'VE'}, token);
   console.log('Ciudades:', JSON.stringify(data).substring(0,200));
-  if(Array.isArray(data)) return data;
-  if(Array.isArray(data.entidadRespuesta)) return data.entidadRespuesta;
-  if(Array.isArray(data.data)) return data.data;
-  // Lista completa ciudades ZOOM Venezuela — fallback cuando la API no responde
+  const fallback = getZoomCiudadesFallback();
+  let apiList = [];
+  if(Array.isArray(data)) apiList = data;
+  else if(Array.isArray(data.entidadRespuesta)) apiList = data.entidadRespuesta;
+  else if(Array.isArray(data.data)) apiList = data.data;
+  // Si la API devolvió datos, combinar con fallback (sin duplicar por nombre)
+  if(apiList.length > 0){
+    const nombres = new Set(apiList.map(c=>(c.nombre_ciudad||'').toUpperCase().trim()));
+    const extra = fallback.filter(c=>!nombres.has((c.nombre_ciudad||'').toUpperCase().trim()));
+    return [...apiList, ...extra].sort((a,b)=>(a.nombre_ciudad||'').localeCompare(b.nombre_ciudad||''));
+  }
+  return fallback;
+}
+function getZoomCiudadesFallback(){
   return [
     // AMAZONAS
     {codciudad:35,nombre_ciudad:'PUERTO AYACUCHO',nombre_estado:'AMAZONAS'},
@@ -2472,10 +2480,18 @@ async function getZoomCiudades(token){
 async function getZoomSucursales(token, ciudadId){
   const data = await zoomFetch('sucursales', {token, codciudad:ciudadId, ciudad:ciudadId, paisDestino:'VE'}, token);
   console.log('Sucursales:', JSON.stringify(data).substring(0,200));
-  if(Array.isArray(data)) return data;
-  if(Array.isArray(data.entidadRespuesta)) return data.entidadRespuesta;
-  if(Array.isArray(data.data)) return data.data;
-  return [];
+  if(Array.isArray(data) && data.length>0) return data;
+  if(Array.isArray(data.entidadRespuesta) && data.entidadRespuesta.length>0) return data.entidadRespuesta;
+  if(Array.isArray(data.data) && data.data.length>0) return data.data;
+  // Fallback sucursales para ciudades conocidas que la API no devuelve
+  const sucFallback = {
+    83: [{codsucursal:'001762',nombre:'ZOOM SAN FELIX - C.C La Carinosa',direccion:'Sector El Roble, Av. Morena Mendoza, C.C La Carinosa, Local C'}],
+    134:[{codsucursal:'001800',nombre:'ZOOM EL CALLAO',direccion:'Calle La Paz, frente al Parque Infantil Victoria Torrealba, Local S/N'}],
+    135:[{codsucursal:'001801',nombre:'ZOOM GUASIPATI',direccion:'Calle Merida, C.C Clement, Nivel 1, Local 5-6, Sector Las Gracias'}],
+    89: [{codsucursal:'001802',nombre:'ZOOM GUASDUALITO',direccion:'Centro de Guasdualito, Estado Apure'}],
+    101:[{codsucursal:'001803',nombre:'ZOOM SAN FERNANDO DE ATABAPO',direccion:'Centro, San Fernando de Atabapo, Amazonas'}],
+  };
+  return sucFallback[ciudadId] || [];
 }
 
 async function abrirZoom(){
