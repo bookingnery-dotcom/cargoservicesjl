@@ -2564,6 +2564,7 @@ async function descargarPDFZoom(){
       }catch(b64err){
         toast('Error PDF: '+b64err.message+' — ver consola F12',1);
         console.error('ZOOM PDF b64err:', b64err);
+      }
     } else {
       toast('Resp ZOOM: '+JSON.stringify(data).substring(0,200),1);
     }
