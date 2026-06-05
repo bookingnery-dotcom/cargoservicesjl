@@ -2454,7 +2454,7 @@ async function imprimirEtiquetaZoom(){
   if(!zoomGuiaNumero||!zoomToken) return toast('Sin número de guía ZOOM',1);
   try{
     const data = await zoomFetch('etiqueta',
-      {token:zoomToken, codguia:String(zoomGuiaNumero), termicaPdf:'1', terminos:'1'}, zoomToken);
+      {token:zoomToken, codguia:[String(zoomGuiaNumero)], termicaPdf:'1', terminos:'1'}, zoomToken);
     console.log('Etiqueta resp:', JSON.stringify(data).substring(0,200));
     const pdfBase64 = data.entidadRespuesta?.guiaPDF ||
                       data.entidadRespuesta?.pdf ||
@@ -2483,7 +2483,7 @@ async function descargarPDFZoom(){
   toast('🔄 Descargando etiqueta ZOOM...');
   try{
     // Etiqueta no necesita token según documentación ZOOM
-    const data = await zoomFetch('etiqueta', {codguia: String(guiaNum)}, null);
+    const data = await zoomFetch('etiqueta', {codguia: [String(guiaNum)]}, null);
     console.log('Etiqueta resp:', JSON.stringify(data).substring(0,400));
 
     const pdfBase64 = data.entidadRespuesta?.guiaPDF ||
