@@ -857,7 +857,7 @@ tbody tr:hover{background:#FAFCFF;}
           ✅ Datos mapeados automáticamente desde tu guía. Revisa y confirma.
         </p>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
-          <div class="fi ni"><label>Referencia (tu COL)</label><div class="fi-w"><input type="text" id="zRef" readonly style="background:#f9f9f9;"></div></div>
+          <div class="fi ni"><label>Referencia (tu COL)</label><div class="fi-w"><input type="text" id="zRef" style="background:#fff;"></div></div>
           <div class="fi ni"><label>Tipo de Envío</label>
             <div class="fi-w"><select id="zTipo"><option value="M">Mercancía</option><option value="D">Documento</option></select></div>
           </div>
@@ -903,6 +903,19 @@ tbody tr:hover{background:#FAFCFF;}
           <button class="btn sm" style="background:#1565C0;color:#fff;font-weight:700;" onclick="imprimirEtiquetaZoom()">🖨️ Imprimir Etiqueta ZOOM</button>
           <button class="btn bg sm" onclick="closeOv('ovZoom')">Cerrar</button>
         </div>
+      </div>
+
+      <!-- Ingreso manual de correlativo ZOOM -->
+      <div id="zoomManual" style="display:none;padding:16px;background:#E3F2FD;border-radius:10px;margin-bottom:8px;">
+        <div style="font-size:12px;font-weight:700;color:#1565C0;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;">📝 Ingresar Número de Guía ZOOM Manualmente</div>
+        <div style="font-size:12px;color:var(--t2);margin-bottom:12px;">Ingresa el código de guía ZOOM que te proporcionó la empresa (ej: de tu correo o sistema externo).</div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <input type="text" id="zoomNumeroManual" placeholder="Ej: 123456789"
+            style="flex:1;padding:10px 14px;border:1.5px solid #1565C0;border-radius:8px;font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:700;color:#1565C0;outline:none;"
+            oninput="this.value=this.value.replace(/[^0-9A-Za-z\-]/g,'')">
+          <button class="btn sm" style="background:#1565C0;color:#fff;font-weight:700;white-space:nowrap;" onclick="guardarZoomManual()">💾 Guardar</button>
+        </div>
+        <div id="zoomManualAlert" class="al" style="margin-top:10px;"></div>
       </div>
     </div>
     <div class="mf" id="zoomFooter">
@@ -1977,15 +1990,15 @@ function generarDeclaracionValor(){
   const html = '<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Declaracion Jurada de Valor</title>'
     +'<style>'
     +'*{margin:0;padding:0;box-sizing:border-box;}'
-    +'body{font-family:Arial,Helvetica,sans-serif;font-size:10.5pt;padding:14mm 18mm 12mm 18mm;color:#000;}'
-    +'@media print{@page{size:A4 portrait;margin:0;}body{padding:14mm 18mm 12mm 18mm;}}'
-    +'.titulo{text-align:center;font-size:13pt;font-weight:bold;margin-bottom:10px;}'
-    +'.aviso{font-size:10pt;line-height:1.55;margin-bottom:10px;}'
-    +'.cuerpo{font-size:10pt;line-height:1.9;margin-bottom:5px;}'
+    +'body{font-family:Arial,Helvetica,sans-serif;font-size:10pt;padding:20mm 20mm 16mm 20mm;color:#000;}'
+    +'@media print{@page{size:A4 portrait;margin:0;}body{padding:20mm 20mm 16mm 20mm;}}'
+    +'.titulo{text-align:center;font-size:13pt;font-weight:bold;margin-bottom:12px;letter-spacing:.5px;}'
+    +'.aviso{font-size:10pt;line-height:1.6;margin-bottom:12px;padding:8px 10px;border:1px solid #ddd;background:#fafafa;}'
+    +'.cuerpo{font-size:10pt;line-height:2;margin-bottom:6px;}'
     +'.uf{border-bottom:1px solid #000;display:inline-block;min-width:60px;}'
-    +'table{width:100%;border-collapse:collapse;margin:8px 0;font-size:10pt;}'
-    +'th{background:#000;color:#fff;padding:5px 8px;text-align:center;font-weight:bold;border:1px solid #000;}'
-    +'.juramento{font-size:10pt;line-height:1.55;margin:10px 0;}'
+    +'table{width:100%;border-collapse:collapse;margin:10px 0;font-size:10pt;}'
+    +'th{background:#000;color:#fff;padding:6px 8px;text-align:center;font-weight:bold;border:1px solid #000;}'
+    +'.juramento{font-size:10pt;line-height:1.6;margin:12px 0;}'
     +'</style></head><body>'
     +'<div class="titulo">DECLARACI&Oacute;N JURADA DE VALOR</div>'
     +'<div class="aviso"><strong>AVISO IMPORTANTE:</strong> Todas las cajas enviadas son sometidas a <strong>inspecci&oacute;n mediante Rayos X</strong>. Cualquier producto <strong>no declarado correctamente, oculto o no visible</strong> podr&aacute; ser decomisado, y el remitente se someter&aacute; a las <strong>sanciones administrativas, civiles y penales</strong> que correspondan, seg&uacute;n la legislaci&oacute;n vigente.</div>'
@@ -2003,12 +2016,12 @@ function generarDeclaracionValor(){
     +'<th style="width:16%">MARCA</th>'
     +'<th style="width:16%">VALOR</th>'
     +'</tr></thead><tbody>'+rowsHtml
-    +'<tr><td colspan="3" style="border:1px solid #000;padding:4px 8px;text-align:right;font-weight:bold;background:#f5f5f5;">TOTAL USD</td>'
-    +'<td style="border:1px solid #000;padding:4px 8px;text-align:right;font-weight:bold;">'+total.toFixed(2)+'</td></tr>'
+    +'<tr><td colspan="3" style="border:1px solid #000;padding:5px 8px;text-align:right;font-weight:bold;background:#f5f5f5;">TOTAL USD</td>'
+    +'<td style="border:1px solid #000;padding:5px 8px;text-align:right;font-weight:bold;">'+total.toFixed(2)+'</td></tr>'
     +'</tbody></table>'
     +'<div class="juramento">Declaro bajo juramento que la informaci&oacute;n contenida en este documento es veraz y exacta, y me someto a las sanciones administrativas, civiles y penales correspondientes en caso de falsedad o alteraci&oacute;n de los datos proporcionados.</div>'
-    +'<div style="margin-top:14px;font-size:10pt;">FIRMA: <span class="uf" style="min-width:240px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></div>'
-    +'<div style="margin-top:10px;font-size:10pt;">Lima,<span class="uf" style="min-width:50px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>de<span class="uf" style="min-width:140px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>del 20<span class="uf" style="min-width:50px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></div>'
+    +'<div style="margin-top:18px;font-size:10pt;">FIRMA: <span class="uf" style="min-width:240px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></div>'
+    +'<div style="margin-top:12px;font-size:10pt;">Lima,<span class="uf" style="min-width:50px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>de<span class="uf" style="min-width:140px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>del 20<span class="uf" style="min-width:50px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></div>'
     +'<'+'script>window.onload=function(){setTimeout(function(){window.print();},350);}<'+'/script>'
     +'</body></html>';
   pw.document.write(html);
@@ -2024,20 +2037,20 @@ function generarDeclaracionExportacion(){
   const html = '<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Declaracion Jurada de Exportacion</title>'
     +'<style>'
     +'*{margin:0;padding:0;box-sizing:border-box;}'
-    +'body{font-family:Arial,Helvetica,sans-serif;font-size:10.5pt;padding:12mm 18mm 12mm 18mm;color:#000;}'
-    +'@media print{@page{size:A4 portrait;margin:0;}body{padding:12mm 18mm 10mm 18mm;}}'
-    +'.logo{width:130px;height:auto;}'
-    +'.aviso-title{font-size:12pt;font-weight:bold;text-align:center;margin:12px 0 5px 0;text-transform:uppercase;}'
-    +'.aviso-sub{font-size:10.5pt;font-weight:bold;margin-bottom:5px;}'
-    +'.aviso-body{font-size:10pt;line-height:1.6;margin-bottom:5px;}'
-    +'.check-row{display:flex;align-items:center;gap:8px;margin:4px 0;font-size:10pt;}'
-    +'.check-box{width:15px;height:15px;border:2px solid #2d7a2d;background:#e8f5e9;display:inline-flex;align-items:center;justify-content:center;color:#2d7a2d;font-weight:bold;flex-shrink:0;}'
-    +'.decl-title{font-size:11pt;font-weight:bold;margin:14px 0 5px 0;}'
+    +'body{font-family:Arial,Helvetica,sans-serif;font-size:10pt;padding:20mm 20mm 16mm 20mm;color:#000;}'
+    +'@media print{@page{size:A4 portrait;margin:0;}body{padding:20mm 20mm 16mm 20mm;}}'
+    +'.logo{width:120px;height:auto;}'
+    +'.aviso-title{font-size:12pt;font-weight:bold;text-align:center;margin:14px 0 6px 0;text-transform:uppercase;}'
+    +'.aviso-sub{font-size:10.5pt;font-weight:bold;margin-bottom:6px;}'
+    +'.aviso-body{font-size:10pt;line-height:1.6;margin-bottom:6px;}'
+    +'.check-row{display:flex;align-items:center;gap:8px;margin:5px 0;font-size:10pt;}'
+    +'.check-box{width:16px;height:16px;border:2px solid #2d7a2d;background:#e8f5e9;display:inline-flex;align-items:center;justify-content:center;color:#2d7a2d;font-weight:bold;flex-shrink:0;}'
+    +'.decl-title{font-size:11pt;font-weight:bold;margin:16px 0 6px 0;}'
     +'.cuerpo{font-size:10pt;line-height:2;margin-bottom:6px;}'
     +'.uf{border-bottom:1px solid #000;display:inline-block;min-width:60px;}'
-    +'.juramento{font-size:10pt;line-height:1.6;margin:10px 0;}'
-    +'.firmas{margin-top:14px;font-size:10pt;}'
-    +'.frow{margin-bottom:4px;}'
+    +'.juramento{font-size:10pt;line-height:1.6;margin:12px 0;}'
+    +'.firmas{margin-top:16px;font-size:10pt;}'
+    +'.frow{margin-bottom:5px;}'
     +'</style></head><body>'
     +'<img class="logo" src="'+LOGO+'" alt="Cargo JL">'
     +'<div class="aviso-title">AVISO IMPORTANTE</div>'
@@ -2253,6 +2266,8 @@ async function abrirZoom(){
   document.getElementById('zoomGuiaRef').textContent=`${ag.col} / ${ag.cjl}`;
   document.getElementById('zoomDatos').style.display='none';
   document.getElementById('zoomResultado').style.display='none';
+  document.getElementById('zoomManual').style.display='none';
+  if(document.getElementById('zoomManualAlert')) document.getElementById('zoomManualAlert').className='al';
   document.getElementById('zoomFooter').style.display='flex';
   document.getElementById('zoomStatus').style.display='block';
   document.getElementById('zoomStatus').style.background='var(--sky)';
@@ -3016,6 +3031,47 @@ function exportExcel(){
 }
 
 /* ─── UTILS ─── */
+function mostrarZoomManual(){
+  // Muestra el panel manual y oculta el formulario de datos
+  document.getElementById('zoomDatos').style.display='none';
+  document.getElementById('zoomResultado').style.display='none';
+  document.getElementById('zoomStatus').style.display='none';
+  document.getElementById('zoomManual').style.display='block';
+  document.getElementById('zoomFooter').style.display='none';
+  // Pre-rellenar si ya hay número guardado
+  if(ag && ag.guiaZoom){
+    document.getElementById('zoomNumeroManual').value = ag.guiaZoom;
+  }
+}
+
+async function guardarZoomManual(){
+  const num = document.getElementById('zoomNumeroManual').value.trim();
+  const alertEl = document.getElementById('zoomManualAlert');
+  if(!num){
+    alertEl.textContent='⚠ Ingresa un número de guía válido.';
+    alertEl.className='al show al-er';
+    return;
+  }
+  if(!ag){
+    alertEl.textContent='⚠ No hay guía seleccionada.';
+    alertEl.className='al show al-er';
+    return;
+  }
+  try{
+    zoomGuiaNumero = num;
+    await updateGuiaFS(ag.col, {guiaZoom: String(num)});
+    const gi = guias.findIndex(x=>x.col===ag.col);
+    if(gi>=0) guias[gi].guiaZoom = String(num);
+    document.getElementById('zoomManual').style.display='none';
+    document.getElementById('zoomResultado').style.display='block';
+    document.getElementById('zoomNumero').textContent = num;
+    renderReg();
+    toast('Número ZOOM guardado manualmente ✓');
+  }catch(e){
+    alertEl.textContent='❌ Error al guardar: '+e.message;
+    alertEl.className='al show al-er';
+  }
+}
 function closeOv(id){document.getElementById(id).classList.remove('show');}
 function toast(msg,err=0){
   const c=document.getElementById('toastC');
