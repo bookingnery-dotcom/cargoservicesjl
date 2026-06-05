@@ -1945,16 +1945,13 @@ function abrirDocumentos(col){
 }
 
 function descargarDocHTML(html, nombre){
-  const blob = new Blob([html], {type:'text/html;charset=utf-8'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = nombre + '.html';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-  toast('✅ Documento descargado — ábrelo y usa Ctrl+P para imprimir');
+  const pw = window.open('','_blank','width=900,height=700');
+  if(!pw){ toast('Permite ventanas emergentes para imprimir',1); return; }
+  pw.document.open();
+  pw.document.write(html);
+  pw.document.close();
+  pw.onload = ()=>{ setTimeout(()=>{ pw.focus(); pw.print(); }, 400); };
+  toast('✅ Se abre diálogo de impresión — elige A4 y Sin márgenes');
 }
 
 function generarDeclaracionValor(){
@@ -2027,6 +2024,7 @@ function generarDeclaracionValor(){
     FIRMA: <span class="uf" style="min-width:220px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
   </div>
   <div class="fecha-line">Lima,<span class="uf narrow">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>de<span class="uf" style="min-width:130px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>del 20<span class="uf narrow">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></div>
+  <script>window.onload=function(){setTimeout(function(){window.print();},300);}</script>
   </body></html>`;
   descargarDocHTML(html, `DeclaracionValor_${g.col}`);
 }
@@ -2083,6 +2081,7 @@ function generarDeclaracionExportacion(){
     <br>
     <div class="frow">Firma: <span class="uf" style="min-width:140px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></div>
   </div>
+  <script>window.onload=function(){setTimeout(function(){window.print();},300);}</script>
   </body></html>`;
   descargarDocHTML(html, `DeclaracionExportacion_${g.col}`);
 }
@@ -2455,24 +2454,42 @@ async function imprimirEtiquetaZoom(){
   try{
     const data = await zoomFetch('etiqueta',
       {token:zoomToken, codguia:[String(zoomGuiaNumero)], termicaPdf:'1', terminos:'1'}, zoomToken);
-    console.log('Etiqueta resp:', JSON.stringify(data).substring(0,200));
-    const pdfBase64 = data.entidadRespuesta?.guiaPDF ||
-                      data.entidadRespuesta?.pdf ||
-                      data.guiaPDF || data.pdf || null;
-    if(pdfBase64){
-      const byteChars = atob(pdfBase64);
-      const byteNums = new Uint8Array(byteChars.length);
-      for(let i=0;i<byteChars.length;i++) byteNums[i]=byteChars.charCodeAt(i);
-      const blob = new Blob([byteNums], {type:'application/pdf'});
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `GuiaZOOM_${zoomGuiaNumero}.pdf`;
-      a.click();
-      URL.revokeObjectURL(url);
-      toast('✅ Etiqueta ZOOM descargada');
+    console.log('ZOOM Etiqueta FULL:', JSON.stringify(data));
+    let pdfBase64 = null;
+    const ent = data.entidadRespuesta;
+    if(typeof ent === 'string' && ent.length > 100) pdfBase64 = ent;
+    else if(Array.isArray(ent) && ent[0]){
+      const item = ent[0];
+      pdfBase64 = item.guiaPDF || item.pdf || item.pdfBase64 || item.documento || (typeof item === 'string' ? item : null);
+    } else if(ent && typeof ent === 'object'){
+      pdfBase64 = ent.guiaPDF || ent.pdf || ent.pdfBase64 || ent.documento || ent.contenido || null;
+    }
+    if(!pdfBase64) pdfBase64 = data.guiaPDF || data.pdf || null;
+    if(pdfBase64 && pdfBase64.length > 100){
+      let b64 = pdfBase64.trim();
+      if(b64.includes(',')) b64 = b64.split(',')[1];
+      b64 = b64.replace(/\s+/g,'');
+      try{
+        const byteChars = atob(b64);
+        const byteNums = new Uint8Array(byteChars.length);
+        for(let i=0;i<byteChars.length;i++) byteNums[i]=byteChars.charCodeAt(i);
+        const blob = new Blob([byteNums],{type:'application/pdf'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `GuiaZOOM_${zoomGuiaNumero}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        toast('✅ Etiqueta ZOOM descargada');
+      }catch(b64err){
+        if(b64.startsWith('http')){ window.open(b64,'_blank'); toast('✅ PDF abierto en nueva pestaña'); }
+        else { console.error('b64err:', b64err); toast('Error decodificando PDF. Ver consola F12',1); }
+      }
     } else {
-      toast('Respuesta: '+JSON.stringify(data).substring(0,150), 1);
+      console.warn('ZOOM no devolvió PDF:', JSON.stringify(data));
+      toast('Respuesta: '+JSON.stringify(data).substring(0,200), 1);
     }
   }catch(e){ toast('Error etiqueta: '+e.message,1); }
 }
@@ -2482,34 +2499,55 @@ async function descargarPDFZoom(){
   if(!guiaNum) return toast('Esta guía no tiene número ZOOM registrado',1);
   toast('🔄 Descargando etiqueta ZOOM...');
   try{
-    // Etiqueta no necesita token según documentación ZOOM
-    const data = await zoomFetch('etiqueta', {codguia: [String(guiaNum)]}, null);
-    console.log('Etiqueta resp:', JSON.stringify(data).substring(0,400));
+    // Intentar con token si está disponible, sino sin token
+    const token = zoomToken || sessionStorage.getItem('zoomToken') || null;
+    const data = await zoomFetch('etiqueta', {codguia:[String(guiaNum)], termicaPdf:'1', terminos:'1'}, token);
+    console.log('ZOOM Etiqueta FULL:', JSON.stringify(data));
 
-    const pdfBase64 = data.entidadRespuesta?.guiaPDF ||
-                      data.entidadRespuesta?.pdf ||
-                      data.guiaPDF || data.pdf ||
-                      (typeof data.entidadRespuesta === 'string' ? data.entidadRespuesta : null);
+    // Buscar el PDF en todas las posibles ubicaciones de la respuesta
+    let pdfBase64 = null;
+    const ent = data.entidadRespuesta;
+    if(typeof ent === 'string' && ent.length > 100) pdfBase64 = ent;
+    else if(Array.isArray(ent) && ent[0]){
+      const item = ent[0];
+      pdfBase64 = item.guiaPDF || item.pdf || item.pdfBase64 || item.documento || (typeof item === 'string' ? item : null);
+    } else if(ent && typeof ent === 'object'){
+      pdfBase64 = ent.guiaPDF || ent.pdf || ent.pdfBase64 || ent.documento || ent.contenido || null;
+    }
+    if(!pdfBase64) pdfBase64 = data.guiaPDF || data.pdf || data.pdfBase64 || null;
 
     if(pdfBase64 && pdfBase64.length > 100){
+      // Limpiar base64: quitar prefijos data:, espacios, saltos de línea
+      let b64 = pdfBase64.trim();
+      if(b64.includes(',')) b64 = b64.split(',')[1]; // quitar "data:application/pdf;base64,"
+      b64 = b64.replace(/\s+/g,''); // quitar espacios y saltos
       try{
-        const byteChars = atob(pdfBase64);
+        const byteChars = atob(b64);
         const byteNums = new Uint8Array(byteChars.length);
         for(let i=0;i<byteChars.length;i++) byteNums[i]=byteChars.charCodeAt(i);
-        const blob = new Blob([byteNums], {type:'application/pdf'});
+        const blob = new Blob([byteNums],{type:'application/pdf'});
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
         a.download = `GuiaZOOM_${guiaNum}.pdf`;
+        document.body.appendChild(a);
         a.click();
+        document.body.removeChild(a);
         URL.revokeObjectURL(url);
         toast('✅ PDF ZOOM descargado');
       }catch(b64err){
-        // Intentar abrir como URL directa si no es base64
-        toast('Error PDF: '+b64err.message,1);
+        // Si falla atob, puede ser una URL directa
+        if(b64.startsWith('http')){
+          window.open(b64,'_blank');
+          toast('✅ PDF abierto en nueva pestaña');
+        } else {
+          console.error('b64err:', b64err, 'b64 muestra:', b64.substring(0,50));
+          toast('Error decodificando PDF. Ver consola F12',1);
+        }
       }
     } else {
-      toast('Resp ZOOM: '+JSON.stringify(data).substring(0,200),1);
+      console.warn('ZOOM no devolvió PDF. Resp completa:', JSON.stringify(data));
+      toast('ZOOM resp: '+JSON.stringify(data).substring(0,250),1);
     }
   }catch(e){ toast('Error: '+e.message,1); }
 }
