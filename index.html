@@ -1983,22 +1983,22 @@ function generarDeclaracionValor(){
       +'<td style="text-align:center;padding:3px 6px;border:1px solid #000;">'+(it.marca||'')+'</td>'
       +'<td style="text-align:right;padding:3px 6px;border:1px solid #000;">'+parseFloat(it.valor||0).toFixed(2)+'</td></tr>';
   });
-  var empties = Math.max(0,20-filled.length);
+  var empties = Math.max(0,18-filled.length);
   for(var i=0;i<empties;i++) rowsHtml += '<tr><td style="padding:5px 6px;border:1px solid #000;">&nbsp;</td><td style="border:1px solid #000;"></td><td style="border:1px solid #000;"></td><td style="border:1px solid #000;"></td></tr>';
   const pw = window.open('','_blank','width=900,height=700');
   if(!pw){ toast('Permite ventanas emergentes',1); return; }
   const html = '<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Declaracion Jurada de Valor</title>'
     +'<style>'
     +'*{margin:0;padding:0;box-sizing:border-box;}'
-    +'body{font-family:Arial,Helvetica,sans-serif;font-size:10pt;padding:20mm 20mm 16mm 20mm;color:#000;}'
-    +'@media print{@page{size:A4 portrait;margin:0;}body{padding:20mm 20mm 16mm 20mm;}}'
-    +'.titulo{text-align:center;font-size:13pt;font-weight:bold;margin-bottom:12px;letter-spacing:.5px;}'
-    +'.aviso{font-size:10pt;line-height:1.6;margin-bottom:12px;padding:8px 10px;border:1px solid #ddd;background:#fafafa;}'
-    +'.cuerpo{font-size:10pt;line-height:2;margin-bottom:6px;}'
+    +'body{font-family:Arial,Helvetica,sans-serif;font-size:9.5pt;padding:16mm 18mm 12mm 18mm;color:#000;}'
+    +'@media print{@page{size:A4 portrait;margin:0;}body{padding:16mm 18mm 12mm 18mm;}}'
+    +'.titulo{text-align:center;font-size:12pt;font-weight:bold;margin-bottom:8px;letter-spacing:.5px;}'
+    +'.aviso{font-size:9.5pt;line-height:1.5;margin-bottom:8px;padding:6px 8px;border:1px solid #ddd;background:#fafafa;}'
+    +'.cuerpo{font-size:9.5pt;line-height:1.8;margin-bottom:4px;}'
     +'.uf{border-bottom:1px solid #000;display:inline-block;min-width:60px;}'
-    +'table{width:100%;border-collapse:collapse;margin:10px 0;font-size:10pt;}'
-    +'th{background:#000;color:#fff;padding:6px 8px;text-align:center;font-weight:bold;border:1px solid #000;}'
-    +'.juramento{font-size:10pt;line-height:1.6;margin:12px 0;}'
+    +'table{width:100%;border-collapse:collapse;margin:7px 0;font-size:9pt;}'
+    +'th{background:#000;color:#fff;padding:4px 6px;text-align:center;font-weight:bold;border:1px solid #000;}'
+    +'.juramento{font-size:9pt;line-height:1.5;margin:8px 0;}'
     +'</style></head><body>'
     +'<div class="titulo">DECLARACI&Oacute;N JURADA DE VALOR</div>'
     +'<div class="aviso"><strong>AVISO IMPORTANTE:</strong> Todas las cajas enviadas son sometidas a <strong>inspecci&oacute;n mediante Rayos X</strong>. Cualquier producto <strong>no declarado correctamente, oculto o no visible</strong> podr&aacute; ser decomisado, y el remitente se someter&aacute; a las <strong>sanciones administrativas, civiles y penales</strong> que correspondan, seg&uacute;n la legislaci&oacute;n vigente.</div>'
@@ -2020,8 +2020,8 @@ function generarDeclaracionValor(){
     +'<td style="border:1px solid #000;padding:5px 8px;text-align:right;font-weight:bold;">'+total.toFixed(2)+'</td></tr>'
     +'</tbody></table>'
     +'<div class="juramento">Declaro bajo juramento que la informaci&oacute;n contenida en este documento es veraz y exacta, y me someto a las sanciones administrativas, civiles y penales correspondientes en caso de falsedad o alteraci&oacute;n de los datos proporcionados.</div>'
-    +'<div style="margin-top:18px;font-size:10pt;">FIRMA: <span class="uf" style="min-width:240px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></div>'
-    +'<div style="margin-top:12px;font-size:10pt;">Lima,<span class="uf" style="min-width:50px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>de<span class="uf" style="min-width:140px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>del 20<span class="uf" style="min-width:50px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></div>'
+    +'<div style="margin-top:12px;font-size:9.5pt;">FIRMA: <span class="uf" style="min-width:240px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></div>'
+    +'<div style="margin-top:8px;font-size:9.5pt;">Lima,<span class="uf" style="min-width:50px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>de<span class="uf" style="min-width:140px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>del 20<span class="uf" style="min-width:50px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></div>'
     +'<'+'script>window.onload=function(){setTimeout(function(){window.print();},350);}<'+'/script>'
     +'</body></html>';
   pw.document.write(html);
@@ -2037,20 +2037,20 @@ function generarDeclaracionExportacion(){
   const html = '<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Declaracion Jurada de Exportacion</title>'
     +'<style>'
     +'*{margin:0;padding:0;box-sizing:border-box;}'
-    +'body{font-family:Arial,Helvetica,sans-serif;font-size:10pt;padding:20mm 20mm 16mm 20mm;color:#000;}'
-    +'@media print{@page{size:A4 portrait;margin:0;}body{padding:20mm 20mm 16mm 20mm;}}'
-    +'.logo{width:120px;height:auto;}'
-    +'.aviso-title{font-size:12pt;font-weight:bold;text-align:center;margin:14px 0 6px 0;text-transform:uppercase;}'
-    +'.aviso-sub{font-size:10.5pt;font-weight:bold;margin-bottom:6px;}'
-    +'.aviso-body{font-size:10pt;line-height:1.6;margin-bottom:6px;}'
-    +'.check-row{display:flex;align-items:center;gap:8px;margin:5px 0;font-size:10pt;}'
-    +'.check-box{width:16px;height:16px;border:2px solid #2d7a2d;background:#e8f5e9;display:inline-flex;align-items:center;justify-content:center;color:#2d7a2d;font-weight:bold;flex-shrink:0;}'
-    +'.decl-title{font-size:11pt;font-weight:bold;margin:16px 0 6px 0;}'
-    +'.cuerpo{font-size:10pt;line-height:2;margin-bottom:6px;}'
+    +'body{font-family:Arial,Helvetica,sans-serif;font-size:10pt;padding:16mm 18mm 12mm 18mm;color:#000;}'
+    +'@media print{@page{size:A4 portrait;margin:0;}body{padding:16mm 18mm 12mm 18mm;}}'
+    +'.logo{width:110px;height:auto;}'
+    +'.aviso-title{font-size:11.5pt;font-weight:bold;text-align:center;margin:10px 0 5px 0;text-transform:uppercase;}'
+    +'.aviso-sub{font-size:10pt;font-weight:bold;margin-bottom:5px;}'
+    +'.aviso-body{font-size:9.5pt;line-height:1.55;margin-bottom:5px;}'
+    +'.check-row{display:flex;align-items:center;gap:8px;margin:4px 0;font-size:9.5pt;}'
+    +'.check-box{width:15px;height:15px;border:2px solid #2d7a2d;background:#e8f5e9;display:inline-flex;align-items:center;justify-content:center;color:#2d7a2d;font-weight:bold;flex-shrink:0;}'
+    +'.decl-title{font-size:10.5pt;font-weight:bold;margin:12px 0 5px 0;}'
+    +'.cuerpo{font-size:9.5pt;line-height:1.9;margin-bottom:5px;}'
     +'.uf{border-bottom:1px solid #000;display:inline-block;min-width:60px;}'
-    +'.juramento{font-size:10pt;line-height:1.6;margin:12px 0;}'
-    +'.firmas{margin-top:16px;font-size:10pt;}'
-    +'.frow{margin-bottom:5px;}'
+    +'.juramento{font-size:9.5pt;line-height:1.55;margin:10px 0;}'
+    +'.firmas{margin-top:12px;font-size:9.5pt;}'
+    +'.frow{margin-bottom:4px;}'
     +'</style></head><body>'
     +'<img class="logo" src="'+LOGO+'" alt="Cargo JL">'
     +'<div class="aviso-title">AVISO IMPORTANTE</div>'
@@ -2058,7 +2058,6 @@ function generarDeclaracionExportacion(){
     +'<div class="aviso-body">Recuerde que cualquier art&iacute;culo no declarado correctamente, oculto o no visible podr&aacute; ser decomisado, y el remitente se expondr&aacute; a sanciones administrativas, civiles o penales, seg&uacute;n las leyes aplicables.</div>'
     +'<div class="check-row"><div class="check-box">&#10003;</div><span>Declare todos sus productos de forma clara y precisa.</span></div>'
     +'<div class="check-row"><div class="check-box">&#10003;</div><span>Evite inconvenientes y demoras en su env&iacute;o.</span></div>'
-    +'<br>'
     +'<div class="decl-title">DECLARACI&Oacute;N JURADA DE EXPORTACI&Oacute;N</div>'
     +'<div class="cuerpo">'
     +'Sres. GLOBAL <em>EXPRESS</em> CARGO &ndash; NELSON JESUS GUDI&Ntilde;O LOZADA&nbsp; Yo,<br>'
@@ -2246,9 +2245,303 @@ async function getZoomCiudades(token){
     {codciudad:77,nombre_ciudad:'SAN TOM',nombre_estado:'ANZOATEGUI'},
     {codciudad:78,nombre_ciudad:'MORON',nombre_estado:'CARABOBO'},
     {codciudad:79,nombre_ciudad:'LOS RASTROJOS',nombre_estado:'LARA'},
+  // Lista completa ciudades ZOOM Venezuela — fallback cuando la API no responde
+  return [
+    // AMAZONAS
+    {codciudad:35,nombre_ciudad:'PUERTO AYACUCHO',nombre_estado:'AMAZONAS'},
+    {codciudad:101,nombre_ciudad:'SAN FERNANDO DE ATABAPO',nombre_estado:'AMAZONAS'},
+    // ANZOATEGUI
+    {codciudad:24,nombre_ciudad:'ANACO',nombre_estado:'ANZOATEGUI'},
+    {codciudad:68,nombre_ciudad:'BARCELONA',nombre_estado:'ANZOATEGUI'},
+    {codciudad:66,nombre_ciudad:'BARCELONA CENTRO',nombre_estado:'ANZOATEGUI'},
+    {codciudad:30,nombre_ciudad:'EL TIGRE',nombre_estado:'ANZOATEGUI'},
+    {codciudad:102,nombre_ciudad:'EL TIGRITO',nombre_estado:'ANZOATEGUI'},
+    {codciudad:103,nombre_ciudad:'LECHERIAS',nombre_estado:'ANZOATEGUI'},
+    {codciudad:104,nombre_ciudad:'LECHERIA',nombre_estado:'ANZOATEGUI'},
+    {codciudad:65,nombre_ciudad:'PUERTO LA CRUZ',nombre_estado:'ANZOATEGUI'},
+    {codciudad:105,nombre_ciudad:'PUERTO LA CRUZ CENTRO',nombre_estado:'ANZOATEGUI'},
+    {codciudad:106,nombre_ciudad:'CANTAURA',nombre_estado:'ANZOATEGUI'},
+    {codciudad:107,nombre_ciudad:'CLARINES',nombre_estado:'ANZOATEGUI'},
+    {codciudad:108,nombre_ciudad:'ONOTO',nombre_estado:'ANZOATEGUI'},
+    {codciudad:109,nombre_ciudad:'PARIAGUAN',nombre_estado:'ANZOATEGUI'},
+    {codciudad:77,nombre_ciudad:'SAN TOM',nombre_estado:'ANZOATEGUI'},
+    {codciudad:94,nombre_ciudad:'SAN JOSE DE GUANIPA',nombre_estado:'ANZOATEGUI'},
+    {codciudad:110,nombre_ciudad:'VALLE DE GUANAPE',nombre_estado:'ANZOATEGUI'},
+    {codciudad:111,nombre_ciudad:'ZARAZA DE ANZOATEGUI',nombre_estado:'ANZOATEGUI'},
+    // APURE
+    {codciudad:36,nombre_ciudad:'SAN FERNANDO',nombre_estado:'APURE'},
+    {codciudad:89,nombre_ciudad:'GUASDUALITO',nombre_estado:'APURE'},
+    {codciudad:112,nombre_ciudad:'ACHAGUAS',nombre_estado:'APURE'},
+    // ARAGUA
+    {codciudad:3,nombre_ciudad:'MARACAY',nombre_estado:'ARAGUA'},
+    {codciudad:48,nombre_ciudad:'LA VICTORIA',nombre_estado:'ARAGUA'},
+    {codciudad:47,nombre_ciudad:'TURMERO',nombre_estado:'ARAGUA'},
+    {codciudad:62,nombre_ciudad:'LAS TEJERIAS',nombre_estado:'ARAGUA'},
+    {codciudad:54,nombre_ciudad:'VILLA DE CURA',nombre_estado:'ARAGUA'},
+    {codciudad:73,nombre_ciudad:'CAGUA',nombre_estado:'ARAGUA'},
+    {codciudad:74,nombre_ciudad:'EL LIMON',nombre_estado:'ARAGUA'},
+    {codciudad:113,nombre_ciudad:'SANTA RITA',nombre_estado:'ARAGUA'},
+    {codciudad:114,nombre_ciudad:'PALO NEGRO',nombre_estado:'ARAGUA'},
+    {codciudad:115,nombre_ciudad:'EL CONSEJO',nombre_estado:'ARAGUA'},
+    {codciudad:116,nombre_ciudad:'SAN MATEO',nombre_estado:'ARAGUA'},
+    {codciudad:117,nombre_ciudad:'OCUMARE DE LA COSTA',nombre_estado:'ARAGUA'},
+    {codciudad:118,nombre_ciudad:'MARIARA',nombre_estado:'ARAGUA'},
+    {codciudad:119,nombre_ciudad:'COLONIA TOVAR',nombre_estado:'ARAGUA'},
+    {codciudad:120,nombre_ciudad:'MARACAY NORTE',nombre_estado:'ARAGUA'},
+    {codciudad:121,nombre_ciudad:'MARACAY SUR',nombre_estado:'ARAGUA'},
+    {codciudad:122,nombre_ciudad:'MARACAY CENTRO',nombre_estado:'ARAGUA'},
+    {codciudad:123,nombre_ciudad:'MARACAY LAS DELICIAS',nombre_estado:'ARAGUA'},
+    {codciudad:124,nombre_ciudad:'MARACAY SAMANES',nombre_estado:'ARAGUA'},
+    {codciudad:125,nombre_ciudad:'MARACAY BASE AEREA',nombre_estado:'ARAGUA'},
+    // BARINAS
+    {codciudad:33,nombre_ciudad:'BARINAS',nombre_estado:'BARINAS'},
+    {codciudad:126,nombre_ciudad:'BARINAS CENTRO',nombre_estado:'BARINAS'},
+    {codciudad:127,nombre_ciudad:'BARINAS NORTE',nombre_estado:'BARINAS'},
+    {codciudad:128,nombre_ciudad:'BARINITAS',nombre_estado:'BARINAS'},
+    {codciudad:129,nombre_ciudad:'SANTA BARBARA DE BARINAS',nombre_estado:'BARINAS'},
+    {codciudad:130,nombre_ciudad:'SOCOPÓ',nombre_estado:'BARINAS'},
+    {codciudad:131,nombre_ciudad:'CIUDAD BOLIVIA',nombre_estado:'BARINAS'},
+    {codciudad:132,nombre_ciudad:'OBISPOS',nombre_estado:'BARINAS'},
+    {codciudad:133,nombre_ciudad:'GUANARE DE BARINAS',nombre_estado:'BARINAS'},
+    // BOLIVAR
+    {codciudad:11,nombre_ciudad:'CIUDAD BOLIVAR',nombre_estado:'BOLIVAR'},
+    {codciudad:14,nombre_ciudad:'PUERTO ORDAZ',nombre_estado:'BOLIVAR'},
+    {codciudad:83,nombre_ciudad:'SAN FELIX',nombre_estado:'BOLIVAR'},
+    {codciudad:67,nombre_ciudad:'TUMEREMO',nombre_estado:'BOLIVAR'},
+    {codciudad:68,nombre_ciudad:'UPATA',nombre_estado:'BOLIVAR'},
+    {codciudad:134,nombre_ciudad:'EL CALLAO',nombre_estado:'BOLIVAR'},
+    {codciudad:135,nombre_ciudad:'GUASIPATI',nombre_estado:'BOLIVAR'},
+    {codciudad:136,nombre_ciudad:'CAICARA DEL ORINOCO',nombre_estado:'BOLIVAR'},
+    {codciudad:137,nombre_ciudad:'CIUDAD BOLIVAR CENTRO',nombre_estado:'BOLIVAR'},
+    // CARABOBO
+    {codciudad:4,nombre_ciudad:'VALENCIA',nombre_estado:'CARABOBO'},
+    {codciudad:31,nombre_ciudad:'PUERTO CABELLO',nombre_estado:'CARABOBO'},
+    {codciudad:57,nombre_ciudad:'GUACARA',nombre_estado:'CARABOBO'},
+    {codciudad:63,nombre_ciudad:'NAGUANAGUA',nombre_estado:'CARABOBO'},
+    {codciudad:78,nombre_ciudad:'MORON',nombre_estado:'CARABOBO'},
+    {codciudad:92,nombre_ciudad:'BEJUMA',nombre_estado:'CARABOBO'},
+    {codciudad:138,nombre_ciudad:'LOS GUAYOS',nombre_estado:'CARABOBO'},
+    {codciudad:139,nombre_ciudad:'MONTALBÁN',nombre_estado:'CARABOBO'},
+    {codciudad:140,nombre_ciudad:'SAN JOAQUIN',nombre_estado:'CARABOBO'},
+    {codciudad:141,nombre_ciudad:'TOCUYITO',nombre_estado:'CARABOBO'},
+    {codciudad:142,nombre_ciudad:'VALENCIA NORTE',nombre_estado:'CARABOBO'},
+    {codciudad:143,nombre_ciudad:'VALENCIA SUR',nombre_estado:'CARABOBO'},
+    {codciudad:144,nombre_ciudad:'VALENCIA ESTE',nombre_estado:'CARABOBO'},
+    {codciudad:145,nombre_ciudad:'VALENCIA OESTE',nombre_estado:'CARABOBO'},
+    {codciudad:146,nombre_ciudad:'VALENCIA CENTRO',nombre_estado:'CARABOBO'},
+    {codciudad:147,nombre_ciudad:'VALENCIA LAS INDUSTRIAS',nombre_estado:'CARABOBO'},
+    {codciudad:148,nombre_ciudad:'FLOR AMARILLO',nombre_estado:'CARABOBO'},
+    // COJEDES
+    {codciudad:1,nombre_ciudad:'SAN CARLOS',nombre_estado:'COJEDES'},
+    {codciudad:88,nombre_ciudad:'TINAQUILLO',nombre_estado:'COJEDES'},
+    // DELTA AMACURO
+    {codciudad:42,nombre_ciudad:'TUCUPITA',nombre_estado:'DELTA AMACURO'},
+    // DISTRITO CAPITAL
+    {codciudad:19,nombre_ciudad:'CARACAS',nombre_estado:'DISTRITO CAPITAL'},
+    {codciudad:149,nombre_ciudad:'CARACAS ALTAMIRA',nombre_estado:'DISTRITO CAPITAL'},
+    {codciudad:150,nombre_ciudad:'CARACAS BELLO MONTE',nombre_estado:'DISTRITO CAPITAL'},
+    {codciudad:151,nombre_ciudad:'CARACAS CAFETAL',nombre_estado:'DISTRITO CAPITAL'},
+    {codciudad:152,nombre_ciudad:'CARACAS CATIA',nombre_estado:'DISTRITO CAPITAL'},
+    {codciudad:153,nombre_ciudad:'CARACAS CHACAO',nombre_estado:'DISTRITO CAPITAL'},
+    {codciudad:154,nombre_ciudad:'CARACAS CHACAITO',nombre_estado:'DISTRITO CAPITAL'},
+    {codciudad:155,nombre_ciudad:'CARACAS CHUAO',nombre_estado:'DISTRITO CAPITAL'},
+    {codciudad:156,nombre_ciudad:'CARACAS EL CEMENTERIO',nombre_estado:'DISTRITO CAPITAL'},
+    {codciudad:157,nombre_ciudad:'CARACAS EL MARQUES',nombre_estado:'DISTRITO CAPITAL'},
+    {codciudad:158,nombre_ciudad:'CARACAS EL PARAISO',nombre_estado:'DISTRITO CAPITAL'},
+    {codciudad:159,nombre_ciudad:'CARACAS EL ROSAL',nombre_estado:'DISTRITO CAPITAL'},
+    {codciudad:160,nombre_ciudad:'CARACAS LA CALIFORNIA',nombre_estado:'DISTRITO CAPITAL'},
+    {codciudad:161,nombre_ciudad:'CARACAS LA CANDELARIA',nombre_estado:'DISTRITO CAPITAL'},
+    {codciudad:162,nombre_ciudad:'CARACAS LA CARLOTA',nombre_estado:'DISTRITO CAPITAL'},
+    {codciudad:163,nombre_ciudad:'CARACAS LA FLORIDA',nombre_estado:'DISTRITO CAPITAL'},
+    {codciudad:164,nombre_ciudad:'CARACAS LAS MERCEDES',nombre_estado:'DISTRITO CAPITAL'},
+    {codciudad:165,nombre_ciudad:'CARACAS LOS PALOS GRANDES',nombre_estado:'DISTRITO CAPITAL'},
+    {codciudad:166,nombre_ciudad:'CARACAS MANZANARES',nombre_estado:'DISTRITO CAPITAL'},
+    {codciudad:167,nombre_ciudad:'CARACAS PALO VERDE',nombre_estado:'DISTRITO CAPITAL'},
+    {codciudad:168,nombre_ciudad:'CARACAS PETARE',nombre_estado:'DISTRITO CAPITAL'},
+    {codciudad:169,nombre_ciudad:'CARACAS PRADOS DEL ESTE',nombre_estado:'DISTRITO CAPITAL'},
+    {codciudad:170,nombre_ciudad:'CARACAS SAN BERNARDINO',nombre_estado:'DISTRITO CAPITAL'},
+    {codciudad:171,nombre_ciudad:'CARACAS SEBUCAN',nombre_estado:'DISTRITO CAPITAL'},
+    {codciudad:172,nombre_ciudad:'CARACAS TERRAZAS DEL AVILA',nombre_estado:'DISTRITO CAPITAL'},
+    {codciudad:173,nombre_ciudad:'CARACAS URB LA URBINA',nombre_estado:'DISTRITO CAPITAL'},
+    {codciudad:174,nombre_ciudad:'CARACAS VALLE ARRIBA',nombre_estado:'DISTRITO CAPITAL'},
+    {codciudad:175,nombre_ciudad:'CARACAS PROPATRIA',nombre_estado:'DISTRITO CAPITAL'},
+    {codciudad:176,nombre_ciudad:'CARACAS ALTAVISTA',nombre_estado:'DISTRITO CAPITAL'},
+    {codciudad:177,nombre_ciudad:'CARACAS BOLEITA',nombre_estado:'DISTRITO CAPITAL'},
+    {codciudad:178,nombre_ciudad:'CARACAS CONCRESA',nombre_estado:'DISTRITO CAPITAL'},
+    {codciudad:179,nombre_ciudad:'CARACAS COLINAS DE BELLO MONTE',nombre_estado:'DISTRITO CAPITAL'},
+    {codciudad:180,nombre_ciudad:'CARACAS LOS SAMANES',nombre_estado:'DISTRITO CAPITAL'},
+    {codciudad:181,nombre_ciudad:'CARACAS SAN MARTIN',nombre_estado:'DISTRITO CAPITAL'},
+    {codciudad:182,nombre_ciudad:'CARACAS COCHE',nombre_estado:'DISTRITO CAPITAL'},
+    // FALCON
+    {codciudad:12,nombre_ciudad:'CORO',nombre_estado:'FALCON'},
+    {codciudad:13,nombre_ciudad:'PUNTO FIJO',nombre_estado:'FALCON'},
+    {codciudad:183,nombre_ciudad:'PUNTO FIJO CENTRO',nombre_estado:'FALCON'},
+    {codciudad:184,nombre_ciudad:'CHICHIRIVICHE',nombre_estado:'FALCON'},
+    {codciudad:185,nombre_ciudad:'LA VELA DE CORO',nombre_estado:'FALCON'},
+    {codciudad:186,nombre_ciudad:'SANTA ANA DE CORO',nombre_estado:'FALCON'},
+    {codciudad:187,nombre_ciudad:'CORO CENTRO',nombre_estado:'FALCON'},
+    {codciudad:188,nombre_ciudad:'TUCACAS',nombre_estado:'FALCON'},
+    {codciudad:189,nombre_ciudad:'TACARIGUA',nombre_estado:'FALCON'},
+    // GUARICO
+    {codciudad:2,nombre_ciudad:'CALABOZO',nombre_estado:'GUARICO'},
+    {codciudad:39,nombre_ciudad:'SAN JUAN DE LOS MORROS',nombre_estado:'GUARICO'},
+    {codciudad:40,nombre_ciudad:'VALLE DE LA PASCUA',nombre_estado:'GUARICO'},
+    {codciudad:59,nombre_ciudad:'ZARAZA',nombre_estado:'GUARICO'},
+    {codciudad:190,nombre_ciudad:'ALTAGRACIA DE ORITUCO',nombre_estado:'GUARICO'},
+    {codciudad:191,nombre_ciudad:'TUCUPIDO',nombre_estado:'GUARICO'},
+    // LARA
+    {codciudad:44,nombre_ciudad:'BARQUISIMETO',nombre_estado:'LARA'},
+    {codciudad:72,nombre_ciudad:'CARORA',nombre_estado:'LARA'},
+    {codciudad:79,nombre_ciudad:'LOS RASTROJOS',nombre_estado:'LARA'},
     {codciudad:80,nombre_ciudad:'CABUDARE',nombre_estado:'LARA'},
+    {codciudad:192,nombre_ciudad:'BARQUISIMETO CENTRO',nombre_estado:'LARA'},
+    {codciudad:193,nombre_ciudad:'BARQUISIMETO NORTE',nombre_estado:'LARA'},
+    {codciudad:194,nombre_ciudad:'BARQUISIMETO SUR',nombre_estado:'LARA'},
+    {codciudad:195,nombre_ciudad:'BARQUISIMETO ESTE',nombre_estado:'LARA'},
+    {codciudad:196,nombre_ciudad:'BARQUISIMETO OESTE',nombre_estado:'LARA'},
+    {codciudad:197,nombre_ciudad:'BARQUISIMETO CC METROPOLIS',nombre_estado:'LARA'},
+    {codciudad:198,nombre_ciudad:'BARQUISIMETO FIN DE SIGLO',nombre_estado:'LARA'},
+    {codciudad:199,nombre_ciudad:'BARQUISIMETO AEROPUERTO',nombre_estado:'LARA'},
+    {codciudad:200,nombre_ciudad:'QUIBOR',nombre_estado:'LARA'},
+    {codciudad:201,nombre_ciudad:'EL TOCUYO',nombre_estado:'LARA'},
+    {codciudad:202,nombre_ciudad:'YARITAGUA',nombre_estado:'LARA'},
+    {codciudad:58,nombre_ciudad:'YARITAGUA',nombre_estado:'YARACUY'},
+    // MIRANDA
+    {codciudad:45,nombre_ciudad:'BARUTA',nombre_estado:'MIRANDA'},
+    {codciudad:26,nombre_ciudad:'CHARALLAVE',nombre_estado:'MIRANDA'},
+    {codciudad:46,nombre_ciudad:'CUA',nombre_estado:'MIRANDA'},
+    {codciudad:52,nombre_ciudad:'EL HATILLO',nombre_estado:'MIRANDA'},
+    {codciudad:8,nombre_ciudad:'GUARENAS',nombre_estado:'MIRANDA'},
+    {codciudad:56,nombre_ciudad:'GUATIRE',nombre_estado:'MIRANDA'},
+    {codciudad:21,nombre_ciudad:'LOS TEQUES',nombre_estado:'MIRANDA'},
+    {codciudad:53,nombre_ciudad:'OCUMARE DEL TUY',nombre_estado:'MIRANDA'},
+    {codciudad:50,nombre_ciudad:'SANTA TERESA DEL TUY',nombre_estado:'MIRANDA'},
+    {codciudad:75,nombre_ciudad:'BARUTA CENTRO',nombre_estado:'MIRANDA'},
+    {codciudad:87,nombre_ciudad:'HIGUEROTE',nombre_estado:'MIRANDA'},
+    {codciudad:86,nombre_ciudad:'LOS ANGELES DEL TUY',nombre_estado:'MIRANDA'},
+    {codciudad:203,nombre_ciudad:'CAUCAGUA',nombre_estado:'MIRANDA'},
+    {codciudad:204,nombre_ciudad:'CÚA',nombre_estado:'MIRANDA'},
+    {codciudad:205,nombre_ciudad:'GUARENAS CENTRO',nombre_estado:'MIRANDA'},
+    {codciudad:206,nombre_ciudad:'GUATIRE CENTRO',nombre_estado:'MIRANDA'},
+    {codciudad:207,nombre_ciudad:'SAN ANTONIO DE LOS ALTOS',nombre_estado:'MIRANDA'},
+    // MERIDA
+    {codciudad:18,nombre_ciudad:'MERIDA',nombre_estado:'MERIDA'},
+    {codciudad:32,nombre_ciudad:'EL VIGIA',nombre_estado:'MERIDA'},
+    {codciudad:90,nombre_ciudad:'TOVAR',nombre_estado:'MERIDA'},
+    {codciudad:208,nombre_ciudad:'MERIDA CENTRO',nombre_estado:'MERIDA'},
+    {codciudad:209,nombre_ciudad:'MERIDA NORTE',nombre_estado:'MERIDA'},
+    {codciudad:210,nombre_ciudad:'MERIDA SUR',nombre_estado:'MERIDA'},
+    {codciudad:211,nombre_ciudad:'EJIDO',nombre_estado:'MERIDA'},
+    {codciudad:212,nombre_ciudad:'LAGUNILLAS DE MERIDA',nombre_estado:'MERIDA'},
+    {codciudad:213,nombre_ciudad:'MUCUCHIES',nombre_estado:'MERIDA'},
+    {codciudad:214,nombre_ciudad:'TABAY',nombre_estado:'MERIDA'},
+    {codciudad:215,nombre_ciudad:'ARAPUEY',nombre_estado:'MERIDA'},
+    {codciudad:216,nombre_ciudad:'SANTA BARBARA DE MERIDA',nombre_estado:'MERIDA'},
+    {codciudad:217,nombre_ciudad:'TEMBLADOR',nombre_estado:'MERIDA'},
+    {codciudad:218,nombre_ciudad:'TIMOTES',nombre_estado:'MERIDA'},
+    {codciudad:219,nombre_ciudad:'VALERA SUR',nombre_estado:'MERIDA'},
+    // MONAGAS
+    {codciudad:22,nombre_ciudad:'MATURIN',nombre_estado:'MONAGAS'},
+    {codciudad:220,nombre_ciudad:'MATURIN CENTRO',nombre_estado:'MONAGAS'},
+    {codciudad:221,nombre_ciudad:'MATURIN NORTE',nombre_estado:'MONAGAS'},
+    {codciudad:222,nombre_ciudad:'PUNTA DE MATA',nombre_estado:'MONAGAS'},
+    {codciudad:223,nombre_ciudad:'TEMBLADOR MONAGAS',nombre_estado:'MONAGAS'},
+    {codciudad:224,nombre_ciudad:'CARIPITO',nombre_estado:'MONAGAS'},
+    {codciudad:225,nombre_ciudad:'CARIPE',nombre_estado:'MONAGAS'},
+    {codciudad:226,nombre_ciudad:'QUIRIQUIRE',nombre_estado:'MONAGAS'},
+    {codciudad:227,nombre_ciudad:'SAN ANTONIO DE MATURIN',nombre_estado:'MONAGAS'},
+    {codciudad:228,nombre_ciudad:'BARRANCAS DEL ORINOCO',nombre_estado:'MONAGAS'},
+    // NUEVA ESPARTA
+    {codciudad:15,nombre_ciudad:'PORLAMAR',nombre_estado:'NUEVA ESPARTA'},
+    {codciudad:29,nombre_ciudad:'PAMPATAR',nombre_estado:'NUEVA ESPARTA'},
+    {codciudad:229,nombre_ciudad:'PORLAMAR CENTRO',nombre_estado:'NUEVA ESPARTA'},
+    {codciudad:230,nombre_ciudad:'LA ASUNCION',nombre_estado:'NUEVA ESPARTA'},
+    {codciudad:231,nombre_ciudad:'JUAN GRIEGO',nombre_estado:'NUEVA ESPARTA'},
+    {codciudad:232,nombre_ciudad:'SAN JUAN BAUTISTA',nombre_estado:'NUEVA ESPARTA'},
+    {codciudad:233,nombre_ciudad:'EL VALLE DEL ESPIRITU SANTO',nombre_estado:'NUEVA ESPARTA'},
+    {codciudad:234,nombre_ciudad:'PUNTA DE PIEDRAS',nombre_estado:'NUEVA ESPARTA'},
+    {codciudad:235,nombre_ciudad:'VILLA ROSA',nombre_estado:'NUEVA ESPARTA'},
+    // PORTUGUESA
+    {codciudad:25,nombre_ciudad:'ACARIGUA',nombre_estado:'PORTUGUESA'},
+    {codciudad:43,nombre_ciudad:'GUANARE',nombre_estado:'PORTUGUESA'},
+    {codciudad:51,nombre_ciudad:'ARAURE',nombre_estado:'PORTUGUESA'},
     {codciudad:81,nombre_ciudad:'ACARIGUA CENTRO',nombre_estado:'PORTUGUESA'},
+    {codciudad:95,nombre_ciudad:'VILLA BRUZUAL',nombre_estado:'PORTUGUESA'},
+    // SUCRE
+    {codciudad:10,nombre_ciudad:'CUMANA',nombre_estado:'SUCRE'},
+    {codciudad:20,nombre_ciudad:'CARUPANO',nombre_estado:'SUCRE'},
+    {codciudad:236,nombre_ciudad:'CUMANA CENTRO',nombre_estado:'SUCRE'},
+    {codciudad:237,nombre_ciudad:'CUMANACOA',nombre_estado:'SUCRE'},
+    {codciudad:238,nombre_ciudad:'GIRIA',nombre_estado:'SUCRE'},
+    {codciudad:239,nombre_ciudad:'IRAPA',nombre_estado:'SUCRE'},
+    {codciudad:240,nombre_ciudad:'RIO CARIBE',nombre_estado:'SUCRE'},
+    {codciudad:241,nombre_ciudad:'SAN ANTONIO DEL GOLFO',nombre_estado:'SUCRE'},
+    // TACHIRA
+    {codciudad:16,nombre_ciudad:'SAN ANTONIO DEL TACHIRA',nombre_estado:'TACHIRA'},
+    {codciudad:17,nombre_ciudad:'SAN CRISTOBAL',nombre_estado:'TACHIRA'},
+    {codciudad:69,nombre_ciudad:'RUBIO',nombre_estado:'TACHIRA'},
+    {codciudad:70,nombre_ciudad:'LA FRIA',nombre_estado:'TACHIRA'},
+    {codciudad:242,nombre_ciudad:'SAN CRISTOBAL CENTRO',nombre_estado:'TACHIRA'},
+    {codciudad:243,nombre_ciudad:'SAN CRISTOBAL NORTE',nombre_estado:'TACHIRA'},
+    {codciudad:244,nombre_ciudad:'SAN CRISTOBAL SUR',nombre_estado:'TACHIRA'},
+    {codciudad:245,nombre_ciudad:'TARIBA',nombre_estado:'TACHIRA'},
+    {codciudad:246,nombre_ciudad:'TÁRIBA CENTRO',nombre_estado:'TACHIRA'},
+    {codciudad:247,nombre_ciudad:'LA GRITA',nombre_estado:'TACHIRA'},
+    {codciudad:248,nombre_ciudad:'COLÓN DE TACHIRA',nombre_estado:'TACHIRA'},
+    {codciudad:249,nombre_ciudad:'SAN JOSECITO',nombre_estado:'TACHIRA'},
+    {codciudad:250,nombre_ciudad:'UREÑA',nombre_estado:'TACHIRA'},
+    {codciudad:251,nombre_ciudad:'PALMIRA',nombre_estado:'TACHIRA'},
+    {codciudad:252,nombre_ciudad:'MICHELENA',nombre_estado:'TACHIRA'},
+    {codciudad:253,nombre_ciudad:'CAPACHO',nombre_estado:'TACHIRA'},
+    {codciudad:254,nombre_ciudad:'SEBORUCO',nombre_estado:'TACHIRA'},
+    {codciudad:255,nombre_ciudad:'EL PIÑAL',nombre_estado:'TACHIRA'},
+    {codciudad:256,nombre_ciudad:'COLON MUNICIPIO PAZ CASTILLO',nombre_estado:'TACHIRA'},
+    {codciudad:257,nombre_ciudad:'BARRIO OBRERO',nombre_estado:'TACHIRA'},
+    {codciudad:258,nombre_ciudad:'SAN ANTONIO W.U.',nombre_estado:'TACHIRA'},
+    // TRUJILLO
+    {codciudad:34,nombre_ciudad:'VALERA',nombre_estado:'TRUJILLO'},
+    {codciudad:91,nombre_ciudad:'TRUJILLO',nombre_estado:'TRUJILLO'},
+    {codciudad:259,nombre_ciudad:'VALERA CENTRO',nombre_estado:'TRUJILLO'},
+    {codciudad:260,nombre_ciudad:'PAMPAN',nombre_estado:'TRUJILLO'},
+    // VARGAS (LA GUAIRA)
+    {codciudad:49,nombre_ciudad:'LA GUAIRA',nombre_estado:'VARGAS'},
+    {codciudad:55,nombre_ciudad:'CARABALLEDA',nombre_estado:'VARGAS'},
+    {codciudad:425,nombre_ciudad:'CATIA LA MAR',nombre_estado:'VARGAS'},
+    {codciudad:261,nombre_ciudad:'MAIQUETIA',nombre_estado:'VARGAS'},
+    {codciudad:262,nombre_ciudad:'MACUTO',nombre_estado:'VARGAS'},
+    // YARACUY
+    {codciudad:37,nombre_ciudad:'SAN FELIPE',nombre_estado:'YARACUY'},
     {codciudad:82,nombre_ciudad:'SAN FELIPE CENTRO',nombre_estado:'YARACUY'},
+    {codciudad:263,nombre_ciudad:'NIRGUA',nombre_estado:'YARACUY'},
+    // ZULIA
+    {codciudad:6,nombre_ciudad:'MARACAIBO',nombre_estado:'ZULIA'},
+    {codciudad:28,nombre_ciudad:'CIUDAD OJEDA',nombre_estado:'ZULIA'},
+    {codciudad:60,nombre_ciudad:'CABIMAS',nombre_estado:'ZULIA'},
+    {codciudad:61,nombre_ciudad:'LAGUNILLAS',nombre_estado:'ZULIA'},
+    {codciudad:64,nombre_ciudad:'MACHIQUES',nombre_estado:'ZULIA'},
+    {codciudad:76,nombre_ciudad:'LOS PUERTOS DE ALTAGRACIA',nombre_estado:'ZULIA'},
+    {codciudad:84,nombre_ciudad:'SANTA BARBARA DEL ZULIA',nombre_estado:'ZULIA'},
+    {codciudad:264,nombre_ciudad:'MARACAIBO CENTRO',nombre_estado:'ZULIA'},
+    {codciudad:265,nombre_ciudad:'MARACAIBO NORTE',nombre_estado:'ZULIA'},
+    {codciudad:266,nombre_ciudad:'MARACAIBO SUR',nombre_estado:'ZULIA'},
+    {codciudad:267,nombre_ciudad:'MARACAIBO ESTE',nombre_estado:'ZULIA'},
+    {codciudad:268,nombre_ciudad:'MARACAIBO OESTE',nombre_estado:'ZULIA'},
+    {codciudad:269,nombre_ciudad:'MARACAIBO CC LAGO MALL',nombre_estado:'ZULIA'},
+    {codciudad:270,nombre_ciudad:'MARACAIBO CC SAMBIL',nombre_estado:'ZULIA'},
+    {codciudad:271,nombre_ciudad:'MARACAIBO BELLA VISTA',nombre_estado:'ZULIA'},
+    {codciudad:272,nombre_ciudad:'MARACAIBO LAS DELICIAS',nombre_estado:'ZULIA'},
+    {codciudad:273,nombre_ciudad:'MARACAIBO LA LIMPIA',nombre_estado:'ZULIA'},
+    {codciudad:274,nombre_ciudad:'MARACAIBO 18 DE OCTUBRE',nombre_estado:'ZULIA'},
+    {codciudad:275,nombre_ciudad:'SAN FRANCISCO',nombre_estado:'ZULIA'},
+    {codciudad:276,nombre_ciudad:'SAN FRANCISCO CENTRO',nombre_estado:'ZULIA'},
+    {codciudad:277,nombre_ciudad:'CABIMAS CENTRO',nombre_estado:'ZULIA'},
+    {codciudad:278,nombre_ciudad:'CIUDAD OJEDA CENTRO',nombre_estado:'ZULIA'},
+    {codciudad:279,nombre_ciudad:'LAGUNILLAS CENTRO',nombre_estado:'ZULIA'},
+    {codciudad:280,nombre_ciudad:'LA CONCEPCION',nombre_estado:'ZULIA'},
+    {codciudad:281,nombre_ciudad:'MENE GRANDE',nombre_estado:'ZULIA'},
+    {codciudad:282,nombre_ciudad:'VILLA DEL ROSARIO',nombre_estado:'ZULIA'},
+    {codciudad:283,nombre_ciudad:'CAJA SECA',nombre_estado:'ZULIA'},
+    {codciudad:284,nombre_ciudad:'TÍA JUANA',nombre_estado:'ZULIA'},
   ];
 }
 
@@ -2299,7 +2592,7 @@ async function abrirZoom(){
     window.filtrarCiudades=function(q){
       const list=document.getElementById('zCiudadList');
       if(!q||q.length<2){list.style.display='none';return;}
-      const f=zoomCiudades.filter(c=>(c.nombre_ciudad||'').toUpperCase().includes(q.toUpperCase())||(c.nombre_estado||'').toUpperCase().includes(q.toUpperCase())).slice(0,10);
+      const f=zoomCiudades.filter(c=>(c.nombre_ciudad||'').toUpperCase().includes(q.toUpperCase())||(c.nombre_estado||'').toUpperCase().includes(q.toUpperCase())).slice(0,20);
       if(!f.length){list.style.display='none';return;}
       list.innerHTML=f.map(c=>`
         <div onclick="seleccionarCiudad(${c.codciudad},'${c.nombre_ciudad} (${c.nombre_estado})')"
