@@ -284,7 +284,7 @@ tbody tr:hover{background:#FAFCFF;}
 .cs-btn:hover{border-color:var(--blue);color:var(--blue);}
 .label-wrap{width:380px;margin:0 auto;}
 
-.et{font-family:'Plus Jakarta Sans',sans-serif;background:#fff;border:2px solid #1a1a1a;width:380px;color:#111;line-height:1.4;}
+.et{font-family:'Plus Jakarta Sans',sans-serif;background:#fff;border:2px solid #1a1a1a;width:380px;min-height:540px;color:#111;line-height:1.4;display:flex;flex-direction:column;}
 .et-head{border-bottom:2px solid #1a1a1a;padding:9px 12px;display:flex;align-items:center;justify-content:space-between;gap:10px;}
 .et-logo-name{font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:800;color:#111;letter-spacing:.4px;}
 .et-logo-name em{color:var(--blue);font-style:normal;}
@@ -318,7 +318,7 @@ tbody tr:hover{background:#FAFCFF;}
 .et-obs{border-bottom:1px solid #ccc;padding:5px 10px;display:flex;align-items:baseline;gap:6px;}
 .et-obs small{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#555;white-space:nowrap;}
 .et-obs span{font-size:12px;font-weight:500;color:#111;}
-.et-bottom{padding:10px 12px;display:flex;align-items:center;gap:14px;}
+.et-bottom{padding:10px 12px;display:flex;align-items:center;gap:14px;flex:1;}
 .et-bottom-text{flex:1;text-align:center;}
 .et-bottom-brand{font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:600;color:#444;letter-spacing:.5px;margin-bottom:3px;}
 .et-bottom-num{font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:800;color:#111;letter-spacing:1px;line-height:1;}
@@ -1615,7 +1615,7 @@ function getLabelHTML(g, cajaNum, totalCajas){
   const cajaInfo = totalCajas>1?`Caja ${cajaNum} de ${totalCajas}`:'';
   const qrData=encodeURIComponent(`CSJL|${g.col}|${g.cjl}|${g.rN}|${g.rC}|${g.dN}|${g.dC}|${g.fecha}${totalCajas>1?'|Caja '+cajaNum+'/'+totalCajas:''}`);
   const qrUrl=`https://api.qrserver.com/v1/create-qr-code/?size=88x88&ecc=H&bgcolor=ffffff&color=000000&data=${qrData}`;
-  return `<div class="et" style="page-break-after:always;">
+  return `<div class="et" style="page-break-after:always;min-height:540px;display:flex;flex-direction:column;">
     <div class="et-head">
       <div><div class="et-logo-name">CARGO SERVICES <em>JL</em></div><div class="et-logo-sub">Guía de Transporte Aéreo</div></div>
       <div style="display:flex;flex-direction:column;gap:3px;align-items:flex-end;">
@@ -1812,18 +1812,30 @@ function closeAllMenus(){
   document.querySelectorAll('[id^="menu_"]').forEach(m=>m.style.display='none');
 }
 
-function crearZoomDesdeTabla(col){
+function crearZoomDesdeTabla(col, cajaIdx=0){
   const g = guias.find(x=>x.col===col);
   if(!g) return;
   ag = g;
+  currentBoxIdx = cajaIdx;
   abrirZoom();
 }
 
-async function descargarPDFZoomDirecto(col){
+async function descargarPDFZoomDirecto(col, cajaIdx){
   const g = guias.find(x=>x.col===col);
-  if(!g||!g.guiaZoom) return toast('Sin número ZOOM',1);
+  if(!g) return toast('Sin número ZOOM',1);
   ag = g;
-  zoomGuiaNumero = g.guiaZoom;
+  const totalCajas = parseInt(g.bul)||1;
+  if(cajaIdx !== undefined && totalCajas > 1){
+    // Caja específica en guía multicaja
+    const guiaNum = g.cajas && g.cajas[cajaIdx] && g.cajas[cajaIdx].guiaZoom
+      ? g.cajas[cajaIdx].guiaZoom : null;
+    if(!guiaNum) return toast('Sin número ZOOM para Caja '+(cajaIdx+1),1);
+    currentBoxIdx = cajaIdx;
+    zoomGuiaNumero = guiaNum;
+  } else {
+    if(!g.guiaZoom) return toast('Sin número ZOOM',1);
+    zoomGuiaNumero = g.guiaZoom;
+  }
   await descargarPDFZoom();
 }
 
@@ -3022,7 +3034,24 @@ function renderReg(){
           <div onclick="abrirEstatus('${g.col}');closeAllMenus()" style="padding:10px 16px;cursor:pointer;font-size:13px;display:flex;align-items:center;gap:8px;" onmouseover="this.style.background='var(--blue3)'" onmouseout="this.style.background='#fff'">📦 Cambiar estado</div>
           <div onclick="abrirEditar('${g.col}');closeAllMenus()" style="padding:10px 16px;cursor:pointer;font-size:13px;display:flex;align-items:center;gap:8px;" onmouseover="this.style.background='var(--blue3)'" onmouseout="this.style.background='#fff'">✏️ Editar guía</div>
           <hr style="border:none;border-top:1px solid var(--border);margin:2px 0;">
-          ${g.guiaZoom ? `<div onclick="descargarPDFZoomDirecto('${g.col}');closeAllMenus()" style="padding:10px 16px;cursor:pointer;font-size:13px;display:flex;align-items:center;gap:8px;" onmouseover="this.style.background='#E3F2FD'" onmouseout="this.style.background='#fff'">✈️ Descargar Guía ZOOM PDF</div>` : `<div onclick="crearZoomDesdeTabla('${g.col}');closeAllMenus()" style="padding:10px 16px;cursor:pointer;font-size:13px;display:flex;align-items:center;gap:8px;" onmouseover="this.style.background='#E3F2FD'" onmouseout="this.style.background='#fff'">✈️ Crear Guía ZOOM</div>`}
+          ${(()=>{
+            const totalCajas = parseInt(g.bul)||1;
+            if(totalCajas > 1 && g.cajas){
+              // Múltiples cajas: mostrar opción por cada caja que tenga guía ZOOM
+              const opciones = g.cajas.map((c,i)=>{
+                if(c && c.guiaZoom){
+                  return `<div onclick="descargarPDFZoomDirecto('${g.col}',${i});closeAllMenus()" style="padding:10px 16px;cursor:pointer;font-size:13px;display:flex;align-items:center;gap:8px;" onmouseover="this.style.background='#E3F2FD'" onmouseout="this.style.background='#fff'">✈️ PDF ZOOM Caja ${i+1} (${c.guiaZoom})</div>`;
+                } else {
+                  return `<div onclick="crearZoomDesdeTabla('${g.col}',${i});closeAllMenus()" style="padding:10px 16px;cursor:pointer;font-size:13px;display:flex;align-items:center;gap:8px;" onmouseover="this.style.background='#E3F2FD'" onmouseout="this.style.background='#fff'">✈️ Crear ZOOM Caja ${i+1}</div>`;
+                }
+              }).join('');
+              return opciones || `<div onclick="crearZoomDesdeTabla('${g.col}',0);closeAllMenus()" style="padding:10px 16px;cursor:pointer;font-size:13px;display:flex;align-items:center;gap:8px;" onmouseover="this.style.background='#E3F2FD'" onmouseout="this.style.background='#fff'">✈️ Crear Guía ZOOM</div>`;
+            }
+            // Caja única
+            return g.guiaZoom
+              ? `<div onclick="descargarPDFZoomDirecto('${g.col}');closeAllMenus()" style="padding:10px 16px;cursor:pointer;font-size:13px;display:flex;align-items:center;gap:8px;" onmouseover="this.style.background='#E3F2FD'" onmouseout="this.style.background='#fff'">✈️ Descargar Guía ZOOM PDF</div>`
+              : `<div onclick="crearZoomDesdeTabla('${g.col}');closeAllMenus()" style="padding:10px 16px;cursor:pointer;font-size:13px;display:flex;align-items:center;gap:8px;" onmouseover="this.style.background='#E3F2FD'" onmouseout="this.style.background='#fff'">✈️ Crear Guía ZOOM</div>`;
+          })()}
           <div onclick="abrirDocumentos('${g.col}');closeAllMenus()" style="padding:10px 16px;cursor:pointer;font-size:13px;display:flex;align-items:center;gap:8px;" onmouseover="this.style.background='var(--green2)'" onmouseout="this.style.background='#fff'">📄 Documentos</div>
           <hr style="border:none;border-top:1px solid var(--border);margin:2px 0;">
           <div onclick="eliminarGuiaDirecto('${g.col}');closeAllMenus()" style="padding:10px 16px;cursor:pointer;font-size:13px;color:var(--red);display:flex;align-items:center;gap:8px;" onmouseover="this.style.background='var(--red2)'" onmouseout="this.style.background='#fff'">🗑️ Eliminar guía</div>
