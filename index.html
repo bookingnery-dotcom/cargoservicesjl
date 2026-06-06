@@ -2806,7 +2806,16 @@ async function imprimirEtiquetaZoom(){
 }
 
 async function descargarPDFZoom(){
-  const guiaNum = ag?.guiaZoom || zoomGuiaNumero;
+  // Determinar el número ZOOM correcto según la caja activa
+  let guiaNum = zoomGuiaNumero;
+  if(!guiaNum && ag){
+    const totalCajas = parseInt(ag.bul)||1;
+    if(totalCajas > 1 && ag.cajas && ag.cajas[currentBoxIdx]){
+      guiaNum = ag.cajas[currentBoxIdx].guiaZoom || null;
+    } else {
+      guiaNum = ag.guiaZoom || null;
+    }
+  }
   if(!guiaNum) return toast('Esta guía no tiene número ZOOM registrado',1);
   toast('🔄 Descargando etiqueta ZOOM...');
   try{
