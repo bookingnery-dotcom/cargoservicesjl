@@ -1460,6 +1460,18 @@ function renderBox(g, idx){
     document.getElementById('editCajaAncho').value = c.ancho||'';
   }
 
+  // Mostrar botón ZOOM según la caja actual
+  const btnDL = document.getElementById('btnDownloadZoom');
+  const guiaZoomCaja = total > 1
+    ? (g.cajas && g.cajas[idx] && g.cajas[idx].guiaZoom ? g.cajas[idx].guiaZoom : null)
+    : (g.guiaZoom || null);
+  if(guiaZoomCaja){
+    btnDL.style.display='inline-flex';
+    btnDL.textContent=`📥 PDF ZOOM (${guiaZoomCaja})`;
+  } else {
+    btnDL.style.display='none';
+  }
+
   // Obtener datos de la caja actual para la etiqueta
   const cajaData = (g.cajas && g.cajas[idx]) ? g.cajas[idx] : g;
   buildLabel({...g, peso:cajaData.peso||g.peso, dims:cajaData.dims||g.dims}, 'qrBox', ()=>{}, idx+1, total);
@@ -2591,8 +2603,27 @@ async function abrirZoom(){
     document.getElementById('zCiudad').value=ag.dC||'';
     document.getElementById('zSucursal').innerHTML='<option value="">Selecciona ciudad primero</option>';
 
-    document.getElementById('zoomStatus').style.display='none';
-    document.getElementById('zoomDatos').style.display='block';
+    // Detectar si la caja actual ya tiene guía ZOOM
+    const totalCajas = parseInt(ag.bul)||1;
+    let guiaYaExiste = null;
+    if(totalCajas > 1){
+      guiaYaExiste = ag.cajas && ag.cajas[currentBoxIdx] && ag.cajas[currentBoxIdx].guiaZoom
+        ? ag.cajas[currentBoxIdx].guiaZoom : null;
+    } else {
+      guiaYaExiste = ag.guiaZoom || null;
+    }
+
+    if(guiaYaExiste){
+      // Ya tiene guía — mostrar resultado directamente
+      zoomGuiaNumero = guiaYaExiste;
+      document.getElementById('zoomStatus').style.display='none';
+      document.getElementById('zoomDatos').style.display='none';
+      document.getElementById('zoomResultado').style.display='block';
+      document.getElementById('zoomNumero').textContent = guiaYaExiste;
+    } else {
+      document.getElementById('zoomStatus').style.display='none';
+      document.getElementById('zoomDatos').style.display='block';
+    }
 
   }catch(e){
     // Limpiar token cacheado si hubo error
@@ -2699,11 +2730,23 @@ async function enviarAZoom(){
                      resp.numguia || resp.guia || null;
 
     if(resp.codrespuesta === 'COD_001' || zoomGuiaNumero){
-      // Guardar en Firebase
+      // Guardar en Firebase — por caja si hay múltiples
       if(zoomGuiaNumero){
-        await updateGuiaFS(ag.col, {guiaZoom: String(zoomGuiaNumero)});
+        const totalCajas = parseInt(ag.bul)||1;
         const gi = guias.findIndex(x=>x.col===ag.col);
-        if(gi>=0) guias[gi].guiaZoom = String(zoomGuiaNumero);
+        if(totalCajas > 1){
+          // Guardar en cajas[idx].guiaZoom
+          if(!ag.cajas) ag.cajas = Array.from({length:totalCajas},()=>({}));
+          ag.cajas[currentBoxIdx] = ag.cajas[currentBoxIdx] || {};
+          ag.cajas[currentBoxIdx].guiaZoom = String(zoomGuiaNumero);
+          await updateGuiaFS(ag.col, {cajas: ag.cajas});
+          if(gi>=0) guias[gi].cajas = ag.cajas;
+        } else {
+          // Guía de 1 sola caja — guardar en raíz como antes
+          await updateGuiaFS(ag.col, {guiaZoom: String(zoomGuiaNumero)});
+          if(gi>=0) guias[gi].guiaZoom = String(zoomGuiaNumero);
+          ag.guiaZoom = String(zoomGuiaNumero);
+        }
       }
       document.getElementById('zoomStatus').style.display='none';
       document.getElementById('zoomDatos').style.display='none';
@@ -2957,7 +3000,14 @@ function renderReg(){
       </td>
       <td><span style="color:var(--t3);font-size:12px;">${data.length-i}</span></td>
       <td><small style="color:var(--t3);">${g.fecha}</small></td>
-      <td><span class="bdg bbl">${g.col}</span>${g.guiaZoom?`<br><span style="font-size:10px;color:#1565C0;font-weight:700;">✈️ ${g.guiaZoom}</span>`:''}</td>
+      <td><span class="bdg bbl">${g.col}</span>${(()=>{
+        const total = parseInt(g.bul)||1;
+        if(total > 1 && g.cajas){
+          const nums = g.cajas.map((c,i)=>c&&c.guiaZoom?`<span style="font-size:10px;color:#1565C0;font-weight:700;">✈️ C${i+1}: ${c.guiaZoom}</span>`:'').filter(Boolean);
+          return nums.length ? '<br>'+nums.join('<br>') : (g.guiaZoom?`<br><span style="font-size:10px;color:#1565C0;font-weight:700;">✈️ ${g.guiaZoom}</span>`:'');
+        }
+        return g.guiaZoom?`<br><span style="font-size:10px;color:#1565C0;font-weight:700;">✈️ ${g.guiaZoom}</span>`:'';
+      })()}</td>
       <td><span class="bdg bam">${g.cjl}</span></td>
       <td><strong>${g.rN}</strong></td>
       <td>${g.dN}</td>
@@ -3292,9 +3342,19 @@ async function guardarZoomManual(){
   }
   try{
     zoomGuiaNumero = num;
-    await updateGuiaFS(ag.col, {guiaZoom: String(num)});
+    const totalCajas = parseInt(ag.bul)||1;
     const gi = guias.findIndex(x=>x.col===ag.col);
-    if(gi>=0) guias[gi].guiaZoom = String(num);
+    if(totalCajas > 1){
+      if(!ag.cajas) ag.cajas = Array.from({length:totalCajas},()=>({}));
+      ag.cajas[currentBoxIdx] = ag.cajas[currentBoxIdx] || {};
+      ag.cajas[currentBoxIdx].guiaZoom = String(num);
+      await updateGuiaFS(ag.col, {cajas: ag.cajas});
+      if(gi>=0) guias[gi].cajas = ag.cajas;
+    } else {
+      await updateGuiaFS(ag.col, {guiaZoom: String(num)});
+      if(gi>=0) guias[gi].guiaZoom = String(num);
+      ag.guiaZoom = String(num);
+    }
     document.getElementById('zoomManual').style.display='none';
     document.getElementById('zoomResultado').style.display='block';
     document.getElementById('zoomNumero').textContent = num;
