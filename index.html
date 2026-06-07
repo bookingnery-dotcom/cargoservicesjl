@@ -2187,18 +2187,23 @@ async function getZoomToken(){
 
 async function getZoomCiudades(token){
   const data = await zoomFetch('ciudades', {token, paisDestino:'VE'}, token);
-  console.log('Ciudades:', JSON.stringify(data).substring(0,200));
+  console.log('Ciudades API raw:', JSON.stringify(data).substring(0,500));
   const fallback = getZoomCiudadesFallback();
   let apiList = [];
   if(Array.isArray(data)) apiList = data;
   else if(Array.isArray(data.entidadRespuesta)) apiList = data.entidadRespuesta;
   else if(Array.isArray(data.data)) apiList = data.data;
-  // Si la API devolvió datos, combinar con fallback (sin duplicar por nombre)
+
   if(apiList.length > 0){
-    const nombres = new Set(apiList.map(c=>(c.nombre_ciudad||'').toUpperCase().trim()));
-    const extra = fallback.filter(c=>!nombres.has((c.nombre_ciudad||'').toUpperCase().trim()));
-    return [...apiList, ...extra].sort((a,b)=>(a.nombre_ciudad||'').localeCompare(b.nombre_ciudad||''));
+    console.log(`Ciudades API: ${apiList.length} ciudades. Ejemplo:`, JSON.stringify(apiList[0]));
+    // API tiene prioridad total — agregar del fallback solo si nombre NO existe en API
+    const nombresApi = new Set(apiList.map(c=>(c.nombre_ciudad||'').toUpperCase().trim()));
+    const extra = fallback.filter(c=>!nombresApi.has((c.nombre_ciudad||'').toUpperCase().trim()));
+    const combined = [...apiList, ...extra].sort((a,b)=>(a.nombre_ciudad||'').localeCompare(b.nombre_ciudad||''));
+    console.log(`Ciudades combinadas: ${combined.length}`);
+    return combined;
   }
+  console.log('API no respondió, usando fallback:', fallback.length, 'ciudades');
   return fallback;
 }
 function getZoomCiudadesFallback(){
@@ -2502,18 +2507,33 @@ function getZoomCiudadesFallback(){
 }
 
 async function getZoomSucursales(token, ciudadId){
-  const data = await zoomFetch('sucursales', {token, codciudad:ciudadId, ciudad:ciudadId, paisDestino:'VE'}, token);
-  console.log('Sucursales:', JSON.stringify(data).substring(0,200));
-  if(Array.isArray(data) && data.length>0) return data;
-  if(Array.isArray(data.entidadRespuesta) && data.entidadRespuesta.length>0) return data.entidadRespuesta;
-  if(Array.isArray(data.data) && data.data.length>0) return data.data;
-  // Fallback sucursales para ciudades conocidas que la API no devuelve
+  // Intentar primero con getOficinasGE — endpoint público GET sin token
+  try{
+    const r = await fetch(`https://sandbox.zoom.red/baaszoom/public/canguroazul/getOficinasGE?codigo_ciudad_destino=${ciudadId}`);
+    const data = await r.json();
+    console.log('getOficinasGE resp:', JSON.stringify(data).substring(0,300));
+    const lista = Array.isArray(data) ? data
+      : Array.isArray(data.entidadRespuesta) ? data.entidadRespuesta
+      : Array.isArray(data.data) ? data.data : [];
+    if(lista.length > 0) return lista;
+  }catch(e){ console.log('getOficinasGE error:', e.message); }
+
+  // Fallback: getSucursales via proxy
+  try{
+    const data = await zoomFetch('sucursales', {token, codciudad:ciudadId, ciudad:ciudadId, paisDestino:'VE'}, token);
+    console.log('getSucursales resp:', JSON.stringify(data).substring(0,200));
+    if(Array.isArray(data) && data.length>0) return data;
+    if(Array.isArray(data.entidadRespuesta) && data.entidadRespuesta.length>0) return data.entidadRespuesta;
+    if(Array.isArray(data.data) && data.data.length>0) return data.data;
+  }catch(e){ console.log('getSucursales error:', e.message); }
+
+  // Fallback manual para ciudades conocidas
   const sucFallback = {
-    83: [{codsucursal:'001762',nombre:'ZOOM SAN FELIX - C.C La Carinosa',direccion:'Sector El Roble, Av. Morena Mendoza, C.C La Carinosa, Local C'}],
-    134:[{codsucursal:'001800',nombre:'ZOOM EL CALLAO',direccion:'Calle La Paz, frente al Parque Infantil Victoria Torrealba, Local S/N'}],
-    135:[{codsucursal:'001801',nombre:'ZOOM GUASIPATI',direccion:'Calle Merida, C.C Clement, Nivel 1, Local 5-6, Sector Las Gracias'}],
-    89: [{codsucursal:'001802',nombre:'ZOOM GUASDUALITO',direccion:'Centro de Guasdualito, Estado Apure'}],
-    101:[{codsucursal:'001803',nombre:'ZOOM SAN FERNANDO DE ATABAPO',direccion:'Centro, San Fernando de Atabapo, Amazonas'}],
+    83: [{codoficina:'001762',nombre:'ZOOM SAN FELIX - C.C La Carinosa',direccion:'Sector El Roble, Av. Morena Mendoza, C.C La Carinosa, Local C'}],
+    134:[{codoficina:'001800',nombre:'ZOOM EL CALLAO',direccion:'Calle La Paz, frente al Parque Infantil Victoria Torrealba'}],
+    135:[{codoficina:'001801',nombre:'ZOOM GUASIPATI',direccion:'Calle Merida, C.C Clement, Nivel 1, Local 5-6'}],
+    89: [{codoficina:'001802',nombre:'ZOOM GUASDUALITO',direccion:'Centro de Guasdualito, Estado Apure'}],
+    101:[{codoficina:'001803',nombre:'ZOOM SAN FERNANDO DE ATABAPO',direccion:'Centro, San Fernando de Atabapo, Amazonas'}],
   };
   return sucFallback[ciudadId] || [];
 }
@@ -2574,19 +2594,57 @@ async function abrirZoom(){
       const selSuc=document.getElementById('zSucursal');
       selSuc.innerHTML='<option>Cargando sucursales...</option>';
       try{
-        const suc=await getZoomSucursales(zoomToken,codciudad);
+        let suc=await getZoomSucursales(zoomToken,codciudad);
+
+        // Si no hay sucursales, probar con códigos alternativos de la misma ciudad
+        if(!suc.length){
+          const nombreBase = nombre.split('(')[0].trim().toUpperCase();
+          const alternativas = zoomCiudades
+            .filter(c=>(c.nombre_ciudad||'').toUpperCase()===nombreBase && c.codciudad!==codciudad)
+            .map(c=>c.codciudad);
+          for(const altCod of alternativas){
+            const altSuc = await getZoomSucursales(zoomToken, altCod);
+            if(altSuc.length){
+              suc = altSuc;
+              document.getElementById('zCiudad').dataset.codciudad = altCod;
+              break;
+            }
+          }
+        }
+
+        // Si aún no hay, probar códigos secuenciales cerca del código original (±50)
+        if(!suc.length){
+          for(let delta=1; delta<=50; delta++){
+            for(const tryCode of [codciudad+delta, codciudad-delta]){
+              if(tryCode<=0) continue;
+              const trySuc = await getZoomSucursales(zoomToken, tryCode);
+              if(trySuc.length){
+                // Verificar que la ciudad corresponde
+                const ciudadMatch = zoomCiudades.find(c=>c.codciudad===tryCode);
+                const nombreBase = nombre.split('(')[0].trim().toUpperCase();
+                if(!ciudadMatch || ciudadMatch.nombre_ciudad.toUpperCase()===nombreBase){
+                  suc = trySuc;
+                  document.getElementById('zCiudad').dataset.codciudad = tryCode;
+                  break;
+                }
+              }
+            }
+            if(suc.length) break;
+          }
+        }
+
         if(!suc.length){selSuc.innerHTML='<option value="">Sin sucursales disponibles</option>';return;}
         selSuc.innerHTML='<option value="">Selecciona sucursal</option>';
         window._zoomSucursales=suc;
         console.log('SUCURSAL RAW[0]:', JSON.stringify(suc[0]));
         suc.forEach(s=>{
-          const id=s.codoficina||s.codsucursal||s.cod_sucursal||s.codigo||s.id||'';
-          const nom=s.nombre_sucursal||s.nombreSucursal||s.nombre||s.name||String(id);
-          const dir=s.direccion||s.address||s.localidad||'';
+          // getOficinasGE devuelve: codoficina, nombre_oficina, direccion, nombre_ciudad, etc.
+          const id = s.codoficina||s.codsucursal||s.cod_sucursal||s.codigo||s.id||'';
+          const nom = s.nombre_oficina||s.nombre_sucursal||s.nombreSucursal||s.nombre||s.name||String(id);
+          const dir = s.direccion||s.address||s.localidad||'';
           console.log(`SUC: id="${id}" nom="${nom}" keys:`, Object.keys(s).join(','));
           selSuc.innerHTML+=`<option value="${id}" data-dir="${dir}" data-nom="${nom}">${nom}${dir?' — '+dir:''}</option>`;
         });
-        // Al seleccionar sucursal → llenar dirección automáticamente
         selSuc.onchange=function(){
           const opt=this.options[this.selectedIndex];
           if(!opt||!opt.value) return;
