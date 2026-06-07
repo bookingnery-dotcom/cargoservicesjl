@@ -942,7 +942,7 @@ tbody tr:hover{background:#FAFCFF;}
           ✅ Datos mapeados automáticamente desde tu guía. Revisa y confirma.
         </p>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
-          <div class="fi ni"><label>Referencia (tu COL)</label><div class="fi-w"><input type="text" id="zRef" style="background:#fff;"></div></div>
+          <div class="fi ni"><label id="zRefLabel">Referencia (tu COL)</label><div class="fi-w"><input type="text" id="zRef" style="background:#fff;"></div></div>
           <div class="fi ni"><label>Tipo de Envío</label>
             <div class="fi-w"><select id="zTipo"><option value="M">Mercancía</option><option value="D">Documento</option></select></div>
           </div>
@@ -2790,7 +2790,9 @@ async function abrirZoom(){
     };
 
     // Llenar campos
-    document.getElementById('zRef').value=ag.col;
+    const esCJL = (ag.cjl||'').toUpperCase().startsWith('CJL');
+    document.getElementById('zRefLabel').textContent = esCJL ? 'Referencia (tu CJL)' : 'Referencia (tu COL)';
+    document.getElementById('zRef').value = esCJL ? ag.cjl : ag.col;
     document.getElementById('zDN').value=ag.dN||'';
     document.getElementById('zDD').value=ag.dD||'';
     document.getElementById('zDT').value=ag.dT||'';
