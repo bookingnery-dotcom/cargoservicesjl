@@ -2690,9 +2690,8 @@ async function abrirZoom(){
           if(!opt||!opt.value) return;
           const dir=opt.dataset.dir||'';
           const nom=opt.dataset.nom||opt.textContent||'';
-          if(dir){
-            document.getElementById('zDDir').value=`ZOOM ${nom} — ${dir}`;
-          }
+          // Llenar dirección con lo que tengamos — dirección real o nombre de oficina
+          document.getElementById('zDDir').value = dir ? `${nom} — ${dir}` : nom;
         };
       }catch(e){selSuc.innerHTML='<option value="">Error cargando sucursales</option>';}
     };
