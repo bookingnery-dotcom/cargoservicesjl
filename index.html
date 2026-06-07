@@ -2507,10 +2507,9 @@ function getZoomCiudadesFallback(){
 }
 
 async function getZoomSucursales(token, ciudadId){
-  // Intentar primero con getOficinasGE — endpoint público GET sin token
+  // Usar getOficinasGE via proxy
   try{
-    const r = await fetch(`https://sandbox.zoom.red/baaszoom/public/canguroazul/getOficinasGE?codigo_ciudad_destino=${ciudadId}`);
-    const data = await r.json();
+    const data = await zoomFetch('oficinas', {codigo_ciudad_destino: ciudadId}, token);
     console.log('getOficinasGE resp:', JSON.stringify(data).substring(0,300));
     const lista = Array.isArray(data) ? data
       : Array.isArray(data.entidadRespuesta) ? data.entidadRespuesta
@@ -2518,7 +2517,7 @@ async function getZoomSucursales(token, ciudadId){
     if(lista.length > 0) return lista;
   }catch(e){ console.log('getOficinasGE error:', e.message); }
 
-  // Fallback: getSucursales via proxy
+  // Fallback: getSucursales
   try{
     const data = await zoomFetch('sucursales', {token, codciudad:ciudadId, ciudad:ciudadId, paisDestino:'VE'}, token);
     console.log('getSucursales resp:', JSON.stringify(data).substring(0,200));
@@ -2527,13 +2526,11 @@ async function getZoomSucursales(token, ciudadId){
     if(Array.isArray(data.data) && data.data.length>0) return data.data;
   }catch(e){ console.log('getSucursales error:', e.message); }
 
-  // Fallback manual para ciudades conocidas
+  // Fallback manual
   const sucFallback = {
-    83: [{codoficina:'001762',nombre:'ZOOM SAN FELIX - C.C La Carinosa',direccion:'Sector El Roble, Av. Morena Mendoza, C.C La Carinosa, Local C'}],
-    134:[{codoficina:'001800',nombre:'ZOOM EL CALLAO',direccion:'Calle La Paz, frente al Parque Infantil Victoria Torrealba'}],
-    135:[{codoficina:'001801',nombre:'ZOOM GUASIPATI',direccion:'Calle Merida, C.C Clement, Nivel 1, Local 5-6'}],
-    89: [{codoficina:'001802',nombre:'ZOOM GUASDUALITO',direccion:'Centro de Guasdualito, Estado Apure'}],
-    101:[{codoficina:'001803',nombre:'ZOOM SAN FERNANDO DE ATABAPO',direccion:'Centro, San Fernando de Atabapo, Amazonas'}],
+    83: [{codoficina:'001762',nombre_oficina:'ZOOM SAN FELIX - C.C La Carinosa',direccion:'Sector El Roble, Av. Morena Mendoza, C.C La Carinosa'}],
+    134:[{codoficina:'001800',nombre_oficina:'ZOOM EL CALLAO',direccion:'Calle La Paz, frente al Parque Infantil Victoria Torrealba'}],
+    89: [{codoficina:'001802',nombre_oficina:'ZOOM GUASDUALITO',direccion:'Centro de Guasdualito, Estado Apure'}],
   };
   return sucFallback[ciudadId] || [];
 }
