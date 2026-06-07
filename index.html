@@ -2684,33 +2684,17 @@ async function abrirZoom(){
         window._zoomSucursales=suc;
         console.log('SUCURSAL RAW[0]:', JSON.stringify(suc[0]));
         suc.forEach(s=>{
-          // getOficinasGE devuelve: codoficina, nombre_oficina, direccion, nombre_ciudad, etc.
           const id = s.codoficina||s.codsucursal||s.cod_sucursal||s.codigo||s.id||'';
           const nom = s.nombre_oficina||s.nombre_sucursal||s.nombreSucursal||s.nombre||s.name||String(id);
           const dir = s.direccion||s.address||s.localidad||'';
           console.log(`SUC: id="${id}" nom="${nom}" keys:`, Object.keys(s).join(','));
-          selSuc.innerHTML+=`<option value="${id}" data-dir="${dir}" data-nom="${nom}">${nom}${dir?' — '+dir:''}</option>`;
+          selSuc.innerHTML+=`<option value="${id}" data-dir="${dir}" data-nom="${nom}">${nom}</option>`;
         });
-        selSuc.onchange=async function(){
+        selSuc.onchange=function(){
           const opt=this.options[this.selectedIndex];
           if(!opt||!opt.value) return;
           const dir=opt.dataset.dir||'';
-          const nom=opt.dataset.nom||opt.textContent||'';
-          if(dir){
-            document.getElementById('zDDir').value=dir;
-          } else {
-            document.getElementById('zDDir').value='Cargando dirección...';
-            try{
-              const codCiudad=document.getElementById('zCiudad').dataset.codciudad;
-              const data=await zoomFetch('oficinas',{codigo_ciudad_destino:codCiudad},zoomToken);
-              const lista=Array.isArray(data)?data:Array.isArray(data.entidadRespuesta)?data.entidadRespuesta:[];
-              const codOfi=String(opt.value);
-              const match=lista.find(o=>String(o.codoficina)===codOfi);
-              document.getElementById('zDDir').value=match&&match.direccion?match.direccion:'';
-            }catch(e){
-              document.getElementById('zDDir').value='';
-            }
-          }
+          document.getElementById('zDDir').value=dir;
         };
       }catch(e){selSuc.innerHTML='<option value="">Error cargando sucursales</option>';}
     };
