@@ -685,17 +685,25 @@ tbody tr:hover{background:#FAFCFF;}
     <div id="pg-tracking" class="page">
       <div class="ph">
         <div class="ph-l"><h2>Tracking ZOOM</h2><p>Estatus en tiempo real de todas las guías ZOOM</p></div>
-        <div class="ph-r">
-          <button class="btn sm" style="background:#1565C0;color:#fff;font-weight:700;" onclick="cargarTodoTracking()">
-            🔄 Actualizar todo
-          </button>
+        <div class="ph-r" style="display:flex;gap:8px;align-items:center;">
+          <button class="btn sm" style="background:#1565C0;color:#fff;font-weight:700;" onclick="cargarTodoTracking()">🔄 Actualizar todo</button>
         </div>
       </div>
       <div id="trackingPageContent" style="padding:0 24px 24px;">
+
+        <!-- Buscador -->
+        <div style="margin-bottom:20px;">
+          <input type="text" id="trackingSearch" placeholder="🔍 Buscar por guía ZOOM, código COL/CJL o destinatario..."
+            style="width:100%;padding:11px 16px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'Space Grotesk',sans-serif;outline:none;background:#fff;"
+            oninput="filtrarTracking(this.value)"
+            onfocus="this.style.borderColor='var(--blue)'" onblur="this.style.borderColor='var(--border)'">
+        </div>
+
         <div id="trackingPageStatus" style="text-align:center;padding:60px 20px;color:var(--t2);">
           <div style="font-size:40px;margin-bottom:12px;">📡</div>
           <div style="font-size:15px;">Cargando guías ZOOM...</div>
         </div>
+
         <!-- COL -->
         <div id="trackingSecCOL" style="display:none;margin-bottom:32px;">
           <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
@@ -705,6 +713,7 @@ tbody tr:hover{background:#FAFCFF;}
           </div>
           <div id="trackingGridCOL" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;"></div>
         </div>
+
         <!-- CJL -->
         <div id="trackingSecCJL" style="display:none;margin-bottom:32px;">
           <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
@@ -714,6 +723,19 @@ tbody tr:hover{background:#FAFCFF;}
           </div>
           <div id="trackingGridCJL" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;"></div>
         </div>
+
+        <!-- Manifiesto ZOOM -->
+        <div id="trackingSecManifiesto" style="margin-bottom:32px;">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+            <div style="width:4px;height:24px;background:#F57F17;border-radius:2px;"></div>
+            <h3 style="font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:800;color:var(--navy);">Manifiesto ZOOM — Entregadas</h3>
+            <span id="trackingBadgeManifiesto" style="background:#FFF8E1;color:#F57F17;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;">0 guías</span>
+          </div>
+          <div id="trackingGridManifiesto" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;">
+            <div style="color:var(--t2);font-size:13px;padding:20px;grid-column:1/-1;">Las guías archivadas aparecerán aquí.</div>
+          </div>
+        </div>
+
       </div>
     </div>
 
@@ -3522,6 +3544,9 @@ function exportExcel(){
 }
 
 /* ─── TRACKING ZOOM PAGE ─── */
+let _trackingDatos = []; // cache para buscador
+let _manifiestoZoom = JSON.parse(localStorage.getItem('manifiestoZoom')||'[]');
+
 function trackingEstiloEstatus(cod){
   if([7,8,9].includes(cod))  return {bg:'#E8F5E9',color:'#2E7D32',ic:'✅',label:'ENTREGADO'};
   if([1,2,3].includes(cod))  return {bg:'#E3F2FD',color:'#1565C0',ic:'📦',label:'PROCESADO'};
@@ -3531,25 +3556,84 @@ function trackingEstiloEstatus(cod){
   return {bg:'#F5F5F5',color:'#555',ic:'📋',label:'EN PROCESO'};
 }
 
+function filtrarTracking(q){
+  if(!q||!q.trim()){
+    // Mostrar todo
+    document.querySelectorAll('.tcard-wrap').forEach(el=>el.style.display='');
+    return;
+  }
+  const qUp = q.toUpperCase().trim();
+  document.querySelectorAll('.tcard-wrap').forEach(el=>{
+    const txt = (el.dataset.search||'').toUpperCase();
+    el.style.display = txt.includes(qUp) ? '' : 'none';
+  });
+}
+
+function archivarGuiaZoom(guiaZoom, col, dN, dC, cajaLabel, descripcion){
+  const entry = {guiaZoom, col, dN, dC, cajaLabel, descripcion, fechaArchivo: new Date().toLocaleDateString('es-PE')};
+  _manifiestoZoom = _manifiestoZoom.filter(x=>x.guiaZoom!==guiaZoom);
+  _manifiestoZoom.unshift(entry);
+  localStorage.setItem('manifiestoZoom', JSON.stringify(_manifiestoZoom));
+  renderManifiestoZoom();
+  // Ocultar la tarjeta
+  const wrap = document.getElementById(`twrap_${guiaZoom}`);
+  if(wrap) wrap.style.display='none';
+  toast('Guía archivada en Manifiesto ZOOM ✓');
+}
+
+function renderManifiestoZoom(){
+  const grid = document.getElementById('trackingGridManifiesto');
+  const badge = document.getElementById('trackingBadgeManifiesto');
+  if(!grid||!badge) return;
+  badge.textContent = `${_manifiestoZoom.length} guía${_manifiestoZoom.length!==1?'s':''}`;
+  if(!_manifiestoZoom.length){
+    grid.innerHTML='<div style="color:var(--t2);font-size:13px;padding:20px;grid-column:1/-1;">Las guías archivadas aparecerán aquí.</div>';
+    return;
+  }
+  grid.innerHTML = _manifiestoZoom.map(e=>`
+    <div style="background:#FFF8E1;border:1.5px solid #FFE082;border-radius:12px;padding:14px 16px;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
+        <div>
+          <div style="font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:13px;color:var(--navy);">${e.col} ${e.cajaLabel?'· '+e.cajaLabel:''}</div>
+          <div style="font-size:11px;color:var(--t2);margin-top:2px;">✈️ ${e.guiaZoom}</div>
+        </div>
+        <div style="font-size:18px;">✅</div>
+      </div>
+      <div style="font-size:12px;font-weight:600;color:var(--navy);margin-bottom:2px;">${e.dN||'—'}</div>
+      <div style="font-size:11px;color:var(--t2);">${e.dC||''}</div>
+      <div style="margin-top:8px;display:flex;justify-content:space-between;align-items:center;">
+        <div style="font-size:11px;font-weight:700;padding:4px 8px;border-radius:6px;background:#E8F5E9;color:#2E7D32;">ENTREGADO</div>
+        <div style="font-size:10px;color:var(--t2);">Archivado ${e.fechaArchivo}</div>
+      </div>
+    </div>`).join('');
+}
+
 async function cargarTodoTracking(){
   const statusEl = document.getElementById('trackingPageStatus');
   statusEl.style.display='block';
   statusEl.innerHTML='<div style="font-size:40px;margin-bottom:12px;">📡</div><div style="font-size:15px;">Cargando guías ZOOM...</div>';
   document.getElementById('trackingSecCOL').style.display='none';
   document.getElementById('trackingSecCJL').style.display='none';
+  document.getElementById('trackingSearch').value='';
 
-  // Obtener todas las guías con número ZOOM
+  // Renderizar manifiesto guardado
+  renderManifiestoZoom();
+
+  // IDs ya archivados
+  const archivados = new Set(_manifiestoZoom.map(x=>String(x.guiaZoom)));
+
+  // Obtener todas las guías con número ZOOM no archivadas
   const guiasCOL = [], guiasCJL = [];
   guias.forEach(g => {
     const total = parseInt(g.bul)||1;
     if(total > 1 && g.cajas){
       g.cajas.forEach((c,i) => {
-        if(c && c.guiaZoom){
+        if(c && c.guiaZoom && !archivados.has(String(c.guiaZoom))){
           const entry = {...g, _guiaZoom: c.guiaZoom, _cajaLabel: `Caja ${i+1}/${total}`};
           (g.col||'').startsWith('CJL') ? guiasCJL.push(entry) : guiasCOL.push(entry);
         }
       });
-    } else if(g.guiaZoom){
+    } else if(g.guiaZoom && !archivados.has(String(g.guiaZoom))){
       const entry = {...g, _guiaZoom: g.guiaZoom, _cajaLabel: ''};
       (g.col||'').startsWith('CJL') ? guiasCJL.push(entry) : guiasCOL.push(entry);
     }
@@ -3557,33 +3641,36 @@ async function cargarTodoTracking(){
 
   const total = guiasCOL.length + guiasCJL.length;
   if(!total){
-    statusEl.innerHTML='<div style="font-size:40px;margin-bottom:12px;">📭</div><div style="font-size:15px;">No hay guías ZOOM creadas aún.</div>';
+    statusEl.innerHTML='<div style="font-size:40px;margin-bottom:12px;">📭</div><div style="font-size:15px;">No hay guías ZOOM activas.</div>';
     return;
   }
-
   statusEl.innerHTML=`<div style="font-size:14px;color:var(--t2);">Consultando ${total} guía(s)... ⏳</div>`;
 
-  // Renderizar tarjetas con tracking en paralelo
-  async function renderGrupo(lista, gridId, badgeId, secId){
+  async function renderGrupo(lista, gridId, badgeId, secId, accentColor){
     if(!lista.length) return;
     document.getElementById(badgeId).textContent = `${lista.length} guía${lista.length>1?'s':''}`;
     document.getElementById(secId).style.display='block';
     const grid = document.getElementById(gridId);
     grid.innerHTML = lista.map(g=>`
-      <div id="tcard_${g._guiaZoom}" style="background:#fff;border:1.5px solid #e8edf4;border-radius:12px;padding:14px 16px;cursor:pointer;transition:box-shadow .2s;" onclick="verTrackingZoom('${g._guiaZoom}','${g._cajaLabel}')" onmouseover="this.style.boxShadow='0 4px 16px rgba(0,0,0,.1)'" onmouseout="this.style.boxShadow='none'">
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
-          <div>
-            <div style="font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:13px;color:var(--navy);">${g.col||''} ${g._cajaLabel?'· '+g._cajaLabel:''}</div>
-            <div style="font-size:11px;color:var(--t2);margin-top:2px;">✈️ ${g._guiaZoom}</div>
+      <div class="tcard-wrap" id="twrap_${g._guiaZoom}" data-search="${g._guiaZoom} ${g.col} ${g.dN||''} ${g.dC||''}">
+        <div id="tcard_${g._guiaZoom}" style="background:#fff;border:1.5px solid #e8edf4;border-radius:12px;padding:14px 16px;cursor:pointer;transition:box-shadow .2s;" onclick="verTrackingZoom('${g._guiaZoom}','${g._cajaLabel}')" onmouseover="this.style.boxShadow='0 4px 16px rgba(0,0,0,.1)'" onmouseout="this.style.boxShadow='none'">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
+            <div>
+              <div style="font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:13px;color:var(--navy);">${g.col||''} ${g._cajaLabel?'· '+g._cajaLabel:''}</div>
+              <div style="font-size:11px;color:var(--t2);margin-top:2px;">✈️ ${g._guiaZoom}</div>
+            </div>
+            <div id="tstat_${g._guiaZoom}" style="font-size:18px;">⏳</div>
           </div>
-          <div id="tstat_${g._guiaZoom}" style="font-size:18px;">⏳</div>
+          <div style="font-size:12px;font-weight:600;color:var(--navy);margin-bottom:2px;">${g.dN||'—'}</div>
+          <div style="font-size:11px;color:var(--t2);">${g.dC||''}</div>
+          <div style="margin-top:8px;display:flex;justify-content:space-between;align-items:center;">
+            <div id="tdesc_${g._guiaZoom}" style="font-size:11px;font-weight:700;padding:4px 8px;border-radius:6px;background:#f5f5f5;color:#555;display:inline-block;">Consultando...</div>
+            <button id="tbtn_${g._guiaZoom}" onclick="event.stopPropagation();archivarGuiaZoom('${g._guiaZoom}','${g.col}','${(g.dN||'').replace(/'/g,"\\'")}','${g.dC||''}','${g._cajaLabel}','')" style="display:none;font-size:11px;padding:4px 10px;border-radius:6px;background:#E8F5E9;color:#2E7D32;border:none;cursor:pointer;font-weight:700;">📥 Archivar</button>
+          </div>
         </div>
-        <div style="font-size:12px;font-weight:600;color:var(--navy);margin-bottom:2px;">${g.dN||'—'}</div>
-        <div style="font-size:11px;color:var(--t2);">${g.dC||''}</div>
-        <div id="tdesc_${g._guiaZoom}" style="margin-top:8px;font-size:11px;font-weight:700;padding:4px 8px;border-radius:6px;background:#f5f5f5;color:#555;display:inline-block;">Consultando...</div>
       </div>`).join('');
 
-    // Cargar tracking de cada guía
+    // Cargar tracking de cada guía en paralelo
     await Promise.all(lista.map(async g => {
       try{
         const data = await zoomFetch('tracking', {tipo_busqueda:1, codigo: g._guiaZoom}, zoomToken);
@@ -3594,9 +3681,12 @@ async function cargarTodoTracking(){
           const statEl = document.getElementById(`tstat_${g._guiaZoom}`);
           const descEl = document.getElementById(`tdesc_${g._guiaZoom}`);
           const cardEl = document.getElementById(`tcard_${g._guiaZoom}`);
+          const btnEl  = document.getElementById(`tbtn_${g._guiaZoom}`);
           if(statEl) statEl.textContent = st.ic;
           if(descEl){ descEl.style.background=st.bg; descEl.style.color=st.color; descEl.textContent=ult.descripcion_estatus; }
           if(cardEl) cardEl.style.borderColor = st.color+'44';
+          // Mostrar botón archivar solo si está entregado
+          if(btnEl && [7,8,9].includes(ult.codigo_estatus)) btnEl.style.display='inline-block';
         } else {
           const descEl = document.getElementById(`tdesc_${g._guiaZoom}`);
           if(descEl) descEl.textContent = 'Sin datos';
@@ -3609,8 +3699,8 @@ async function cargarTodoTracking(){
   }
 
   await Promise.all([
-    renderGrupo(guiasCOL, 'trackingGridCOL', 'trackingBadgeCOL', 'trackingSecCOL'),
-    renderGrupo(guiasCJL, 'trackingGridCJL', 'trackingBadgeCJL', 'trackingSecCJL'),
+    renderGrupo(guiasCOL, 'trackingGridCOL', 'trackingBadgeCOL', 'trackingSecCOL', '#1565C0'),
+    renderGrupo(guiasCJL, 'trackingGridCJL', 'trackingBadgeCJL', 'trackingSecCJL', '#2E7D32'),
   ]);
 
   statusEl.style.display='none';
