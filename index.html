@@ -2186,25 +2186,61 @@ async function getZoomToken(){
 }
 
 async function getZoomCiudades(token){
-  const data = await zoomFetch('ciudades', {token, paisDestino:'VE'}, token);
-  console.log('Ciudades API raw:', JSON.stringify(data).substring(0,500));
-  const fallback = getZoomCiudadesFallback();
-  let apiList = [];
-  if(Array.isArray(data)) apiList = data;
-  else if(Array.isArray(data.entidadRespuesta)) apiList = data.entidadRespuesta;
-  else if(Array.isArray(data.data)) apiList = data.data;
+  // Códigos reales de estados según getEstados de ZOOM
+  const estados = [
+    {codestado:17,nombre:'AMAZONAS'},{codestado:18,nombre:'ANZOATEGUI'},
+    {codestado:19,nombre:'APURE'},{codestado:20,nombre:'ARAGUA'},
+    {codestado:21,nombre:'BARINAS'},{codestado:22,nombre:'BOLIVAR'},
+    {codestado:23,nombre:'CARABOBO'},{codestado:24,nombre:'COJEDES'},
+    {codestado:26,nombre:'DELTA AMACURO'},{codestado:2,nombre:'DISTRITO CAPITAL'},
+    {codestado:3,nombre:'FALCON'},{codestado:4,nombre:'GUARICO'},
+    {codestado:25,nombre:'LA GUAIRA'},{codestado:6,nombre:'LARA'},
+    {codestado:7,nombre:'MERIDA'},{codestado:8,nombre:'MIRANDA'},
+    {codestado:9,nombre:'MONAGAS'},{codestado:10,nombre:'NUEVA ESPARTA'},
+    {codestado:11,nombre:'PORTUGUESA'},{codestado:12,nombre:'SUCRE'},
+    {codestado:13,nombre:'TACHIRA'},{codestado:14,nombre:'TRUJILLO'},
+    {codestado:15,nombre:'YARACUY'},{codestado:16,nombre:'ZULIA'}
+  ];
 
-  if(apiList.length > 0){
-    console.log(`Ciudades API: ${apiList.length} ciudades. Ejemplo:`, JSON.stringify(apiList[0]));
-    // API tiene prioridad total — agregar del fallback solo si nombre NO existe en API
-    const nombresApi = new Set(apiList.map(c=>(c.nombre_ciudad||'').toUpperCase().trim()));
-    const extra = fallback.filter(c=>!nombresApi.has((c.nombre_ciudad||'').toUpperCase().trim()));
-    const combined = [...apiList, ...extra].sort((a,b)=>(a.nombre_ciudad||'').localeCompare(b.nombre_ciudad||''));
-    console.log(`Ciudades combinadas: ${combined.length}`);
-    return combined;
+  try{
+    // Cargar ciudades con oficinas de todos los estados en paralelo
+    const resultados = await Promise.all(
+      estados.map(e => zoomFetch('ciudadesOfi', {codestado: e.codestado}, token)
+        .then(data=>{
+          const lista = Array.isArray(data) ? data
+            : Array.isArray(data.entidadRespuesta) ? data.entidadRespuesta
+            : Array.isArray(data.data) ? data.data : [];
+          // Agregar nombre_estado a cada ciudad
+          return lista.map(c=>({...c, nombre_estado: e.nombre}));
+        })
+        .catch(()=>[])
+      )
+    );
+    const ciudades = resultados.flat();
+    console.log(`getCiudadesOfi: ${ciudades.length} ciudades con oficinas. Ejemplo:`, JSON.stringify(ciudades[0]));
+    if(ciudades.length > 0){
+      return ciudades.sort((a,b)=>(a.nombre_ciudad||a.nombre||'').localeCompare(b.nombre_ciudad||b.nombre||''));
+    }
+  }catch(e){
+    console.log('getCiudadesOfi error:', e.message);
   }
-  console.log('API no respondió, usando fallback:', fallback.length, 'ciudades');
-  return fallback;
+
+  // Fallback: getCiudades original
+  try{
+    const data = await zoomFetch('ciudades', {token, paisDestino:'VE'}, token);
+    console.log('Ciudades API raw:', JSON.stringify(data).substring(0,500));
+    let apiList = [];
+    if(Array.isArray(data)) apiList = data;
+    else if(Array.isArray(data.entidadRespuesta)) apiList = data.entidadRespuesta;
+    else if(Array.isArray(data.data)) apiList = data.data;
+    if(apiList.length > 0){
+      const nombresApi = new Set(apiList.map(c=>(c.nombre_ciudad||'').toUpperCase().trim()));
+      const extra = getZoomCiudadesFallback().filter(c=>!nombresApi.has((c.nombre_ciudad||'').toUpperCase().trim()));
+      return [...apiList, ...extra].sort((a,b)=>(a.nombre_ciudad||'').localeCompare(b.nombre_ciudad||''));
+    }
+  }catch(e){ console.log('getCiudades error:', e.message); }
+
+  return getZoomCiudadesFallback();
 }
 function getZoomCiudadesFallback(){
   return [
@@ -2573,14 +2609,18 @@ async function abrirZoom(){
     window.filtrarCiudades=function(q){
       const list=document.getElementById('zCiudadList');
       if(!q||q.length<2){list.style.display='none';return;}
-      const f=zoomCiudades.filter(c=>(c.nombre_ciudad||'').toUpperCase().includes(q.toUpperCase())||(c.nombre_estado||'').toUpperCase().includes(q.toUpperCase())).slice(0,20);
+      const f=zoomCiudades.filter(c=>{
+        const nom=(c.nombre_ciudad||c.nombre||'').toUpperCase();
+        const est=(c.nombre_estado||'').toUpperCase();
+        return nom.includes(q.toUpperCase())||est.includes(q.toUpperCase());
+      }).slice(0,20);
       if(!f.length){list.style.display='none';return;}
-      list.innerHTML=f.map(c=>`
-        <div onclick="seleccionarCiudad(${c.codciudad},'${c.nombre_ciudad} (${c.nombre_estado})')"
-          style="padding:10px 14px;cursor:pointer;font-size:13px;border-bottom:1px solid #f0f0f0;"
-          onmouseover="this.style.background='var(--sky)'" onmouseout="this.style.background='#fff'">
-          <strong>${c.nombre_ciudad}</strong> <span style="color:var(--t2);font-size:12px;">${c.nombre_estado}</span>
-        </div>`).join('');
+      list.innerHTML=f.map(c=>{
+        const nom=c.nombre_ciudad||c.nombre||'';
+        const est=c.nombre_estado||'';
+        const cod=c.codciudad||c.codigo_ciudad||c.cod_ciudad||c.id||'';
+        return `<div onclick="seleccionarCiudad(${cod},'${nom} (${est})')" style="padding:10px 14px;cursor:pointer;font-size:13px;border-bottom:1px solid #f0f0f0;" onmouseover="this.style.background='var(--sky)'" onmouseout="this.style.background='#fff'"><strong>${nom}</strong> <span style="color:var(--t2);font-size:12px;">${est}</span></div>`;
+      }).join('');
       list.style.display='block';
     };
 
