@@ -2545,9 +2545,9 @@ function getZoomCiudadesFallback(){
 async function getZoomSucursales(token, ciudadId){
   try{
     // Llamar ambos endpoints en paralelo
-    const [respTodas, respGE] = await Promise.all([
+    const [respTodas, respSuc] = await Promise.all([
       zoomFetch('todasOficinas', {codciudad: ciudadId, codservicio: 3}, token),
-      zoomFetch('oficinas', {codigo_ciudad_destino: ciudadId}, token)
+      zoomFetch('sucursales', {token, codciudad:ciudadId, ciudad:ciudadId, paisDestino:'VE'}, token)
     ]);
 
     // Extraer listas
@@ -2555,23 +2555,26 @@ async function getZoomSucursales(token, ciudadId){
       : Array.isArray(respTodas.entidadRespuesta) ? respTodas.entidadRespuesta
       : Array.isArray(respTodas.data) ? respTodas.data : [];
 
-    const conDir = Array.isArray(respGE) ? respGE
-      : Array.isArray(respGE.entidadRespuesta) ? respGE.entidadRespuesta
-      : Array.isArray(respGE.data) ? respGE.data : [];
+    const conDir = Array.isArray(respSuc) ? respSuc
+      : Array.isArray(respSuc.entidadRespuesta) ? respSuc.entidadRespuesta
+      : Array.isArray(respSuc.data) ? respSuc.data : [];
 
-    console.log('getOficinas resp:', JSON.stringify(respTodas).substring(0,400));
+    console.log('getSucursales con dir:', JSON.stringify(conDir).substring(0,300));
 
     if(todas.length > 0){
-      // Cruzar direcciones — buscar en conDir por codoficina
+      // Cruzar direcciones de getSucursales por codoficina
       const dirMap = {};
-      conDir.forEach(o => { if(o.codoficina) dirMap[String(o.codoficina)] = o.direccion||''; });
+      conDir.forEach(o => {
+        const cod = String(o.codoficina||o.codsucursal||o.cod_sucursal||'');
+        if(cod) dirMap[cod] = o.direccion||o.address||o.localidad||'';
+      });
       return todas.map(o => ({
         ...o,
         direccion: dirMap[String(o.codoficina)] || o.direccion || ''
       }));
     }
 
-    // Si getOficinas no devolvió nada, usar getOficinasGE
+    // Si getOficinas no devolvió nada, usar getSucursales directamente
     if(conDir.length > 0) return conDir;
 
   }catch(e){ console.log('getZoomSucursales error:', e.message); }
@@ -2694,7 +2697,8 @@ async function abrirZoom(){
           const opt=this.options[this.selectedIndex];
           if(!opt||!opt.value) return;
           const dir=opt.dataset.dir||'';
-          document.getElementById('zDDir').value=dir;
+          const nom=opt.dataset.nom||opt.textContent||'';
+          document.getElementById('zDDir').value = dir || nom;
         };
       }catch(e){selSuc.innerHTML='<option value="">Error cargando sucursales</option>';}
     };
