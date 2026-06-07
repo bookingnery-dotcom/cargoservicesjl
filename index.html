@@ -2543,32 +2543,38 @@ function getZoomCiudadesFallback(){
 }
 
 async function getZoomSucursales(token, ciudadId){
-  // Usar getOficinas — devuelve TODAS las oficinas de la ciudad
   try{
-    const data = await zoomFetch('todasOficinas', {codciudad: ciudadId, codservicio: 3}, token);
-    console.log('getOficinas resp:', JSON.stringify(data).substring(0,400));
-    const lista = Array.isArray(data) ? data
-      : Array.isArray(data.entidadRespuesta) ? data.entidadRespuesta
-      : Array.isArray(data.data) ? data.data : [];
-    if(lista.length > 0) return lista;
-  }catch(e){ console.log('getOficinas error:', e.message); }
+    // Llamar ambos endpoints en paralelo
+    const [respTodas, respGE] = await Promise.all([
+      zoomFetch('todasOficinas', {codciudad: ciudadId, codservicio: 3}, token),
+      zoomFetch('oficinas', {codigo_ciudad_destino: ciudadId}, token)
+    ]);
 
-  // Fallback: getOficinasGE
-  try{
-    const data = await zoomFetch('oficinas', {codigo_ciudad_destino: ciudadId}, token);
-    console.log('getOficinasGE resp:', JSON.stringify(data).substring(0,300));
-    const lista = Array.isArray(data) ? data
-      : Array.isArray(data.entidadRespuesta) ? data.entidadRespuesta
-      : Array.isArray(data.data) ? data.data : [];
-    if(lista.length > 0) return lista;
-  }catch(e){ console.log('getOficinasGE error:', e.message); }
+    // Extraer listas
+    const todas = Array.isArray(respTodas) ? respTodas
+      : Array.isArray(respTodas.entidadRespuesta) ? respTodas.entidadRespuesta
+      : Array.isArray(respTodas.data) ? respTodas.data : [];
 
-  // Fallback: getSucursales
-  try{
-    const data = await zoomFetch('sucursales', {token, codciudad:ciudadId, ciudad:ciudadId, paisDestino:'VE'}, token);
-    if(Array.isArray(data) && data.length>0) return data;
-    if(Array.isArray(data.entidadRespuesta) && data.entidadRespuesta.length>0) return data.entidadRespuesta;
-  }catch(e){}
+    const conDir = Array.isArray(respGE) ? respGE
+      : Array.isArray(respGE.entidadRespuesta) ? respGE.entidadRespuesta
+      : Array.isArray(respGE.data) ? respGE.data : [];
+
+    console.log('getOficinas resp:', JSON.stringify(respTodas).substring(0,400));
+
+    if(todas.length > 0){
+      // Cruzar direcciones — buscar en conDir por codoficina
+      const dirMap = {};
+      conDir.forEach(o => { if(o.codoficina) dirMap[String(o.codoficina)] = o.direccion||''; });
+      return todas.map(o => ({
+        ...o,
+        direccion: dirMap[String(o.codoficina)] || o.direccion || ''
+      }));
+    }
+
+    // Si getOficinas no devolvió nada, usar getOficinasGE
+    if(conDir.length > 0) return conDir;
+
+  }catch(e){ console.log('getZoomSucursales error:', e.message); }
 
   return [];
 }
@@ -2685,13 +2691,26 @@ async function abrirZoom(){
           console.log(`SUC: id="${id}" nom="${nom}" keys:`, Object.keys(s).join(','));
           selSuc.innerHTML+=`<option value="${id}" data-dir="${dir}" data-nom="${nom}">${nom}${dir?' — '+dir:''}</option>`;
         });
-        selSuc.onchange=function(){
+        selSuc.onchange=async function(){
           const opt=this.options[this.selectedIndex];
           if(!opt||!opt.value) return;
           const dir=opt.dataset.dir||'';
           const nom=opt.dataset.nom||opt.textContent||'';
-          // Llenar dirección con lo que tengamos — dirección real o nombre de oficina
-          document.getElementById('zDDir').value = dir ? `${nom} — ${dir}` : nom;
+          if(dir){
+            document.getElementById('zDDir').value=dir;
+          } else {
+            document.getElementById('zDDir').value='Cargando dirección...';
+            try{
+              const codCiudad=document.getElementById('zCiudad').dataset.codciudad;
+              const data=await zoomFetch('oficinas',{codigo_ciudad_destino:codCiudad},zoomToken);
+              const lista=Array.isArray(data)?data:Array.isArray(data.entidadRespuesta)?data.entidadRespuesta:[];
+              const codOfi=String(opt.value);
+              const match=lista.find(o=>String(o.codoficina)===codOfi);
+              document.getElementById('zDDir').value=match&&match.direccion?match.direccion:'';
+            }catch(e){
+              document.getElementById('zDDir').value='';
+            }
+          }
         };
       }catch(e){selSuc.innerHTML='<option value="">Error cargando sucursales</option>';}
     };
