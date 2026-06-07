@@ -3,13 +3,14 @@ const { URL } = require('url');
 // Netlify function config — increase timeout
 exports.config = { timeout: 26 };
 const ENDPOINTS = {
-  token:      { url: 'https://miws.zoom.red/api/crearToken', method: 'POST' },
-  guia:       { url: 'https://serviciosbd.zoom.red/api/guiaelectronica/createShipmentInternacional', method: 'POST' },
-  etiqueta:   { url: 'https://wsgeneric.zoom.red/api/etiquetaTermica', method: 'POST' },
-  ciudades:   { url: 'https://api.zoom.red/canguroazul/getCiudades', method: 'GET' },
-  sucursales: { url: 'https://api.zoom.red/canguroazul/getSucursales', method: 'GET' },
-  oficinas:   { url: 'https://sandbox.zoom.red/baaszoom/public/canguroazul/getOficinasGE', method: 'GET' },
-  tracking:   { url: 'https://api.zoom.red/canguroazul/getInfoTracking', method: 'GET' },
+  token:        { url: 'https://miws.zoom.red/api/crearToken', method: 'POST' },
+  guia:         { url: 'https://serviciosbd.zoom.red/api/guiaelectronica/createShipmentInternacional', method: 'POST' },
+  etiqueta:     { url: 'https://wsgeneric.zoom.red/api/etiquetaTermica', method: 'POST' },
+  ciudades:     { url: 'https://api.zoom.red/canguroazul/getCiudades', method: 'GET' },
+  sucursales:   { url: 'https://api.zoom.red/canguroazul/getSucursales', method: 'GET' },
+  oficinas:     { url: 'https://sandbox.zoom.red/baaszoom/public/canguroazul/getOficinasGE', method: 'GET' },
+  ciudadesOfi:  { url: 'https://sandbox.zoom.red/baaszoom/public/canguroazul/getCiudadesOfi', method: 'GET' },
+  tracking:     { url: 'https://api.zoom.red/canguroazul/getInfoTracking', method: 'GET' },
 };
 function makeRequest(urlStr, method, headers, body) {
   return new Promise((resolve, reject) => {
