@@ -2543,7 +2543,17 @@ function getZoomCiudadesFallback(){
 }
 
 async function getZoomSucursales(token, ciudadId){
-  // Usar getOficinasGE via proxy
+  // Usar getOficinas — devuelve TODAS las oficinas de la ciudad
+  try{
+    const data = await zoomFetch('todasOficinas', {codciudad: ciudadId, codservicio: 3}, token);
+    console.log('getOficinas resp:', JSON.stringify(data).substring(0,400));
+    const lista = Array.isArray(data) ? data
+      : Array.isArray(data.entidadRespuesta) ? data.entidadRespuesta
+      : Array.isArray(data.data) ? data.data : [];
+    if(lista.length > 0) return lista;
+  }catch(e){ console.log('getOficinas error:', e.message); }
+
+  // Fallback: getOficinasGE
   try{
     const data = await zoomFetch('oficinas', {codigo_ciudad_destino: ciudadId}, token);
     console.log('getOficinasGE resp:', JSON.stringify(data).substring(0,300));
@@ -2556,19 +2566,11 @@ async function getZoomSucursales(token, ciudadId){
   // Fallback: getSucursales
   try{
     const data = await zoomFetch('sucursales', {token, codciudad:ciudadId, ciudad:ciudadId, paisDestino:'VE'}, token);
-    console.log('getSucursales resp:', JSON.stringify(data).substring(0,200));
     if(Array.isArray(data) && data.length>0) return data;
     if(Array.isArray(data.entidadRespuesta) && data.entidadRespuesta.length>0) return data.entidadRespuesta;
-    if(Array.isArray(data.data) && data.data.length>0) return data.data;
-  }catch(e){ console.log('getSucursales error:', e.message); }
+  }catch(e){}
 
-  // Fallback manual
-  const sucFallback = {
-    83: [{codoficina:'001762',nombre_oficina:'ZOOM SAN FELIX - C.C La Carinosa',direccion:'Sector El Roble, Av. Morena Mendoza, C.C La Carinosa'}],
-    134:[{codoficina:'001800',nombre_oficina:'ZOOM EL CALLAO',direccion:'Calle La Paz, frente al Parque Infantil Victoria Torrealba'}],
-    89: [{codoficina:'001802',nombre_oficina:'ZOOM GUASDUALITO',direccion:'Centro de Guasdualito, Estado Apure'}],
-  };
-  return sucFallback[ciudadId] || [];
+  return [];
 }
 
 async function abrirZoom(){
@@ -2618,6 +2620,7 @@ async function abrirZoom(){
       list.innerHTML=f.map(c=>{
         const nom=c.nombre_ciudad||c.nombre||'';
         const est=c.nombre_estado||'';
+        // getCiudadesOfi devuelve codciudad; fallback puede usar otros campos
         const cod=c.codciudad||c.codigo_ciudad||c.cod_ciudad||c.id||'';
         return `<div onclick="seleccionarCiudad(${cod},'${nom} (${est})')" style="padding:10px 14px;cursor:pointer;font-size:13px;border-bottom:1px solid #f0f0f0;" onmouseover="this.style.background='var(--sky)'" onmouseout="this.style.background='#fff'"><strong>${nom}</strong> <span style="color:var(--t2);font-size:12px;">${est}</span></div>`;
       }).join('');
