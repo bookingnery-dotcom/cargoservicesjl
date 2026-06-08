@@ -1351,7 +1351,7 @@ function verManifiesto(mId){
     <tr>
       <td><span style="color:var(--t3);font-size:12px;">${i+1}</span></td>
       <td><small style="color:var(--t3);">${g.fecha}</small></td>
-      <td><span class="${(g.col||'').startsWith('CJL')?'bdg bam':'bdg bbl'}">${(g.col||'').startsWith('CJL')?g.cjl:g.col}</span></td>
+      <td><span class="${(g.userKey||'').toLowerCase()==='chorrillos'?'bdg bam':'bdg bbl'}">${(g.userKey||'').toLowerCase()==='chorrillos'?g.cjl:g.col}</span></td>
       <td><strong>${g.rN}</strong></td>
       <td>${g.dN}</td>
       <td><span style="color:var(--t2);">${g.rC}</span> → <span style="color:var(--blue);font-weight:600;">${g.dC}</span></td>
@@ -2799,7 +2799,7 @@ async function abrirZoom(){
     };
 
     // Llenar campos
-    const esCJL = (ag.col||'').toUpperCase().startsWith('CJL');
+    const esCJL = (ag.userKey||'').toLowerCase()==='chorrillos';
     document.getElementById('zRefLabel').textContent = esCJL ? 'Referencia (tu CJL)' : 'Referencia (tu COL)';
     document.getElementById('zRef').value = esCJL ? ag.cjl : ag.col;
     document.getElementById('zDN').value=ag.dN||'';
@@ -2882,7 +2882,7 @@ async function enviarAZoom(){
   const valor = document.getElementById('zValor').value||'0';
 
   // Detectar tienda: COL = Los Olivos, CJL = Chorrillos
-  const esChorrillos = (ag.col||'').toUpperCase().startsWith('CJL');
+  const esChorrillos = (ag.userKey||'').toLowerCase()==='chorrillos';
   const contactoRem = esChorrillos ? 'CARGO SERVICES JL CH' : 'CARGO SERVICES JL OL';
   const refCodigo = document.getElementById('zRef').value.trim() || ag.col;
   const sucOpt = document.getElementById('zSucursal').options[document.getElementById('zSucursal').selectedIndex];
@@ -3222,7 +3222,7 @@ function renderReg(){
       </td>
       <td><span style="color:var(--t3);font-size:12px;">${data.length-i}</span></td>
       <td><small style="color:var(--t3);">${g.fecha}</small></td>
-      <td><span class="${(g.col||'').startsWith('CJL')?'bdg bam':'bdg bbl'}">${(g.col||'').startsWith('CJL')?g.cjl:g.col}</span>${(()=>{
+      <td><span class="${(g.userKey||'').toLowerCase()==='chorrillos'?'bdg bam':'bdg bbl'}">${(g.userKey||'').toLowerCase()==='chorrillos'?g.cjl:g.col}</span>${(()=>{
         const total = parseInt(g.bul)||1;
         if(total > 1 && g.cajas){
           const nums = g.cajas.map((c,i)=>c&&c.guiaZoom?`<span style="font-size:10px;color:#1565C0;font-weight:700;">✈️ C${i+1}: ${c.guiaZoom}</span>`:'').filter(Boolean);
@@ -3640,12 +3640,12 @@ async function cargarTodoTracking(){
       g.cajas.forEach((c,i) => {
         if(c && c.guiaZoom && !archivados.has(String(c.guiaZoom))){
           const entry = {...g, _guiaZoom: c.guiaZoom, _cajaLabel: `Caja ${i+1}/${total}`};
-          (g.col||'').startsWith('CJL') ? guiasCJL.push(entry) : guiasCOL.push(entry);
+          (g.userKey||'').toLowerCase()==='chorrillos' ? guiasCJL.push(entry) : guiasCOL.push(entry);
         }
       });
     } else if(g.guiaZoom && !archivados.has(String(g.guiaZoom))){
       const entry = {...g, _guiaZoom: g.guiaZoom, _cajaLabel: ''};
-      (g.col||'').startsWith('CJL') ? guiasCJL.push(entry) : guiasCOL.push(entry);
+      (g.userKey||'').toLowerCase()==='chorrillos' ? guiasCJL.push(entry) : guiasCOL.push(entry);
     }
   });
 
