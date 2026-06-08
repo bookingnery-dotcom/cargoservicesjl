@@ -2630,13 +2630,11 @@ function getZoomCiudadesFallback(){
 
 async function getZoomSucursales(token, ciudadId){
   try{
-    // Llamar ambos endpoints en paralelo
     const [respTodas, respSuc] = await Promise.all([
       zoomFetch('todasOficinas', {codciudad: ciudadId, codservicio: 3}, token),
       zoomFetch('sucursales', {token, codciudad:ciudadId, ciudad:ciudadId, paisDestino:'VE'}, token)
     ]);
 
-    // Extraer listas
     const todas = Array.isArray(respTodas) ? respTodas
       : Array.isArray(respTodas.entidadRespuesta) ? respTodas.entidadRespuesta
       : Array.isArray(respTodas.data) ? respTodas.data : [];
@@ -2647,24 +2645,36 @@ async function getZoomSucursales(token, ciudadId){
 
     console.log('getSucursales con dir:', JSON.stringify(conDir).substring(0,300));
 
-    if(todas.length > 0){
-      // Cruzar direcciones de getSucursales por codoficina
-      const dirMap = {};
-      conDir.forEach(o => {
-        const cod = String(o.codoficina||o.codsucursal||o.cod_sucursal||'');
-        if(cod) dirMap[cod] = o.direccion||o.address||o.localidad||'';
-      });
-      return todas.map(o => ({
-        ...o,
-        direccion: dirMap[String(o.codoficina)] || o.direccion || ''
-      }));
-    }
+    // Mapear direcciones por nombre (normalizado) desde getSucursales
+    const dirPorNombre = {};
+    conDir.forEach(o => {
+      const nom = (o.nombre||o.nombre_sucursal||'').toUpperCase().trim();
+      if(nom) dirPorNombre[nom] = o.direccion||o.address||'';
+    });
 
-    // Si getOficinas no devolvió nada, usar getSucursales directamente
+    // Agregar direcciones a todas las oficinas
+    const todasConDir = todas.map(o => {
+      const nom = (o.nombre||'').toUpperCase().trim();
+      return {...o, direccion: o.direccion || dirPorNombre[nom] || ''};
+    });
+
+    // Agregar oficinas de getSucursales que no estén en getOficinas (por nombre)
+    const nombresEnTodas = new Set(todas.map(o=>(o.nombre||'').toUpperCase().trim()));
+    conDir.forEach(o => {
+      const nom = (o.nombre||o.nombre_sucursal||'').toUpperCase().trim();
+      if(nom && !nombresEnTodas.has(nom)){
+        todasConDir.push({
+          codoficina: o.codoficina||o.codsucursal||o.cod_sucursal||'',
+          nombre: o.nombre||o.nombre_sucursal||'',
+          direccion: o.direccion||o.address||''
+        });
+      }
+    });
+
+    if(todasConDir.length > 0) return todasConDir;
     if(conDir.length > 0) return conDir;
 
   }catch(e){ console.log('getZoomSucursales error:', e.message); }
-
   return [];
 }
 
@@ -2873,9 +2883,9 @@ async function enviarAZoom(){
   const valor = document.getElementById('zValor').value||'0';
 
   // Detectar tienda: COL = Los Olivos, CJL = Chorrillos
-  const esChorrillos = ag.col && ag.col.toUpperCase().startsWith('CJL');
+  const esChorrillos = (ag.cjl||'').toUpperCase().startsWith('CJL');
   const contactoRem = esChorrillos ? 'CARGO SERVICES JL CH' : 'CARGO SERVICES JL OL';
-  const refCodigo = ag.col;
+  const refCodigo = document.getElementById('zRef').value.trim() || ag.col;
   const sucOpt = document.getElementById('zSucursal').options[document.getElementById('zSucursal').selectedIndex];
   const sucDir = sucOpt?.dataset?.dir || '';
   const telDest = document.getElementById('zDT').value.trim();
@@ -3213,7 +3223,8 @@ function renderReg(){
       </td>
       <td><span style="color:var(--t3);font-size:12px;">${data.length-i}</span></td>
       <td><small style="color:var(--t3);">${g.fecha}</small></td>
-      <td><span class="bdg bbl">${g.col}</span>${(()=>{
+      <td><span class="bdg bbl">${g.col}</span></td>
+      <td><span class="bdg bam">${g.cjl}</span>${(()=>{
         const total = parseInt(g.bul)||1;
         if(total > 1 && g.cajas){
           const nums = g.cajas.map((c,i)=>c&&c.guiaZoom?`<span style="font-size:10px;color:#1565C0;font-weight:700;">✈️ C${i+1}: ${c.guiaZoom}</span>`:'').filter(Boolean);
@@ -3221,7 +3232,6 @@ function renderReg(){
         }
         return g.guiaZoom?`<br><span style="font-size:10px;color:#1565C0;font-weight:700;">✈️ ${g.guiaZoom}</span>`:'';
       })()}</td>
-      <td><span class="bdg bam">${g.cjl}</span></td>
       <td><strong>${g.rN}</strong></td>
       <td>${g.dN}</td>
       <td><span style="color:var(--t2);">${g.rC}</span> <span style="color:var(--t3);">→</span> <span style="color:var(--blue);font-weight:600;">${g.dC}</span></td>
