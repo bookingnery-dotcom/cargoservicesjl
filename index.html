@@ -629,7 +629,7 @@ tbody tr:hover{background:#FAFCFF;}
           <table>
             <thead><tr>
               <th style="width:36px;"><input type="checkbox" id="chkAll" onclick="toggleAll(this)" style="cursor:pointer;width:15px;height:15px;"></th>
-              <th>#</th><th>Fecha</th><th>COL</th><th>CJL</th><th>Remitente</th><th>Destinatario</th><th>Ruta</th><th>Servicio</th><th>Peso</th><th>Estado</th><th>Acciones</th>
+              <th>#</th><th>Fecha</th><th>Correlativo</th><th>Remitente</th><th>Destinatario</th><th>Ruta</th><th>Servicio</th><th>Peso</th><th>Estado</th><th>Acciones</th>
             </tr></thead>
             <tbody id="rTbody"></tbody>
           </table>
@@ -669,7 +669,7 @@ tbody tr:hover{background:#FAFCFF;}
       <div class="card cb0">
         <div class="tw">
           <table>
-            <thead><tr><th>#</th><th>Fecha</th><th>COL</th><th>CJL</th><th>Remitente</th><th>Destinatario</th><th>Ruta</th><th>Servicio</th><th>Peso</th><th>Estado</th></tr></thead>
+            <thead><tr><th>#</th><th>Fecha</th><th>Correlativo</th><th>Remitente</th><th>Destinatario</th><th>Ruta</th><th>Servicio</th><th>Peso</th><th>Estado</th></tr></thead>
             <tbody id="mDetBody"></tbody>
           </table>
         </div>
@@ -1351,8 +1351,7 @@ function verManifiesto(mId){
     <tr>
       <td><span style="color:var(--t3);font-size:12px;">${i+1}</span></td>
       <td><small style="color:var(--t3);">${g.fecha}</small></td>
-      <td><span class="bdg bbl">${g.col}</span></td>
-      <td><span class="bdg bam">${g.cjl}</span></td>
+      <td><span class="${(g.col||'').startsWith('CJL')?'bdg bam':'bdg bbl'}">${(g.col||'').startsWith('CJL')?g.cjl:g.col}</span></td>
       <td><strong>${g.rN}</strong></td>
       <td>${g.dN}</td>
       <td><span style="color:var(--t2);">${g.rC}</span> → <span style="color:var(--blue);font-weight:600;">${g.dC}</span></td>
@@ -2800,7 +2799,7 @@ async function abrirZoom(){
     };
 
     // Llenar campos
-    const esCJL = (ag.cjl||'').toUpperCase().startsWith('CJL');
+    const esCJL = (ag.col||'').toUpperCase().startsWith('CJL');
     document.getElementById('zRefLabel').textContent = esCJL ? 'Referencia (tu CJL)' : 'Referencia (tu COL)';
     document.getElementById('zRef').value = esCJL ? ag.cjl : ag.col;
     document.getElementById('zDN').value=ag.dN||'';
@@ -2883,7 +2882,7 @@ async function enviarAZoom(){
   const valor = document.getElementById('zValor').value||'0';
 
   // Detectar tienda: COL = Los Olivos, CJL = Chorrillos
-  const esChorrillos = (ag.cjl||'').toUpperCase().startsWith('CJL');
+  const esChorrillos = (ag.col||'').toUpperCase().startsWith('CJL');
   const contactoRem = esChorrillos ? 'CARGO SERVICES JL CH' : 'CARGO SERVICES JL OL';
   const refCodigo = document.getElementById('zRef').value.trim() || ag.col;
   const sucOpt = document.getElementById('zSucursal').options[document.getElementById('zSucursal').selectedIndex];
@@ -3223,8 +3222,7 @@ function renderReg(){
       </td>
       <td><span style="color:var(--t3);font-size:12px;">${data.length-i}</span></td>
       <td><small style="color:var(--t3);">${g.fecha}</small></td>
-      <td><span class="bdg bbl">${g.col}</span></td>
-      <td><span class="bdg bam">${g.cjl}</span>${(()=>{
+      <td><span class="${(g.col||'').startsWith('CJL')?'bdg bam':'bdg bbl'}">${(g.col||'').startsWith('CJL')?g.cjl:g.col}</span>${(()=>{
         const total = parseInt(g.bul)||1;
         if(total > 1 && g.cajas){
           const nums = g.cajas.map((c,i)=>c&&c.guiaZoom?`<span style="font-size:10px;color:#1565C0;font-weight:700;">✈️ C${i+1}: ${c.guiaZoom}</span>`:'').filter(Boolean);
