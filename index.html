@@ -541,7 +541,7 @@ tbody tr:hover{background:#FAFCFF;}
           <div class="g g3" style="margin-bottom:16px;">
             <div class="fi ni"><label>Nombre completo *</label><div class="fi-w"><input id="gDN" type="text" placeholder="Nombre del destinatario"></div></div>
             <div class="fi ni"><label>RUC / DNI</label><div class="fi-w">
-              <input id="gDD" type="text" placeholder="Documento de identidad" oninput="buscarClientePorDoc(this.value)">
+              <input id="gDD" type="text" placeholder="Documento de identidad">
             </div></div>
             <div class="fi ni"><label>Teléfono *</label><div class="fi-w"><input id="gDT" type="text" placeholder="Número de contacto"></div></div>
             <div class="fi ni"><label>Ciudad de destino *</label><div class="fi-w"><input id="gDC" type="text" placeholder="Ciudad"></div></div>
@@ -802,6 +802,9 @@ tbody tr:hover{background:#FAFCFF;}
         </button>
         <button class="btn sm" style="background:#0D47A1;color:#fff;font-weight:700;display:none;" onclick="descargarPDFZoom()" id="btnDownloadZoom">
           📥 Descargar PDF ZOOM
+        </button>
+        <button class="btn sm" style="background:#0D47A1;color:#fff;font-weight:700;display:none;" onclick="descargarTodasGuiasZoom()" id="btnDownloadZoomAll">
+          📥 Descargar todas las guías ZOOM
         </button>
         <button class="btn sm" style="background:#1B5E20;color:#fff;font-weight:700;" onclick="exportExcelTiempoReal()">
           📊 Excel
@@ -1547,14 +1550,36 @@ function renderBox(g, idx){
 
   // Mostrar botón ZOOM según la caja actual
   const btnDL = document.getElementById('btnDownloadZoom');
+  const btnDLAll = document.getElementById('btnDownloadZoomAll');
   const guiaZoomCaja = total > 1
     ? (g.cajas && g.cajas[idx] && g.cajas[idx].guiaZoom ? g.cajas[idx].guiaZoom : null)
     : (g.guiaZoom || null);
-  if(guiaZoomCaja){
-    btnDL.style.display='inline-flex';
-    btnDL.textContent=`📥 PDF ZOOM (${guiaZoomCaja})`;
+
+  if(total > 1){
+    // Multicaja — mostrar botón de caja actual + botón de todas si hay más de una con ZOOM
+    if(guiaZoomCaja){
+      btnDL.style.display='inline-flex';
+      btnDL.textContent=`📥 PDF ZOOM Caja ${idx+1} (${guiaZoomCaja})`;
+    } else {
+      btnDL.style.display='none';
+    }
+    // Botón "todas" si hay al menos 2 cajas con guía ZOOM
+    const cajasConZoom = g.cajas ? g.cajas.filter(c=>c&&c.guiaZoom).length : 0;
+    if(cajasConZoom > 1){
+      btnDLAll.style.display='inline-flex';
+      btnDLAll.textContent=`📥 Todas las guías ZOOM (${cajasConZoom})`;
+    } else {
+      btnDLAll.style.display='none';
+    }
   } else {
-    btnDL.style.display='none';
+    // Caja única
+    btnDLAll.style.display='none';
+    if(guiaZoomCaja){
+      btnDL.style.display='inline-flex';
+      btnDL.textContent=`📥 PDF ZOOM (${guiaZoomCaja})`;
+    } else {
+      btnDL.style.display='none';
+    }
   }
 
   // Obtener datos de la caja actual para la etiqueta
@@ -3006,7 +3031,26 @@ async function imprimirEtiquetaZoom(){
   }catch(e){ toast('Error etiqueta: '+e.message,1); }
 }
 
-async function descargarPDFZoom(){
+async function descargarTodasGuiasZoom(){
+  if(!ag) return;
+  const total = parseInt(ag.bul)||1;
+  const cajasConZoom = ag.cajas ? ag.cajas.filter(c=>c&&c.guiaZoom) : [];
+  if(!cajasConZoom.length) return toast('No hay guías ZOOM para descargar',1);
+
+  toast(`Descargando ${cajasConZoom.length} guías ZOOM...`);
+
+  // Descargar cada guía secuencialmente
+  for(let i=0; i<ag.cajas.length; i++){
+    const caja = ag.cajas[i];
+    if(!caja || !caja.guiaZoom) continue;
+    currentBoxIdx = i;
+    zoomGuiaNumero = caja.guiaZoom;
+    await descargarPDFZoom();
+    // Pequeña pausa entre descargas
+    await new Promise(r=>setTimeout(r,800));
+  }
+  toast(`✅ ${cajasConZoom.length} guías ZOOM descargadas`);
+}
   // Determinar el número ZOOM correcto según la caja activa
   let guiaNum = zoomGuiaNumero;
   if(!guiaNum && ag){
