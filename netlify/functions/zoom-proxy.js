@@ -6,12 +6,14 @@ const ENDPOINTS = {
   token:        { url: 'https://miws.zoom.red/api/crearToken', method: 'POST' },
   guia:         { url: 'https://serviciosbd.zoom.red/api/guiaelectronica/createShipmentInternacional', method: 'POST' },
   etiqueta:     { url: 'https://wsgeneric.zoom.red/api/etiquetaTermica', method: 'POST' },
+  imprimirGuia: { url: 'https://appenvios.zoom.red/guiaelectronica/imprimirGuia', method: 'GET' },
   ciudades:     { url: 'https://api.zoom.red/canguroazul/getCiudades', method: 'GET' },
   sucursales:   { url: 'https://api.zoom.red/canguroazul/getSucursales', method: 'GET' },
   oficinas:     { url: 'https://sandbox.zoom.red/baaszoom/public/canguroazul/getOficinasGE', method: 'GET' },
   todasOficinas:{ url: 'https://sandbox.zoom.red/baaszoom/public/canguroazul/getOficinas', method: 'GET' },
   ciudadesOfi:  { url: 'https://sandbox.zoom.red/baaszoom/public/canguroazul/getCiudadesOfi', method: 'GET' },
-  tracking:     { url: 'https://api.zoom.red/canguroazul/getInfoTracking', method: 'GET' },
+  tracking:     { url: 'https://sandbox.zoom.red/baaszoom/public/canguroazul/getInfoTracking', method: 'GET' },
+  trackingApi:  { url: 'https://api.zoom.red/canguroazul/getInfoTracking', method: 'GET' },
 };
 function makeRequest(urlStr, method, headers, body) {
   return new Promise((resolve, reject) => {
