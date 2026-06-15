@@ -3051,6 +3051,8 @@ async function descargarTodasGuiasZoom(){
   }
   toast(`✅ ${cajasConZoom.length} guías ZOOM descargadas`);
 }
+
+async function descargarPDFZoom(){
   // Determinar el número ZOOM correcto según la caja activa
   let guiaNum = zoomGuiaNumero;
   if(!guiaNum && ag){
