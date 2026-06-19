@@ -12,7 +12,7 @@ const ENDPOINTS = {
   oficinas:     { url: 'https://sandbox.zoom.red/baaszoom/public/canguroazul/getOficinasGE', method: 'GET' },
   todasOficinas:{ url: 'https://sandbox.zoom.red/baaszoom/public/canguroazul/getOficinas', method: 'GET' },
   ciudadesOfi:  { url: 'https://sandbox.zoom.red/baaszoom/public/canguroazul/getCiudadesOfi', method: 'GET' },
-  tracking:     { url: 'https://sandbox.zoom.red/baaszoom/public/canguroazul/getInfoTracking', method: 'GET' },
+  tracking:     { url: 'https://api.zoom.red/canguroazul/getInfoTracking', method: 'GET' },
   trackingApi:  { url: 'https://api.zoom.red/canguroazul/getInfoTracking', method: 'GET' },
 };
 function makeRequest(urlStr, method, headers, body) {
