@@ -424,9 +424,7 @@ tbody tr:hover{background:#FAFCFF;}
       <div class="ni-item" data-p="usuarios" onclick="goP('usuarios',this)">
         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>Usuarios
       </div>
-      <div class="ni-item" data-p="tracking" onclick="goP('tracking',this)">
-        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>Tracking ZOOM
-      </div>
+
     </div>
     <div class="sb-foot">
       <div class="sb-usr">
@@ -682,62 +680,7 @@ tbody tr:hover{background:#FAFCFF;}
       <div class="ug" id="uGrid"></div>
     </div>
 
-    <div id="pg-tracking" class="page">
-      <div class="ph">
-        <div class="ph-l"><h2>Tracking ZOOM</h2><p>Estatus en tiempo real de todas las guías ZOOM</p></div>
-        <div class="ph-r" style="display:flex;gap:8px;align-items:center;">
-          <button class="btn sm" style="background:#1565C0;color:#fff;font-weight:700;" onclick="cargarTodoTracking()">🔄 Actualizar todo</button>
-        </div>
-      </div>
-      <div id="trackingPageContent" style="padding:0 24px 24px;">
 
-        <!-- Buscador -->
-        <div style="margin-bottom:20px;">
-          <input type="text" id="trackingSearch" placeholder="🔍 Buscar por guía ZOOM, código COL/CJL o destinatario..."
-            style="width:100%;padding:11px 16px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'Space Grotesk',sans-serif;outline:none;background:#fff;"
-            oninput="filtrarTracking(this.value)"
-            onfocus="this.style.borderColor='var(--blue)'" onblur="this.style.borderColor='var(--border)'">
-        </div>
-
-        <div id="trackingPageStatus" style="text-align:center;padding:60px 20px;color:var(--t2);">
-          <div style="font-size:40px;margin-bottom:12px;">📡</div>
-          <div style="font-size:15px;">Cargando guías ZOOM...</div>
-        </div>
-
-        <!-- COL -->
-        <div id="trackingSecCOL" style="display:none;margin-bottom:32px;">
-          <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
-            <div style="width:4px;height:24px;background:#1565C0;border-radius:2px;"></div>
-            <h3 style="font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:800;color:var(--navy);">Tienda COL</h3>
-            <span id="trackingBadgeCOL" style="background:#E3F2FD;color:#1565C0;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;">0 guías</span>
-          </div>
-          <div id="trackingGridCOL" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;"></div>
-        </div>
-
-        <!-- CJL -->
-        <div id="trackingSecCJL" style="display:none;margin-bottom:32px;">
-          <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
-            <div style="width:4px;height:24px;background:#2E7D32;border-radius:2px;"></div>
-            <h3 style="font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:800;color:var(--navy);">Tienda CJL</h3>
-            <span id="trackingBadgeCJL" style="background:#E8F5E9;color:#2E7D32;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;">0 guías</span>
-          </div>
-          <div id="trackingGridCJL" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;"></div>
-        </div>
-
-        <!-- Manifiesto ZOOM -->
-        <div id="trackingSecManifiesto" style="margin-bottom:32px;">
-          <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
-            <div style="width:4px;height:24px;background:#F57F17;border-radius:2px;"></div>
-            <h3 style="font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:800;color:var(--navy);">Manifiesto ZOOM — Entregadas</h3>
-            <span id="trackingBadgeManifiesto" style="background:#FFF8E1;color:#F57F17;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;">0 guías</span>
-          </div>
-          <div id="trackingGridManifiesto" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;">
-            <div style="color:var(--t2);font-size:13px;padding:20px;grid-column:1/-1;">Las guías archivadas aparecerán aquí.</div>
-          </div>
-        </div>
-
-      </div>
-    </div>
 
   </div>
 </div>
@@ -904,30 +847,6 @@ tbody tr:hover{background:#FAFCFF;}
 </div>
 
 <!-- MODAL ZOOM -->
-<!-- MODAL TRACKING ZOOM -->
-<div class="ov" id="ovTracking">
-  <div class="modal" style="max-width:580px;">
-    <div class="mh" style="background:linear-gradient(135deg,#0D47A1,#1565C0);">
-      <div>
-        <div style="font-size:11px;opacity:.8;letter-spacing:1px;text-transform:uppercase;">ZOOM TRACKING</div>
-        <div style="font-weight:700;font-size:16px;" id="trackingTitle">Guía —</div>
-      </div>
-      <button class="mcl" style="color:#fff;" onclick="closeOv('ovTracking')"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg></button>
-    </div>
-    <div class="mb" style="padding:20px;">
-      <div id="trackingStatus" style="text-align:center;padding:30px;color:var(--t2);font-size:14px;">🔄 Consultando estatus...</div>
-      <div id="trackingContent" style="display:none;">
-        <div id="trackingUltimo" style="background:#E3F2FD;border-radius:10px;padding:14px 16px;margin-bottom:16px;"></div>
-        <div style="font-size:11px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;">Historial completo</div>
-        <div id="trackingHistorial" style="max-height:320px;overflow-y:auto;"></div>
-      </div>
-    </div>
-    <div class="mf">
-      <button class="btn bg sm" onclick="closeOv('ovTracking')">Cerrar</button>
-      <button class="btn sm" style="background:#1565C0;color:#fff;" onclick="refrescarTracking()">🔄 Actualizar</button>
-    </div>
-  </div>
-</div>
 
 <div class="ov" id="ovZoom">
   <div class="modal" style="max-width:560px;">
@@ -1421,7 +1340,6 @@ function goP(id,el){
   if(id==='dashboard')updDash();
   if(id==='guia')updCorr();
   if(id==='manifiestos')renderManifiestos();
-  if(id==='tracking')cargarTodoTracking();
 }
 
 /* ─── CORRELATIVOS ─── */
@@ -3291,7 +3209,7 @@ function renderReg(){
                 if(c && c.guiaZoom){
                   return c.guiaZoom
                     ? `<div onclick="descargarPDFZoomDirecto('${g.col}',${i});closeAllMenus()" style="padding:10px 16px;cursor:pointer;font-size:13px;display:flex;align-items:center;gap:8px;" onmouseover="this.style.background='#E3F2FD'" onmouseout="this.style.background='#fff'">✈️ PDF ZOOM Caja ${i+1} (${c.guiaZoom})</div>
-<div onclick="verTrackingZoom('${c.guiaZoom}','Caja ${i+1}');closeAllMenus()" style="padding:10px 16px;cursor:pointer;font-size:13px;display:flex;align-items:center;gap:8px;" onmouseover="this.style.background='#E3F2FD'" onmouseout="this.style.background='#fff'">📡 Tracking Caja ${i+1} (${c.guiaZoom})</div>`
+`
                     : `<div onclick="crearZoomDesdeTabla('${g.col}',${i});closeAllMenus()" style="padding:10px 16px;cursor:pointer;font-size:13px;display:flex;align-items:center;gap:8px;" onmouseover="this.style.background='#E3F2FD'" onmouseout="this.style.background='#fff'">✈️ Crear ZOOM Caja ${i+1}</div>`;
                 }
               }).join('');
@@ -3300,7 +3218,7 @@ function renderReg(){
             // Caja única
             return g.guiaZoom
               ? `<div onclick="descargarPDFZoomDirecto('${g.col}');closeAllMenus()" style="padding:10px 16px;cursor:pointer;font-size:13px;display:flex;align-items:center;gap:8px;" onmouseover="this.style.background='#E3F2FD'" onmouseout="this.style.background='#fff'">✈️ Descargar Guía ZOOM PDF</div>
-<div onclick="verTrackingZoom('${g.guiaZoom}','');closeAllMenus()" style="padding:10px 16px;cursor:pointer;font-size:13px;display:flex;align-items:center;gap:8px;" onmouseover="this.style.background='#E3F2FD'" onmouseout="this.style.background='#fff'">📡 Tracking ZOOM (${g.guiaZoom})</div>`
+`
               : `<div onclick="crearZoomDesdeTabla('${g.col}');closeAllMenus()" style="padding:10px 16px;cursor:pointer;font-size:13px;display:flex;align-items:center;gap:8px;" onmouseover="this.style.background='#E3F2FD'" onmouseout="this.style.background='#fff'">✈️ Crear Guía ZOOM</div>`;
           })()}
           <div onclick="abrirDocumentos('${g.col}');closeAllMenus()" style="padding:10px 16px;cursor:pointer;font-size:13px;display:flex;align-items:center;gap:8px;" onmouseover="this.style.background='var(--green2)'" onmouseout="this.style.background='#fff'">📄 Documentos</div>
@@ -3658,242 +3576,7 @@ function renderManifiestoZoom(){
     </div>`).join('');
 }
 
-async function cargarTodoTracking(){
-  const statusEl = document.getElementById('trackingPageStatus');
-  statusEl.style.display='block';
-  statusEl.innerHTML='<div style="font-size:40px;margin-bottom:12px;">📡</div><div style="font-size:15px;">Cargando guías ZOOM...</div>';
-  document.getElementById('trackingSecCOL').style.display='none';
-  document.getElementById('trackingSecCJL').style.display='none';
-  document.getElementById('trackingSearch').value='';
 
-  // Renderizar manifiesto guardado
-  renderManifiestoZoom();
-
-  // IDs ya archivados
-  const archivados = new Set(_manifiestoZoom.map(x=>String(x.guiaZoom)));
-
-  // Obtener todas las guías con número ZOOM no archivadas
-  const guiasCOL = [], guiasCJL = [];
-  guias.forEach(g => {
-    const total = parseInt(g.bul)||1;
-    if(total > 1 && g.cajas){
-      g.cajas.forEach((c,i) => {
-        if(c && c.guiaZoom && !archivados.has(String(c.guiaZoom))){
-          const entry = {...g, _guiaZoom: c.guiaZoom, _cajaLabel: `Caja ${i+1}/${total}`};
-          (g.userKey||'').toLowerCase()==='chorrillos' ? guiasCJL.push(entry) : guiasCOL.push(entry);
-        }
-      });
-    } else if(g.guiaZoom && !archivados.has(String(g.guiaZoom))){
-      const entry = {...g, _guiaZoom: g.guiaZoom, _cajaLabel: ''};
-      (g.userKey||'').toLowerCase()==='chorrillos' ? guiasCJL.push(entry) : guiasCOL.push(entry);
-    }
-  });
-
-  const total = guiasCOL.length + guiasCJL.length;
-  if(!total){
-    statusEl.innerHTML='<div style="font-size:40px;margin-bottom:12px;">📭</div><div style="font-size:15px;">No hay guías ZOOM activas.</div>';
-    return;
-  }
-  statusEl.innerHTML=`<div style="font-size:14px;color:var(--t2);">Consultando ${total} guía(s)... ⏳</div>`;
-
-  async function renderGrupo(lista, gridId, badgeId, secId, accentColor){
-    if(!lista.length) return;
-    document.getElementById(badgeId).textContent = `${lista.length} guía${lista.length>1?'s':''}`;
-    document.getElementById(secId).style.display='block';
-    const grid = document.getElementById(gridId);
-    grid.innerHTML = lista.map(g=>`
-      <div class="tcard-wrap" id="twrap_${g._guiaZoom}" data-search="${g._guiaZoom} ${g.col} ${g.dN||''} ${g.dC||''}">
-        <div id="tcard_${g._guiaZoom}" style="background:#fff;border:1.5px solid #e8edf4;border-radius:12px;padding:14px 16px;cursor:pointer;transition:box-shadow .2s;" onclick="verTrackingZoom('${g._guiaZoom}','${g._cajaLabel}')" onmouseover="this.style.boxShadow='0 4px 16px rgba(0,0,0,.1)'" onmouseout="this.style.boxShadow='none'">
-          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
-            <div>
-              <div style="font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:13px;color:var(--navy);">${g.col||''} ${g._cajaLabel?'· '+g._cajaLabel:''}</div>
-              <div style="font-size:11px;color:var(--t2);margin-top:2px;">✈️ ${g._guiaZoom}</div>
-            </div>
-            <div id="tstat_${g._guiaZoom}" style="font-size:18px;">⏳</div>
-          </div>
-          <div style="font-size:12px;font-weight:600;color:var(--navy);margin-bottom:2px;">${g.dN||'—'}</div>
-          <div style="font-size:11px;color:var(--t2);">${g.dC||''}</div>
-          <div style="margin-top:8px;display:flex;justify-content:space-between;align-items:center;">
-            <div id="tdesc_${g._guiaZoom}" style="font-size:11px;font-weight:700;padding:4px 8px;border-radius:6px;background:#f5f5f5;color:#555;display:inline-block;">Consultando...</div>
-            <button id="tbtn_${g._guiaZoom}" onclick="event.stopPropagation();archivarGuiaZoom('${g._guiaZoom}','${g.col}','${(g.dN||'').replace(/'/g,"\\'")}','${g.dC||''}','${g._cajaLabel}','')" style="display:none;font-size:11px;padding:4px 10px;border-radius:6px;background:#E8F5E9;color:#2E7D32;border:none;cursor:pointer;font-weight:700;">📥 Archivar</button>
-          </div>
-        </div>
-      </div>`).join('');
-
-    // Cargar tracking de cada guía en paralelo
-    await Promise.all(lista.map(async g => {
-      try{
-        // Intentar trackingWs primero, luego trackingQa, luego tracking
-        let hist = [];
-        try{
-          const d1 = await zoomFetch('trackingWs', {codigo: g._guiaZoom, tipo_busqueda:1, web:1}, zoomToken);
-          const t1 = (d1&&d1.entidadRespuesta&&d1.entidadRespuesta.tracking)||[];
-          if(t1.length) hist = t1.map(function(e){ return {
-            codigo_estatus:(e.estatus&&e.estatus.codestatus)||0,
-            descripcion_estatus:(e.estatus&&e.estatus.nombre)||''
-          };});
-        }catch(ex){}
-        if(!hist.length){
-          try{
-            const d2 = await zoomFetch('trackingQa', {numero: g._guiaZoom, tipo_busqueda:1, web:1}, zoomToken);
-            const t2 = (d2&&d2.entidadRespuesta&&d2.entidadRespuesta.traking)||[];
-            if(t2.length) hist = t2.map(function(e){ return {
-              codigo_estatus:(e.estatus&&e.estatus.codestatus)||0,
-              descripcion_estatus:(e.estatus&&e.estatus.nombre)||''
-            };});
-          }catch(ex){}
-        }
-        if(!hist.length){
-          try{
-            const d3 = await zoomFetch('tracking', {tipo_busqueda:1, codigo:g._guiaZoom, codigo_cliente:'407940'}, zoomToken);
-            hist = Array.isArray(d3) ? d3 : Array.isArray(d3.entidadRespuesta) ? d3.entidadRespuesta : [];
-          }catch(ex){}
-        }
-        if(hist.length){
-          const ult = hist[0];
-          const st = trackingEstiloEstatus(ult.codigo_estatus);
-          const statEl = document.getElementById(`tstat_${g._guiaZoom}`);
-          const descEl = document.getElementById(`tdesc_${g._guiaZoom}`);
-          const cardEl = document.getElementById(`tcard_${g._guiaZoom}`);
-          const btnEl  = document.getElementById(`tbtn_${g._guiaZoom}`);
-          if(statEl) statEl.textContent = st.ic;
-          if(descEl){ descEl.style.background=st.bg; descEl.style.color=st.color; descEl.textContent=ult.descripcion_estatus; }
-          if(cardEl) cardEl.style.borderColor = st.color+'44';
-          // Mostrar botón archivar solo si está entregado
-          if(btnEl && [7,8,9].includes(ult.codigo_estatus)) btnEl.style.display='inline-block';
-        } else {
-          const descEl = document.getElementById(`tdesc_${g._guiaZoom}`);
-          if(descEl) descEl.textContent = 'Sin datos';
-        }
-      }catch(e){
-        const descEl = document.getElementById(`tdesc_${g._guiaZoom}`);
-        if(descEl) descEl.textContent = 'Error';
-      }
-    }));
-  }
-
-  await Promise.all([
-    renderGrupo(guiasCOL, 'trackingGridCOL', 'trackingBadgeCOL', 'trackingSecCOL', '#1565C0'),
-    renderGrupo(guiasCJL, 'trackingGridCJL', 'trackingBadgeCJL', 'trackingSecCJL', '#2E7D32'),
-  ]);
-
-  statusEl.style.display='none';
-}
-let _trackingGuia = null;
-
-async function verTrackingZoom(guiaNum, label){
-  _trackingGuia = guiaNum;
-  document.getElementById('trackingTitle').textContent = `Guía ${guiaNum}${label?' — '+label:''}`;
-  document.getElementById('trackingStatus').style.display='block';
-  document.getElementById('trackingStatus').textContent='🔄 Consultando estatus...';
-  document.getElementById('trackingContent').style.display='none';
-  document.getElementById('ovTracking').classList.add('show');
-  await cargarTracking(guiaNum);
-}
-
-async function refrescarTracking(){
-  if(!_trackingGuia) return;
-  document.getElementById('trackingStatus').style.display='block';
-  document.getElementById('trackingStatus').textContent='🔄 Actualizando...';
-  document.getElementById('trackingContent').style.display='none';
-  await cargarTracking(_trackingGuia);
-}
-
-async function cargarTracking(guiaNum){
-  try{
-    let lista = [];
-
-    // Intento 1: getZoomTrackWs
-    try{
-      const data = await zoomFetch('trackingWs', {codigo: guiaNum, tipo_busqueda:1, web:1}, zoomToken);
-      const tracking = (data && data.entidadRespuesta && data.entidadRespuesta.tracking) ? data.entidadRespuesta.tracking : [];
-      if(tracking.length){
-        lista = tracking.map(function(e){ return {
-          fecha: e.fechapro||'',
-          hora: e.horareal||e.hora||'',
-          codigo_estatus: (e.estatus&&e.estatus.codestatus)||e.codestatus||0,
-          descripcion_estatus: (e.estatus&&e.estatus.nombre)||(e.estatus&&e.estatus.nombreweb)||'',
-          siglas: (e.estatus&&e.estatus.siglas)||'',
-          oficina: (e.oficina&&e.oficina.nombre)||''
-        };});
-      }
-    }catch(e1){}
-
-    // Intento 2: consultaTrackingWs
-    if(!lista.length){
-      try{
-        const data = await zoomFetch('trackingQa', {numero: guiaNum, tipo_busqueda:1, web:1}, zoomToken);
-        const tracking = (data && data.entidadRespuesta && data.entidadRespuesta.traking) ? data.entidadRespuesta.traking : [];
-        if(tracking.length){
-          lista = tracking.map(function(e){ return {
-            fecha: e.fechapro||'',
-            hora: e.horareal||e.hora||'',
-            codigo_estatus: (e.estatus&&e.estatus.codestatus)||e.codestatus||0,
-            descripcion_estatus: (e.estatus&&e.estatus.nombre)||(e.estatus&&e.estatus.nombreweb)||'',
-            siglas: (e.estatus&&e.estatus.siglas)||'',
-            oficina: (e.oficina&&e.oficina.nombre)||''
-          };});
-        }
-      }catch(e2){}
-    }
-
-    // Intento 3: getInfoTracking original
-    if(!lista.length){
-      try{
-        const data = await zoomFetch('tracking', {tipo_busqueda:1, codigo:guiaNum, codigo_cliente:'407940'}, zoomToken);
-        const tracking = Array.isArray(data) ? data : (Array.isArray(data.entidadRespuesta) ? data.entidadRespuesta : []);
-        if(tracking.length){
-          lista = tracking.map(function(e){ return {
-            fecha: e.fecha||e.fechapro||'',
-            hora: e.hora||'',
-            codigo_estatus: e.codigo_estatus||0,
-            descripcion_estatus: e.descripcion_estatus||'',
-            siglas: e.siglas||'',
-            oficina: ''
-          };});
-        }
-      }catch(e3){}
-    }
-
-    if(!lista.length){
-      document.getElementById('trackingStatus').textContent='⚠️ Sin resultados para esta guía.';
-      return;
-    }
-
-    var color = function(cod) {
-      if([7,8,9,98,186].includes(cod)) return {bg:'#E8F5E9',ic:'✅',col:'#2E7D32'};
-      if([1,2,3].includes(cod)) return {bg:'#E3F2FD',ic:'📦',col:'#1565C0'};
-      if([12,102,534,8].includes(cod)) return {bg:'#FFF3E0',ic:'🚚',col:'#E65100'};
-      if([22,90,147,259].includes(cod)) return {bg:'#FFEBEE',ic:'⚠️',col:'#C62828'};
-      if([114,125,9].includes(cod)) return {bg:'#F3E5F5',ic:'🏢',col:'#6A1B9A'};
-      return {bg:'#F5F5F5',ic:'📋',col:'#555'};
-    };
-
-    var ult = lista[0];
-    var c = color(ult.codigo_estatus);
-    document.getElementById('trackingUltimo').innerHTML=
-      '<div style="display:flex;align-items:center;gap:12px;">' +
-      '<div style="font-size:32px;">'+c.ic+'</div>' +
-      '<div><div style="font-weight:800;font-size:15px;color:'+c.col+';">'+ult.descripcion_estatus+'</div>' +
-      '<div style="font-size:12px;color:var(--t2);margin-top:3px;">'+ult.fecha+(ult.hora?' · '+ult.hora:'')+(ult.oficina?' · '+ult.oficina:'')+' · '+ult.siglas+'</div>' +
-      '</div></div>';
-
-    document.getElementById('trackingHistorial').innerHTML = lista.map(function(e){
-      var cc = color(e.codigo_estatus);
-      return '<div style="display:flex;gap:12px;padding:10px 0;border-bottom:1px solid #f0f0f0;">' +
-        '<div style="width:28px;text-align:center;flex-shrink:0;font-size:16px;">'+cc.ic+'</div>' +
-        '<div style="flex:1;"><div style="font-weight:600;font-size:13px;color:'+cc.col+';">'+e.descripcion_estatus+'</div>' +
-        '<div style="font-size:11px;color:var(--t2);margin-top:2px;">'+e.fecha+(e.hora?' · '+e.hora:'')+(e.oficina?' · '+e.oficina:'')+' · <strong>'+e.siglas+'</strong></div>' +
-        '</div></div>';
-    }).join('');
-
-    document.getElementById('trackingStatus').style.display='none';
-    document.getElementById('trackingContent').style.display='block';
-
-  }catch(e){
-    document.getElementById('trackingStatus').textContent='❌ Error al consultar: '+e.message;
-  }
-}
 function mostrarZoomManual(){
   // Muestra el panel manual y oculta el formulario de datos
   document.getElementById('zoomDatos').style.display='none';
