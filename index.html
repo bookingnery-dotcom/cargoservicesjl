@@ -3723,7 +3723,7 @@ async function cargarTodoTracking(){
     // Cargar tracking de cada guía en paralelo
     await Promise.all(lista.map(async g => {
       try{
-        const data = await zoomFetch('tracking', {tipo_busqueda:1, codigo: g._guiaZoom}, zoomToken);
+        const data = await zoomFetch('tracking', {tipo_busqueda:1, codigo: g._guiaZoom, codigo_cliente:'407940'}, zoomToken);
         const hist = Array.isArray(data) ? data : Array.isArray(data.entidadRespuesta) ? data.entidadRespuesta : [];
         if(hist.length){
           const ult = hist[0];
@@ -3777,7 +3777,7 @@ async function refrescarTracking(){
 
 async function cargarTracking(guiaNum){
   try{
-    const data = await zoomFetch('tracking', {tipo_busqueda:1, codigo:guiaNum}, zoomToken);
+    const data = await zoomFetch('tracking', {tipo_busqueda:1, codigo:guiaNum, codigo_cliente:'407940'}, zoomToken);
     const lista = Array.isArray(data) ? data
       : Array.isArray(data.entidadRespuesta) ? data.entidadRespuesta : [];
 
