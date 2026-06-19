@@ -3723,8 +3723,32 @@ async function cargarTodoTracking(){
     // Cargar tracking de cada guía en paralelo
     await Promise.all(lista.map(async g => {
       try{
-        const data = await zoomFetch('tracking', {tipo_busqueda:1, codigo: g._guiaZoom, codigo_cliente:'407940'}, zoomToken);
-        const hist = Array.isArray(data) ? data : Array.isArray(data.entidadRespuesta) ? data.entidadRespuesta : [];
+        // Intentar trackingWs primero, luego trackingQa, luego tracking
+        let hist = [];
+        try{
+          const d1 = await zoomFetch('trackingWs', {codigo: g._guiaZoom, tipo_busqueda:1, web:1}, zoomToken);
+          const t1 = (d1&&d1.entidadRespuesta&&d1.entidadRespuesta.tracking)||[];
+          if(t1.length) hist = t1.map(function(e){ return {
+            codigo_estatus:(e.estatus&&e.estatus.codestatus)||0,
+            descripcion_estatus:(e.estatus&&e.estatus.nombre)||''
+          };});
+        }catch(ex){}
+        if(!hist.length){
+          try{
+            const d2 = await zoomFetch('trackingQa', {numero: g._guiaZoom, tipo_busqueda:1, web:1}, zoomToken);
+            const t2 = (d2&&d2.entidadRespuesta&&d2.entidadRespuesta.traking)||[];
+            if(t2.length) hist = t2.map(function(e){ return {
+              codigo_estatus:(e.estatus&&e.estatus.codestatus)||0,
+              descripcion_estatus:(e.estatus&&e.estatus.nombre)||''
+            };});
+          }catch(ex){}
+        }
+        if(!hist.length){
+          try{
+            const d3 = await zoomFetch('tracking', {tipo_busqueda:1, codigo:g._guiaZoom, codigo_cliente:'407940'}, zoomToken);
+            hist = Array.isArray(d3) ? d3 : Array.isArray(d3.entidadRespuesta) ? d3.entidadRespuesta : [];
+          }catch(ex){}
+        }
         if(hist.length){
           const ult = hist[0];
           const st = trackingEstiloEstatus(ult.codigo_estatus);
@@ -3777,46 +3801,90 @@ async function refrescarTracking(){
 
 async function cargarTracking(guiaNum){
   try{
-    const data = await zoomFetch('tracking', {tipo_busqueda:1, codigo:guiaNum, codigo_cliente:'407940'}, zoomToken);
-    const lista = Array.isArray(data) ? data
-      : Array.isArray(data.entidadRespuesta) ? data.entidadRespuesta : [];
+    let lista = [];
+
+    // Intento 1: getZoomTrackWs
+    try{
+      const data = await zoomFetch('trackingWs', {codigo: guiaNum, tipo_busqueda:1, web:1}, zoomToken);
+      const tracking = (data && data.entidadRespuesta && data.entidadRespuesta.tracking) ? data.entidadRespuesta.tracking : [];
+      if(tracking.length){
+        lista = tracking.map(function(e){ return {
+          fecha: e.fechapro||'',
+          hora: e.horareal||e.hora||'',
+          codigo_estatus: (e.estatus&&e.estatus.codestatus)||e.codestatus||0,
+          descripcion_estatus: (e.estatus&&e.estatus.nombre)||(e.estatus&&e.estatus.nombreweb)||'',
+          siglas: (e.estatus&&e.estatus.siglas)||'',
+          oficina: (e.oficina&&e.oficina.nombre)||''
+        };});
+      }
+    }catch(e1){}
+
+    // Intento 2: consultaTrackingWs
+    if(!lista.length){
+      try{
+        const data = await zoomFetch('trackingQa', {numero: guiaNum, tipo_busqueda:1, web:1}, zoomToken);
+        const tracking = (data && data.entidadRespuesta && data.entidadRespuesta.traking) ? data.entidadRespuesta.traking : [];
+        if(tracking.length){
+          lista = tracking.map(function(e){ return {
+            fecha: e.fechapro||'',
+            hora: e.horareal||e.hora||'',
+            codigo_estatus: (e.estatus&&e.estatus.codestatus)||e.codestatus||0,
+            descripcion_estatus: (e.estatus&&e.estatus.nombre)||(e.estatus&&e.estatus.nombreweb)||'',
+            siglas: (e.estatus&&e.estatus.siglas)||'',
+            oficina: (e.oficina&&e.oficina.nombre)||''
+          };});
+        }
+      }catch(e2){}
+    }
+
+    // Intento 3: getInfoTracking original
+    if(!lista.length){
+      try{
+        const data = await zoomFetch('tracking', {tipo_busqueda:1, codigo:guiaNum, codigo_cliente:'407940'}, zoomToken);
+        const tracking = Array.isArray(data) ? data : (Array.isArray(data.entidadRespuesta) ? data.entidadRespuesta : []);
+        if(tracking.length){
+          lista = tracking.map(function(e){ return {
+            fecha: e.fecha||e.fechapro||'',
+            hora: e.hora||'',
+            codigo_estatus: e.codigo_estatus||0,
+            descripcion_estatus: e.descripcion_estatus||'',
+            siglas: e.siglas||'',
+            oficina: ''
+          };});
+        }
+      }catch(e3){}
+    }
 
     if(!lista.length){
       document.getElementById('trackingStatus').textContent='⚠️ Sin resultados para esta guía.';
       return;
     }
 
-    // Colores por estatus
-    const color = (cod) => {
-      if([7,8,9].includes(cod)) return {bg:'#E8F5E9',ic:'✅',col:'#2E7D32'}; // Entregado
-      if([1,2,3].includes(cod)) return {bg:'#E3F2FD',ic:'📦',col:'#1565C0'}; // Procesado
-      if([12,102].includes(cod)) return {bg:'#FFF3E0',ic:'🚚',col:'#E65100'}; // En tránsito
-      if([22,90].includes(cod)) return {bg:'#FFEBEE',ic:'⚠️',col:'#C62828'}; // Problema
+    var color = function(cod) {
+      if([7,8,9,98,186].includes(cod)) return {bg:'#E8F5E9',ic:'✅',col:'#2E7D32'};
+      if([1,2,3].includes(cod)) return {bg:'#E3F2FD',ic:'📦',col:'#1565C0'};
+      if([12,102,534,8].includes(cod)) return {bg:'#FFF3E0',ic:'🚚',col:'#E65100'};
+      if([22,90,147,259].includes(cod)) return {bg:'#FFEBEE',ic:'⚠️',col:'#C62828'};
+      if([114,125,9].includes(cod)) return {bg:'#F3E5F5',ic:'🏢',col:'#6A1B9A'};
       return {bg:'#F5F5F5',ic:'📋',col:'#555'};
     };
 
-    // Último estatus
-    const ult = lista[0];
-    const c = color(ult.codigo_estatus);
-    document.getElementById('trackingUltimo').innerHTML=`
-      <div style="display:flex;align-items:center;gap:12px;">
-        <div style="font-size:32px;">${c.ic}</div>
-        <div>
-          <div style="font-weight:800;font-size:15px;color:${c.col};">${ult.descripcion_estatus}</div>
-          <div style="font-size:12px;color:var(--t2);margin-top:3px;">${ult.fecha}${ult.hora?' · '+ult.hora:''} · Siglas: ${ult.siglas}</div>
-        </div>
-      </div>`;
+    var ult = lista[0];
+    var c = color(ult.codigo_estatus);
+    document.getElementById('trackingUltimo').innerHTML=
+      '<div style="display:flex;align-items:center;gap:12px;">' +
+      '<div style="font-size:32px;">'+c.ic+'</div>' +
+      '<div><div style="font-weight:800;font-size:15px;color:'+c.col+';">'+ult.descripcion_estatus+'</div>' +
+      '<div style="font-size:12px;color:var(--t2);margin-top:3px;">'+ult.fecha+(ult.hora?' · '+ult.hora:'')+(ult.oficina?' · '+ult.oficina:'')+' · '+ult.siglas+'</div>' +
+      '</div></div>';
 
-    // Historial
-    document.getElementById('trackingHistorial').innerHTML = lista.map((e,i)=>{
-      const cc = color(e.codigo_estatus);
-      return `<div style="display:flex;gap:12px;padding:10px 0;border-bottom:1px solid #f0f0f0;${i===0?'opacity:.4;font-size:12px;':''}">
-        <div style="width:28px;text-align:center;flex-shrink:0;font-size:16px;">${cc.ic}</div>
-        <div style="flex:1;">
-          <div style="font-weight:600;font-size:13px;color:${cc.col};">${e.descripcion_estatus}</div>
-          <div style="font-size:11px;color:var(--t2);margin-top:2px;">${e.fecha}${e.hora?' · '+e.hora:''} · <strong>${e.siglas}</strong></div>
-        </div>
-      </div>`;
+    document.getElementById('trackingHistorial').innerHTML = lista.map(function(e){
+      var cc = color(e.codigo_estatus);
+      return '<div style="display:flex;gap:12px;padding:10px 0;border-bottom:1px solid #f0f0f0;">' +
+        '<div style="width:28px;text-align:center;flex-shrink:0;font-size:16px;">'+cc.ic+'</div>' +
+        '<div style="flex:1;"><div style="font-weight:600;font-size:13px;color:'+cc.col+';">'+e.descripcion_estatus+'</div>' +
+        '<div style="font-size:11px;color:var(--t2);margin-top:2px;">'+e.fecha+(e.hora?' · '+e.hora:'')+(e.oficina?' · '+e.oficina:'')+' · <strong>'+e.siglas+'</strong></div>' +
+        '</div></div>';
     }).join('');
 
     document.getElementById('trackingStatus').style.display='none';
