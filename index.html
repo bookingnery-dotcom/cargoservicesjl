@@ -2832,11 +2832,15 @@ async function abrirZoom(){
     document.getElementById('zDT').value=ag.dT||'';
     document.getElementById('zDCel').value=ag.dT||'';
     document.getElementById('zDDir').value=ag.dDir||ag.dC||'';
-    document.getElementById('zPeso').value=ag.peso&&ag.peso!=='—'?ag.peso:'';
+    // Tomar peso y medidas de la caja actual si es multicaja
+    const totalCajas = parseInt(ag.bul)||1;
+    const cajaActual = (totalCajas > 1 && ag.cajas && ag.cajas[currentBoxIdx]) ? ag.cajas[currentBoxIdx] : null;
+    const pesoVal = (cajaActual && cajaActual.peso && cajaActual.peso!=='—') ? cajaActual.peso : (ag.peso&&ag.peso!=='—' ? ag.peso : '');
+    document.getElementById('zPeso').value = pesoVal;
+    document.getElementById('zAlto').value = (cajaActual&&cajaActual.alto) ? cajaActual.alto : (ag.alto||'');
+    document.getElementById('zAncho').value = (cajaActual&&cajaActual.ancho) ? cajaActual.ancho : (ag.ancho||'');
+    document.getElementById('zLargo').value = (cajaActual&&cajaActual.largo) ? cajaActual.largo : (ag.largo||'');
     document.getElementById('zDesc').value=ag.desc||'Paquete';
-    document.getElementById('zAlto').value=ag.alto||'';
-    document.getElementById('zAncho').value=ag.ancho||'';
-    document.getElementById('zLargo').value=ag.largo||'';
     document.getElementById('zValor').value='0';
     document.getElementById('zCiudad').value=ag.dC||'';
     document.getElementById('zSucursal').innerHTML='<option value="">Selecciona ciudad primero</option>';
