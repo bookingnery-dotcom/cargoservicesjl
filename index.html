@@ -2846,7 +2846,6 @@ async function abrirZoom(){
     document.getElementById('zSucursal').innerHTML='<option value="">Selecciona ciudad primero</option>';
 
     // Detectar si la caja actual ya tiene guía ZOOM
-    const totalCajas = parseInt(ag.bul)||1;
     let guiaYaExiste = null;
     if(totalCajas > 1){
       guiaYaExiste = ag.cajas && ag.cajas[currentBoxIdx] && ag.cajas[currentBoxIdx].guiaZoom
