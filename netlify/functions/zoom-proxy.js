@@ -1,7 +1,7 @@
 const https = require('https');
 const { URL } = require('url');
 // Netlify function config — increase timeout
-exports.config = { timeout: 26 };
+exports.config = { timeout: 60 };
 const ENDPOINTS = {
   token:        { url: 'https://miws.zoom.red/api/crearToken', method: 'POST' },
   guia:         { url: 'https://serviciosbd.zoom.red/api/guiaelectronica/createShipmentInternacional', method: 'POST' },
@@ -12,6 +12,7 @@ const ENDPOINTS = {
   oficinas:     { url: 'https://sandbox.zoom.red/baaszoom/public/canguroazul/getOficinasGE', method: 'GET' },
   todasOficinas:{ url: 'https://sandbox.zoom.red/baaszoom/public/canguroazul/getOficinas', method: 'GET' },
   ciudadesOfi:  { url: 'https://sandbox.zoom.red/baaszoom/public/canguroazul/getCiudadesOfi', method: 'GET' },
+  autocompletar:{ url: 'https://mi.zoom.red/vista/autocompletarCiudadsinCOD_prov.php', method: 'GET' },
   tracking:       { url: 'https://sandbox.zoom.red/baaszoom/public/canguroazul/getInfoTracking', method: 'GET' },
   trackingWs:     { url: 'https://sandbox.zoom.red/baaszoom/public/canguroazul/getZoomTrackWs', method: 'GET' },
   trackingQa:     { url: 'https://qa.zoom.red/consultaTrackingWs', method: 'GET' },
