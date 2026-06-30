@@ -2572,48 +2572,48 @@ function getZoomCiudadesFallback(){
 
 async function getZoomSucursales(token, ciudadId){
   try{
-    const [respTodas, respSuc] = await Promise.all([
-      zoomFetch('todasOficinas', {codciudad: ciudadId, codservicio: 3}, token),
-      zoomFetch('sucursales', {token, codciudad:ciudadId, ciudad:ciudadId, paisDestino:'VE'}, token)
-    ]);
-
+    // Primero getOficinas secuencialmente para evitar timeout
+    const respTodas = await zoomFetch('todasOficinas', {codciudad: ciudadId, codservicio: 3}, token);
     const todas = Array.isArray(respTodas) ? respTodas
       : Array.isArray(respTodas.entidadRespuesta) ? respTodas.entidadRespuesta
       : Array.isArray(respTodas.data) ? respTodas.data : [];
 
+    if(todas.length > 0){
+      const sinDir = todas.filter(o=>!o.direccion||o.direccion==='').length;
+      if(sinDir === 0) return todas;
+      try{
+        const respSuc = await zoomFetch('sucursales', {token, codciudad:ciudadId, ciudad:ciudadId, paisDestino:'VE'}, token);
+        const conDir = Array.isArray(respSuc) ? respSuc
+          : Array.isArray(respSuc.entidadRespuesta) ? respSuc.entidadRespuesta
+          : Array.isArray(respSuc.data) ? respSuc.data : [];
+        const dirPorNombre = {};
+        conDir.forEach(o => {
+          const nom = (o.nombre||o.nombre_sucursal||'').toUpperCase().trim();
+          if(nom) dirPorNombre[nom] = o.direccion||o.address||'';
+        });
+        const todasConDir = todas.map(o => {
+          const nom = (o.nombre||'').toUpperCase().trim();
+          return {...o, direccion: o.direccion || dirPorNombre[nom] || ''};
+        });
+        const nombresEnTodas = new Set(todas.map(o=>(o.nombre||'').toUpperCase().trim()));
+        conDir.forEach(o => {
+          const nom = (o.nombre||o.nombre_sucursal||'').toUpperCase().trim();
+          if(nom && !nombresEnTodas.has(nom)){
+            todasConDir.push({
+              codoficina: o.codoficina||o.codsucursal||o.cod_sucursal||'',
+              nombre: o.nombre||o.nombre_sucursal||'',
+              direccion: o.direccion||o.address||''
+            });
+          }
+        });
+        return todasConDir;
+      }catch(e2){ return todas; }
+    }
+
+    const respSuc = await zoomFetch('sucursales', {token, codciudad:ciudadId, ciudad:ciudadId, paisDestino:'VE'}, token);
     const conDir = Array.isArray(respSuc) ? respSuc
       : Array.isArray(respSuc.entidadRespuesta) ? respSuc.entidadRespuesta
       : Array.isArray(respSuc.data) ? respSuc.data : [];
-
-    console.log('getSucursales con dir:', JSON.stringify(conDir).substring(0,300));
-
-    // Mapear direcciones por nombre (normalizado) desde getSucursales
-    const dirPorNombre = {};
-    conDir.forEach(o => {
-      const nom = (o.nombre||o.nombre_sucursal||'').toUpperCase().trim();
-      if(nom) dirPorNombre[nom] = o.direccion||o.address||'';
-    });
-
-    // Agregar direcciones a todas las oficinas
-    const todasConDir = todas.map(o => {
-      const nom = (o.nombre||'').toUpperCase().trim();
-      return {...o, direccion: o.direccion || dirPorNombre[nom] || ''};
-    });
-
-    // Agregar oficinas de getSucursales que no estén en getOficinas (por nombre)
-    const nombresEnTodas = new Set(todas.map(o=>(o.nombre||'').toUpperCase().trim()));
-    conDir.forEach(o => {
-      const nom = (o.nombre||o.nombre_sucursal||'').toUpperCase().trim();
-      if(nom && !nombresEnTodas.has(nom)){
-        todasConDir.push({
-          codoficina: o.codoficina||o.codsucursal||o.cod_sucursal||'',
-          nombre: o.nombre||o.nombre_sucursal||'',
-          direccion: o.direccion||o.address||''
-        });
-      }
-    });
-
-    if(todasConDir.length > 0) return todasConDir;
     if(conDir.length > 0) return conDir;
 
   }catch(e){ console.log('getZoomSucursales error:', e.message); }
