@@ -2158,7 +2158,7 @@ async function zoomFetch(endpoint, body, token=null){
   if(token) headers['Authorization'] = `Bearer ${token}`;
   try{
     const controller = new AbortController();
-    const timeout = setTimeout(()=>controller.abort(), 15000);
+    const timeout = setTimeout(()=>controller.abort(), 55000);
     const r = await fetch(ZOOM_CFG.fnUrl, {
       method: 'POST',
       headers,
@@ -2640,11 +2640,14 @@ async function abrirZoom(){
     if(!zoomToken){
       zoomToken=await getZoomToken();
     }
-    document.getElementById('zoomStatus').textContent='🔄 Cargando ciudades...';
+    document.getElementById('zoomStatus').textContent='';
+    document.getElementById('zoomStatus').style.display='none';
 
-    // Reutilizar ciudades si ya existen
+    // Usar fallback inmediatamente para abrir el modal rápido
     if(!zoomCiudades||zoomCiudades.length===0){
-      zoomCiudades=await getZoomCiudades(zoomToken);
+      zoomCiudades = getZoomCiudadesFallback();
+      // Cargar ciudades de la API en segundo plano
+      getZoomCiudades(zoomToken).then(c=>{ if(c&&c.length>0) zoomCiudades=c; }).catch(()=>{});
     }
 
     // Buscador de ciudades
