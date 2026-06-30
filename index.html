@@ -2658,42 +2658,22 @@ async function abrirZoom(){
         oninput="filtrarCiudades(this.value)">
       <div id="zCiudadList" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1.5px solid var(--blue);border-radius:8px;max-height:200px;overflow-y:auto;z-index:999;box-shadow:0 8px 24px rgba(0,0,0,.15);"></div>`;
 
-    let _filtrarTimer = null;
     window.filtrarCiudades=function(q){
       const list=document.getElementById('zCiudadList');
       if(!q||q.length<2){list.style.display='none';return;}
-      clearTimeout(_filtrarTimer);
-      _filtrarTimer = setTimeout(async function(){
-        // Primero filtrar el fallback local para respuesta inmediata
-        const f=zoomCiudades.filter(c=>{
-          const nom=(c.nombre_ciudad||c.nombre||'').toUpperCase();
-          const est=(c.nombre_estado||'').toUpperCase();
-          return nom.includes(q.toUpperCase())||est.includes(q.toUpperCase());
-        }).slice(0,20);
-        if(f.length){
-          list.innerHTML=f.map(c=>{
-            const nom=c.nombre_ciudad||c.nombre||'';
-            const est=c.nombre_estado||'';
-            const cod=c.codciudad||c.codigo_ciudad||c.cod_ciudad||c.id||'';
-            return '<div onclick="seleccionarCiudad('+cod+',\''+nom+' ('+est+')\')" style="padding:10px 14px;cursor:pointer;font-size:13px;border-bottom:1px solid #f0f0f0;" onmouseover="this.style.background=\'var(--sky)\'" onmouseout="this.style.background=\'#fff\'"><strong>'+nom+'</strong> <span style="color:var(--t2);font-size:12px;">'+est+'</span></div>';
-          }).join('');
-          list.style.display='block';
-        }
-        // Luego buscar en API de miZOOM para resultados más precisos
-        try{
-          const data = await zoomFetch('autocompletar', {q:q, limit:15}, zoomToken);
-          const items = Array.isArray(data) ? data : (data.data||data.results||[]);
-          if(items.length){
-            list.innerHTML=items.map(c=>{
-              const nom=c.nombre_ciudad||c.nombre||c.ciudad||'';
-              const est=c.nombre_estado||c.estado||'';
-              const cod=c.codciudad||c.codigo_ciudad||c.id||'';
-              return '<div onclick="seleccionarCiudad('+cod+',\''+nom+(est?' ('+est+')':'')+'\' )" style="padding:10px 14px;cursor:pointer;font-size:13px;border-bottom:1px solid #f0f0f0;" onmouseover="this.style.background=\'var(--sky)\'" onmouseout="this.style.background=\'#fff\'"><strong>'+nom+'</strong> <span style="color:var(--t2);font-size:12px;">'+est+'</span></div>';
-            }).join('');
-            list.style.display='block';
-          }
-        }catch(e){}
-      }, 300);
+      const f=zoomCiudades.filter(c=>{
+        const nom=(c.nombre_ciudad||c.nombre||'').toUpperCase();
+        const est=(c.nombre_estado||'').toUpperCase();
+        return nom.includes(q.toUpperCase())||est.includes(q.toUpperCase());
+      }).slice(0,20);
+      if(!f.length){list.style.display='none';return;}
+      list.innerHTML=f.map(c=>{
+        const nom=c.nombre_ciudad||c.nombre||'';
+        const est=c.nombre_estado||'';
+        const cod=c.codciudad||c.codigo_ciudad||c.cod_ciudad||c.id||'';
+        return `<div onclick="seleccionarCiudad(${cod},'${nom} (${est})')" style="padding:10px 14px;cursor:pointer;font-size:13px;border-bottom:1px solid #f0f0f0;" onmouseover="this.style.background='var(--sky)'" onmouseout="this.style.background='#fff'"><strong>${nom}</strong> <span style="color:var(--t2);font-size:12px;">${est}</span></div>`;
+      }).join('');
+      list.style.display='block';
     };
 
     window.seleccionarCiudad=async function(codciudad,nombre){
