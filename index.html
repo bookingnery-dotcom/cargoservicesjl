@@ -2572,7 +2572,7 @@ function getZoomCiudadesFallback(){
 
 async function getZoomSucursales(token, ciudadId){
   try{
-    const respTodas = await zoomFetch('todasOficinas', {codciudad: ciudadId, codservicio: 3}, token);
+    const respTodas = await zoomFetch('todasOficinas', {codciudad: ciudadId, codservicio: 1}, token);
     const todas = Array.isArray(respTodas) ? respTodas
       : Array.isArray(respTodas.entidadRespuesta) ? respTodas.entidadRespuesta
       : Array.isArray(respTodas.data) ? respTodas.data : [];
