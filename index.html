@@ -2690,54 +2690,41 @@ async function abrirZoom(){
       const selSuc=document.getElementById('zSucursal');
       selSuc.innerHTML='<option>Cargando sucursales...</option>';
       try{
-        let suc=await getZoomSucursales(zoomToken,codciudad);
+        // Usar autocompletar de miZOOM — mismo endpoint que usa miZOOM internamente
+        const nombreBase = nombre.split('(')[0].trim();
+        const data = await zoomFetch('autocompletar', {q: nombreBase, limit: 20}, zoomToken);
 
-        // Si no hay sucursales, probar con códigos alternativos de la misma ciudad
-        if(!suc.length){
-          const nombreBase = nombre.split('(')[0].trim().toUpperCase();
-          const alternativas = zoomCiudades
-            .filter(c=>(c.nombre_ciudad||'').toUpperCase()===nombreBase && c.codciudad!==codciudad)
-            .map(c=>c.codciudad);
-          for(const altCod of alternativas){
-            const altSuc = await getZoomSucursales(zoomToken, altCod);
-            if(altSuc.length){
-              suc = altSuc;
-              document.getElementById('zCiudad').dataset.codciudad = altCod;
-              break;
-            }
-          }
+        // Respuesta es texto pipe-separated: codoficina|ciudad|nombre_oficina|codciudad\n...
+        let suc = [];
+        if(typeof data === 'string' && data.trim()){
+          suc = data.trim().split('\n').map(line=>{
+            const parts = line.split('|');
+            return {
+              codoficina: parts[0]||'',
+              nombre: parts[2]||parts[1]||'',
+              codciudad: parts[3]||codciudad,
+              direccion: parts[4]||''
+            };
+          }).filter(s=>s.codoficina&&s.nombre);
+        } else if(Array.isArray(data)){
+          suc = data.map(s=>({
+            codoficina: s.codoficina||s.id||'',
+            nombre: s.nombre||s.name||'',
+            direccion: s.direccion||s.address||''
+          }));
         }
 
-        // Si aún no hay, probar códigos secuenciales cerca del código original (±50)
+        // Si autocompletar no funciona, fallback a getSucursales
         if(!suc.length){
-          for(let delta=1; delta<=50; delta++){
-            for(const tryCode of [codciudad+delta, codciudad-delta]){
-              if(tryCode<=0) continue;
-              const trySuc = await getZoomSucursales(zoomToken, tryCode);
-              if(trySuc.length){
-                // Verificar que la ciudad corresponde
-                const ciudadMatch = zoomCiudades.find(c=>c.codciudad===tryCode);
-                const nombreBase = nombre.split('(')[0].trim().toUpperCase();
-                if(!ciudadMatch || ciudadMatch.nombre_ciudad.toUpperCase()===nombreBase){
-                  suc = trySuc;
-                  document.getElementById('zCiudad').dataset.codciudad = tryCode;
-                  break;
-                }
-              }
-            }
-            if(suc.length) break;
-          }
+          suc = await getZoomSucursales(zoomToken, codciudad);
         }
 
         if(!suc.length){selSuc.innerHTML='<option value="">Sin sucursales disponibles</option>';return;}
         selSuc.innerHTML='<option value="">Selecciona sucursal</option>';
-        window._zoomSucursales=suc;
-        console.log('SUCURSAL RAW[0]:', JSON.stringify(suc[0]));
         suc.forEach(s=>{
           const id = s.codoficina||s.codsucursal||s.cod_sucursal||s.codigo||s.id||'';
           const nom = s.nombre_oficina||s.nombre_sucursal||s.nombreSucursal||s.nombre||s.name||String(id);
           const dir = s.direccion||s.address||s.localidad||'';
-          console.log(`SUC: id="${id}" nom="${nom}" keys:`, Object.keys(s).join(','));
           selSuc.innerHTML+=`<option value="${id}" data-dir="${dir}" data-nom="${nom}">${nom}</option>`;
         });
         selSuc.onchange=function(){
