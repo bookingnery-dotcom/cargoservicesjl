@@ -2571,18 +2571,55 @@ function getZoomCiudadesFallback(){
 }
 
 async function getZoomSucursales(token, ciudadId){
+  // Intentar todasOficinas del sandbox
+  try{
+    const respTodas = await zoomFetch('todasOficinas', {codciudad: ciudadId, codservicio: 3}, token);
+    const todas = Array.isArray(respTodas) ? respTodas
+      : Array.isArray(respTodas.entidadRespuesta) ? respTodas.entidadRespuesta
+      : Array.isArray(respTodas.data) ? respTodas.data : [];
+    if(todas.length > 0){
+      try{
+        const respSuc = await zoomFetch('sucursales', {token, codciudad:ciudadId, ciudad:ciudadId, paisDestino:'VE'}, token);
+        const conDir = Array.isArray(respSuc) ? respSuc
+          : Array.isArray(respSuc.entidadRespuesta) ? respSuc.entidadRespuesta
+          : Array.isArray(respSuc.data) ? respSuc.data : [];
+        const dirPorNombre = {};
+        conDir.forEach(o => {
+          const nom = (o.nombre||o.nombre_sucursal||'').toUpperCase().trim();
+          if(nom) dirPorNombre[nom] = o.direccion||o.address||'';
+        });
+        const todasConDir = todas.map(o => {
+          const nom = (o.nombre||'').toUpperCase().trim();
+          return {...o, direccion: o.direccion || dirPorNombre[nom] || ''};
+        });
+        const nombresEnTodas = new Set(todas.map(o=>(o.nombre||'').toUpperCase().trim()));
+        conDir.forEach(o => {
+          const nom = (o.nombre||o.nombre_sucursal||'').toUpperCase().trim();
+          if(nom && !nombresEnTodas.has(nom)){
+            todasConDir.push({
+              codoficina: o.codoficina||o.codsucursal||o.cod_sucursal||'',
+              nombre: o.nombre||o.nombre_sucursal||'',
+              direccion: o.direccion||o.address||''
+            });
+          }
+        });
+        return todasConDir;
+      }catch(e2){ return todas; }
+    }
+  }catch(e){ console.log('todasOficinas error:', e.message); }
+
+  // Fallback: getSucursales filtrando por codciudad
   try{
     const respSuc = await zoomFetch('sucursales', {token, codciudad:ciudadId, ciudad:ciudadId, paisDestino:'VE'}, token);
-    let suc = Array.isArray(respSuc) ? respSuc
+    const suc = Array.isArray(respSuc) ? respSuc
       : Array.isArray(respSuc.entidadRespuesta) ? respSuc.entidadRespuesta
       : Array.isArray(respSuc.data) ? respSuc.data : [];
-    // Filtrar solo oficinas que correspondan a la ciudad solicitada
-    if(suc.length > 0 && suc[0].codciudad){
+    if(suc.length > 0){
       const filtradas = suc.filter(o=> String(o.codciudad)===String(ciudadId));
-      if(filtradas.length > 0) return filtradas;
+      return filtradas.length > 0 ? filtradas : [];
     }
-    if(suc.length > 0) return suc;
-  }catch(e){ console.log('getZoomSucursales error:', e.message); }
+  }catch(e){ console.log('getSucursales error:', e.message); }
+
   return [];
 }
 async function abrirZoom(){
