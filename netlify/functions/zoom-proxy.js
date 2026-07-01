@@ -17,20 +17,22 @@ const ENDPOINTS = {
   trackingQa:     { url: 'https://qa.zoom.red/consultaTrackingWs', method: 'GET' },
   trackingApi:  { url: 'https://api.zoom.red/canguroazul/getInfoTracking', method: 'GET' },
 };
-function makeRequest(urlStr, method, headers, body) {
+function makeRequest(urlStr, method, headers, body, timeoutMs=25000) {
   return new Promise((resolve, reject) => {
     const u = new URL(urlStr);
     const opts = {
       hostname: u.hostname,
       path: u.pathname + u.search,
       method,
-      headers: { ...headers, 'Host': u.hostname }
+      headers: { ...headers, 'Host': u.hostname },
+      timeout: timeoutMs
     };
     const req = https.request(opts, (res) => {
       let data = '';
       res.on('data', chunk => data += chunk);
       res.on('end', () => resolve({ status: res.statusCode, body: data }));
     });
+    req.on('timeout', () => { req.destroy(); reject(new Error('ETIMEDOUT')); });
     req.on('error', reject);
     if (body && method !== 'GET') req.write(body);
     req.end();
