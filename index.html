@@ -2573,9 +2573,14 @@ function getZoomCiudadesFallback(){
 async function getZoomSucursales(token, ciudadId){
   try{
     const respSuc = await zoomFetch('sucursales', {token, codciudad:ciudadId, ciudad:ciudadId, paisDestino:'VE'}, token);
-    const suc = Array.isArray(respSuc) ? respSuc
+    let suc = Array.isArray(respSuc) ? respSuc
       : Array.isArray(respSuc.entidadRespuesta) ? respSuc.entidadRespuesta
       : Array.isArray(respSuc.data) ? respSuc.data : [];
+    // Filtrar solo oficinas que correspondan a la ciudad solicitada
+    if(suc.length > 0 && suc[0].codciudad){
+      const filtradas = suc.filter(o=> String(o.codciudad)===String(ciudadId));
+      if(filtradas.length > 0) return filtradas;
+    }
     if(suc.length > 0) return suc;
   }catch(e){ console.log('getZoomSucursales error:', e.message); }
   return [];
