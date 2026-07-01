@@ -2571,9 +2571,11 @@ function getZoomCiudadesFallback(){
 }
 
 async function getZoomSucursales(token, ciudadId){
-  // Intentar todasOficinas del sandbox
+  // Intentar todasOficinas con timeout de 8 segundos
   try{
-    const respTodas = await zoomFetch('todasOficinas', {codciudad: ciudadId, codservicio: 3}, token);
+    const timeoutPromise = new Promise((_,reject)=>setTimeout(()=>reject(new Error('timeout')),8000));
+    const fetchPromise = zoomFetch('todasOficinas', {codciudad: ciudadId, codservicio: 3}, token);
+    const respTodas = await Promise.race([fetchPromise, timeoutPromise]);
     const todas = Array.isArray(respTodas) ? respTodas
       : Array.isArray(respTodas.entidadRespuesta) ? respTodas.entidadRespuesta
       : Array.isArray(respTodas.data) ? respTodas.data : [];
@@ -2606,7 +2608,7 @@ async function getZoomSucursales(token, ciudadId){
         return todasConDir;
       }catch(e2){ return todas; }
     }
-  }catch(e){ console.log('todasOficinas error:', e.message); }
+  }catch(e){ console.log('todasOficinas:', e.message); }
 
   // Fallback: getSucursales filtrando por codciudad
   try{
