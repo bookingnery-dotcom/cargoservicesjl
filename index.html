@@ -2112,7 +2112,7 @@ function generarDeclaracionExportacion(){
     +'<div class="check-row"><div class="check-box">&#10003;</div><span>Evite inconvenientes y demoras en su env&iacute;o.</span></div>'
     +'<div class="decl-title">DECLARACI&Oacute;N JURADA DE EXPORTACI&Oacute;N</div>'
     +'<div class="cuerpo">'
-    +'Sres. GLOBAL <em>EXPRESS</em> CARGO &ndash; NELSON JESUS GUDI&Ntilde;O LOZADA&nbsp; Yo,<br>'
+    +'Sres. GLOBAL <em>EXPRESS</em> CARGO&nbsp; Yo,<br>'
     +'<span class="uf" style="min-width:230px;">&nbsp;'+(g.rN||'')+'&nbsp;</span>&nbsp;, titular del documento de identidad<br>'
     +'DNI/CE/PTP/PAS N.&ordm;&nbsp;<span class="uf" style="min-width:110px;">&nbsp;'+(g.rD||'')+'&nbsp;</span>&nbsp;, de nacionalidad&nbsp;<span class="uf" style="min-width:110px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>&nbsp;, por medio de la<br>'
     +'presente hago constar que estoy realizando la exportaci&oacute;n de&nbsp;<span class="uf" style="min-width:50px;">&nbsp;'+(g.bul||1)+'&nbsp;</span>&nbsp;( ) bultos, los cuales<br>'
@@ -2576,21 +2576,26 @@ async function getZoomSucursales(token, ciudadId){
       zoomFetch('todasOficinas', {codciudad: ciudadId, codservicio: 3}, token),
       zoomFetch('sucursales', {token, codciudad:ciudadId, ciudad:ciudadId, paisDestino:'VE'}, token)
     ]);
+
     const todas = Array.isArray(respTodas) ? respTodas
       : Array.isArray(respTodas.entidadRespuesta) ? respTodas.entidadRespuesta
       : Array.isArray(respTodas.data) ? respTodas.data : [];
+
     const conDir = Array.isArray(respSuc) ? respSuc
       : Array.isArray(respSuc.entidadRespuesta) ? respSuc.entidadRespuesta
       : Array.isArray(respSuc.data) ? respSuc.data : [];
+
     const dirPorNombre = {};
     conDir.forEach(o => {
       const nom = (o.nombre||o.nombre_sucursal||'').toUpperCase().trim();
       if(nom) dirPorNombre[nom] = o.direccion||o.address||'';
     });
+
     const todasConDir = todas.map(o => {
       const nom = (o.nombre||'').toUpperCase().trim();
       return {...o, direccion: o.direccion || dirPorNombre[nom] || ''};
     });
+
     const nombresEnTodas = new Set(todas.map(o=>(o.nombre||'').toUpperCase().trim()));
     conDir.forEach(o => {
       const nom = (o.nombre||o.nombre_sucursal||'').toUpperCase().trim();
@@ -2602,8 +2607,13 @@ async function getZoomSucursales(token, ciudadId){
         });
       }
     });
+
     if(todasConDir.length > 0) return todasConDir;
-    if(conDir.length > 0) return conDir;
+
+    // getSucursales solo si codciudad coincide exactamente
+    const filtradas = conDir.filter(o=> String(o.codciudad)===String(ciudadId));
+    if(filtradas.length > 0) return filtradas;
+
   }catch(e){ console.log('getZoomSucursales error:', e.message); }
   return [];
 }
