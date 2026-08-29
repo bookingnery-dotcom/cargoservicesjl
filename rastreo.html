@@ -628,46 +628,88 @@ async function cargarTrackingZoom(guiaNum){
   statusEl.textContent='🔄 Consultando tracking ZOOM...';
   listEl.innerHTML='';
 
+  let tracking = [];
+
+  // Intento 1: getZoomTrackWs
   try{
-    // Intentar con getZoomTrackWs
     const resp = await fetch('/.netlify/functions/zoom-proxy', {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
+      method:'POST', headers:{'Content-Type':'application/json'},
       body:JSON.stringify({endpoint:'trackingWs', codigo:guiaNum, tipo_busqueda:1, web:1})
     });
     const data = await resp.json();
-    const tracking = (data&&data.entidadRespuesta&&data.entidadRespuesta.tracking)||[];
-
-    if(tracking.length > 0){
-      statusEl.style.display='none';
-      const colorEstatus = (cod)=>{
-        if([7,8,9,98,186].includes(cod)) return {bg:'#E8F5E9',color:'#2E7D32',ic:'✅'};
-        if([1,2,3].includes(cod))        return {bg:'#E3F2FD',color:'#1565C0',ic:'📦'};
-        if([12,102,534].includes(cod))   return {bg:'#FFF3E0',color:'#E65100',ic:'🚚'};
-        if([22,90,147].includes(cod))    return {bg:'#FFEBEE',color:'#C62828',ic:'⚠️'};
-        if([114,125].includes(cod))      return {bg:'#F3E5F5',color:'#6A1B9A',ic:'🏢'};
-        return {bg:'#F5F5F5',color:'#555',ic:'📋'};
-      };
-      listEl.innerHTML = tracking.map(e=>{
-        const cod = (e.estatus&&e.estatus.codestatus)||e.codestatus||0;
-        const nom = (e.estatus&&e.estatus.nombre)||(e.estatus&&e.estatus.nombreweb)||'';
-        const fecha = e.fechapro||'';
-        const hora = e.horareal||e.hora||'';
-        const oficina = (e.oficina&&e.oficina.nombre)||'';
-        const c = colorEstatus(cod);
-        return `<div style="display:flex;gap:12px;padding:12px 16px;border-bottom:1px solid #f0f0f0;">
-          <div style="font-size:20px;flex-shrink:0;">${c.ic}</div>
-          <div style="flex:1;">
-            <div style="font-weight:700;font-size:13px;color:${c.color};">${nom}</div>
-            <div style="font-size:11px;color:#888;margin-top:2px;">${fecha}${hora?' · '+hora:''}${oficina?' · '+oficina:''}</div>
-          </div>
-        </div>`;
-      }).join('');
-    } else {
-      statusEl.textContent='ℹ️ ZOOM aún no ha registrado movimientos para esta guía.';
+    const t = (data&&data.entidadRespuesta&&data.entidadRespuesta.tracking)||[];
+    if(t.length > 0){
+      tracking = t.map(e=>({
+        cod:(e.estatus&&e.estatus.codestatus)||0,
+        nom:(e.estatus&&e.estatus.nombre)||(e.estatus&&e.estatus.nombreweb)||'',
+        fecha:e.fechapro||'', hora:e.horareal||e.hora||'',
+        oficina:(e.oficina&&e.oficina.nombre)||''
+      }));
     }
-  }catch(e){
-    statusEl.textContent='⚠️ No se pudo obtener el tracking de ZOOM en este momento.';
+  }catch(e){}
+
+  // Intento 2: getLastTracking
+  if(!tracking.length){
+    try{
+      const resp = await fetch('/.netlify/functions/zoom-proxy', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({endpoint:'trackingLast', codigo:guiaNum, tipo_busqueda:1, codigo_cliente:'407940'})
+      });
+      const data = await resp.json();
+      const t = Array.isArray(data) ? data : (Array.isArray(data.entidadRespuesta) ? data.entidadRespuesta : []);
+      if(t.length > 0){
+        tracking = t.map(e=>({
+          cod:e.codigo_estatus||0,
+          nom:e.descripcion_estatus||'',
+          fecha:e.fecha||e.fechapro||'', hora:e.hora||'',
+          oficina:''
+        }));
+      }
+    }catch(e){}
+  }
+
+  // Intento 3: getInfoTracking
+  if(!tracking.length){
+    try{
+      const resp = await fetch('/.netlify/functions/zoom-proxy', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({endpoint:'tracking', tipo_busqueda:1, codigo:guiaNum, codigo_cliente:'407940'})
+      });
+      const data = await resp.json();
+      const t = Array.isArray(data) ? data : (Array.isArray(data.entidadRespuesta) ? data.entidadRespuesta : []);
+      if(t.length > 0){
+        tracking = t.map(e=>({
+          cod:e.codigo_estatus||0,
+          nom:e.descripcion_estatus||'',
+          fecha:e.fecha||e.fechapro||'', hora:e.hora||'',
+          oficina:''
+        }));
+      }
+    }catch(e){}
+  }
+
+  if(tracking.length > 0){
+    statusEl.style.display='none';
+    const colorEstatus = (cod)=>{
+      if([7,8,9,98,186].includes(cod)) return {bg:'#E8F5E9',color:'#2E7D32',ic:'✅'};
+      if([1,2,3].includes(cod))        return {bg:'#E3F2FD',color:'#1565C0',ic:'📦'};
+      if([12,102,534].includes(cod))   return {bg:'#FFF3E0',color:'#E65100',ic:'🚚'};
+      if([22,90,147].includes(cod))    return {bg:'#FFEBEE',color:'#C62828',ic:'⚠️'};
+      if([114,125].includes(cod))      return {bg:'#F3E5F5',color:'#6A1B9A',ic:'🏢'};
+      return {bg:'#F5F5F5',color:'#555',ic:'📋'};
+    };
+    listEl.innerHTML = tracking.map(e=>{
+      const c = colorEstatus(e.cod);
+      return `<div style="display:flex;gap:12px;padding:12px 16px;border-bottom:1px solid #f0f0f0;">
+        <div style="font-size:20px;flex-shrink:0;">${c.ic}</div>
+        <div style="flex:1;">
+          <div style="font-weight:700;font-size:13px;color:${c.color};">${e.nom}</div>
+          <div style="font-size:11px;color:#888;margin-top:2px;">${e.fecha}${e.hora?' · '+e.hora:''}${e.oficina?' · '+e.oficina:''}</div>
+        </div>
+      </div>`;
+    }).join('');
+  } else {
+    statusEl.textContent='ℹ️ ZOOM aún no ha registrado movimientos para esta guía.';
   }
 }
 </script>
