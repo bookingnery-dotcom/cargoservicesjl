@@ -1272,7 +1272,7 @@ function verManifiesto(mId){
   currentManifiesto=m;
   document.getElementById('mDetTitle').textContent=`${m.id} — ${m.nombre}`;
   document.getElementById('mDetSub').textContent=`${m.totalGuias} guías · ${m.totalPiezas} piezas · ${m.fecha} · Creado por ${m.creadoPor}`;
-  const stBdg={'Recogido':'bnv','En almacén':'bnv','En tránsito':'bbl','En reparto':'bam','Entregado':'bgr','Con incidencia':'brd'};
+  const stBdg={'Recogido':'bnv','En almacén':'bnv','En tránsito':'bbl','En reparto':'bam','Entregado':'bgr','Con incidencia':'brd','Ingresado Tienda Los Olivos':'bnv','Ingresado Tienda Chorrillos':'bnv','En aduana':'bam','Liberado de aduana':'bnv'};
   const guiasDet=m.guias||[];
   document.getElementById('mDetBody').innerHTML=guiasDet.map((g,i)=>`
     <tr>
@@ -1284,7 +1284,7 @@ function verManifiesto(mId){
       <td><span style="color:var(--t2);">${g.rC}</span> → <span style="color:var(--blue);font-weight:600;">${g.dC}</span></td>
       <td><span class="bdg bgr">${g.srv}</span></td>
       <td>${g.peso} <small>kg</small></td>
-      <td><span class="bdg ${stBdg[g.estado||'En tránsito']||'bbl'}">${g.estado||'En tránsito'}</span></td>
+      <td><span class="bdg ${stBdg[g.estado||'En tránsito']||'bbl'}">${(g.estado||'En tránsito').startsWith('Ingresado Tienda') ? 'En tránsito' : g.estado||'En tránsito'}</span></td>
     </tr>`).join('');
   // Mostrar página de detalle
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
@@ -3180,7 +3180,7 @@ function renderReg(){
   const data=q?guias.filter(g=>[g.col,g.cjl,g.rN,g.dN,g.rC,g.dC,g.srv].some(x=>x&&x.toLowerCase().includes(q))):guias;
   const tb=document.getElementById('rTbody');
   if(!data.length){tb.innerHTML=`<tr><td colspan="12"><div class="te"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm-1 7V3.5L18.5 9H13z"/></svg><p>Sin resultados</p></div></td></tr>`;return;}
-  const stBdg={'Recogido':'bnv','En almacén':'bnv','En tránsito':'bbl','En reparto':'bam','Entregado':'bgr','Con incidencia':'brd'};
+  const stBdg={'Recogido':'bnv','En almacén':'bnv','En tránsito':'bbl','En reparto':'bam','Entregado':'bgr','Con incidencia':'brd','Ingresado Tienda Los Olivos':'bnv','Ingresado Tienda Chorrillos':'bnv','En aduana':'bam','Liberado de aduana':'bnv'};
   tb.innerHTML=[...data].reverse().map((g,i)=>`
     <tr style="cursor:pointer;${seleccionadas.has(g.col)?'background:var(--blue3);':''}" onclick="verG('${g.col}')">
       <td onclick="event.stopPropagation()">
@@ -3201,7 +3201,7 @@ function renderReg(){
       <td><span style="color:var(--t2);">${g.rC}</span> <span style="color:var(--t3);">→</span> <span style="color:var(--blue);font-weight:600;">${g.dC}</span></td>
       <td><span class="bdg bgr">${g.srv}</span></td>
       <td>${g.peso} <small>kg</small></td>
-      <td onclick="event.stopPropagation()"><span class="bdg ${stBdg[g.estado||'En tránsito']||'bbl'}">${g.estado||'En tránsito'}</span></td>
+      <td onclick="event.stopPropagation()"><span class="bdg ${stBdg[g.estado||'En tránsito']||'bbl'}">${(g.estado||'En tránsito').startsWith('Ingresado Tienda') ? 'En tránsito' : g.estado||'En tránsito'}</span></td>
       <td onclick="event.stopPropagation()" style="position:relative;">
         <button class="btn bg xs" onclick="toggleMenu('${g.col}',event)" style="font-size:18px;padding:2px 8px;line-height:1;">⋮</button>
         <div id="menu_${g.col}" style="display:none;position:absolute;right:0;top:100%;background:#fff;border:1.5px solid var(--border);border-radius:10px;box-shadow:var(--sh2);z-index:999;min-width:200px;overflow:hidden;">
