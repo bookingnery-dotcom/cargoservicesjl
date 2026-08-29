@@ -994,9 +994,13 @@ tbody tr:hover{background:#FAFCFF;}
       <p style="font-size:13px;color:var(--t2);margin-bottom:14px;">Se aplicará a <strong id="multiCount" style="color:var(--blue);font-size:15px;">0</strong> guías seleccionadas</p>
       <div class="fi ni"><label>Nuevo estado</label>
         <div class="fi-w"><select id="multiSelect">
+          <option value="Ingresado Tienda Los Olivos">🏬 Ingresado Tienda Los Olivos</option>
+          <option value="Ingresado Tienda Chorrillos">🏬 Ingresado Tienda Chorrillos</option>
           <option value="Recogido">📦 Recogido</option>
           <option value="En almacén">🏬 En almacén</option>
-          <option value="En tránsito" selected>🚚 En tránsito</option>
+          <option value="En tránsito" selected>🚚 En tránsito Lima → Venezuela</option>
+          <option value="En aduana">📋 En proceso de aduana</option>
+          <option value="Liberado de aduana">✅ Liberado de aduana</option>
           <option value="En reparto">🛵 En reparto local</option>
           <option value="Entregado">✅ Entregado</option>
           <option value="Con incidencia">⚠️ Con incidencia</option>
@@ -1170,6 +1174,7 @@ function escucharGuias(){
       guias = todas.filter(g=>!g.archivado);
       document.getElementById('nbadge').textContent=guias.length;
       updDash(); updCorr();
+      verificarEstadosAutomaticos();
       if(document.getElementById('pg-registros').classList.contains('active')) renderReg();
     }, err=>{
       let q2 = db.collection('guias');
@@ -1389,10 +1394,14 @@ function generarGuia(){
     pago:document.getElementById('gPago').value,
     obs:v('gObs'),usr:cu.nombre,
     userKey:cu.user,
-    estado:'En tránsito',
+    estado: cu.user==='Chorrillos' ? 'Ingresado Tienda Chorrillos' : 'Ingresado Tienda Los Olivos',
     items:[...items]
   };
   guias.push(g);saveGuiaFS(g);ag=g;
+
+  // Programar cambio automático a "En tránsito" el próximo viernes
+  programarTransito(g.col, g.fecha);
+
   // Guardar cliente en BD automáticamente
   guardarClienteEnBD(g);
   // Reset items
@@ -3575,6 +3584,52 @@ function renderManifiestoZoom(){
     </div>`).join('');
 }
 
+
+/* ─── CAMBIO AUTOMÁTICO DE ESTADO ─── */
+function proximoViernes(fechaStr){
+  const parts = (fechaStr||'').split('/');
+  if(parts.length<3) return new Date(Date.now()+7*24*60*60*1000);
+  const fecha = new Date(parseInt(parts[2]), parseInt(parts[1])-1, parseInt(parts[0]));
+  const dia = fecha.getDay();
+  const diasHastaViernes = dia===5 ? 7 : (5-dia+7)%7;
+  const viernes = new Date(fecha);
+  viernes.setDate(fecha.getDate() + (diasHastaViernes===0 ? 7 : diasHastaViernes));
+  viernes.setHours(8,0,0,0);
+  return viernes;
+}
+
+async function programarTransito(col, fechaCreacion){
+  const viernes = proximoViernes(fechaCreacion);
+  const ahora = new Date();
+  const msHastaViernes = viernes.getTime() - ahora.getTime();
+  if(msHastaViernes > 0 && msHastaViernes < 7*24*60*60*1000){
+    setTimeout(async ()=>{
+      const g = guias.find(x=>x.col===col);
+      if(g && (g.estado==='Ingresado Tienda Los Olivos' || g.estado==='Ingresado Tienda Chorrillos')){
+        const hist = [...(g.historial||[]), {estado:'En tránsito',transportista:'ZOOM',nota:'Salida Lima → Venezuela',ts:new Date().toISOString()}];
+        await updateGuiaFS(col, {estado:'En tránsito', historial:hist});
+        const gi = guias.findIndex(x=>x.col===col);
+        if(gi>=0){guias[gi].estado='En tránsito';guias[gi].historial=hist;}
+        renderReg();
+      }
+    }, msHastaViernes);
+  }
+}
+
+function verificarEstadosAutomaticos(){
+  const ahora = new Date();
+  guias.forEach(g=>{
+    if(g.estado==='Ingresado Tienda Los Olivos'||g.estado==='Ingresado Tienda Chorrillos'){
+      const viernes = proximoViernes(g.fecha||'');
+      if(ahora >= viernes){
+        const hist = [...(g.historial||[]),{estado:'En tránsito',transportista:'ZOOM',nota:'Salida automática Lima → Venezuela',ts:viernes.toISOString()}];
+        updateGuiaFS(g.col,{estado:'En tránsito',historial:hist});
+        g.estado='En tránsito';
+        g.historial=hist;
+      }
+    }
+  });
+}
 
 function mostrarZoomManual(){
   // Muestra el panel manual y oculta el formulario de datos
