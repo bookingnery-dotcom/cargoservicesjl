@@ -15,7 +15,8 @@ const ENDPOINTS = {
   tracking:       { url: 'https://sandbox.zoom.red/baaszoom/public/canguroazul/getInfoTracking', method: 'GET' },
   trackingWs:     { url: 'https://sandbox.zoom.red/baaszoom/public/canguroazul/getZoomTrackWs', method: 'GET' },
   trackingQa:     { url: 'https://qa.zoom.red/consultaTrackingWs', method: 'GET' },
-  trackingApi:  { url: 'https://api.zoom.red/canguroazul/getInfoTracking', method: 'GET' },
+  trackingLast:   { url: 'https://sandbox.zoom.red/baaszoom/public/canguroazul/getLastTracking', method: 'GET' },
+  trackingApi:    { url: 'https://api.zoom.red/canguroazul/getInfoTracking', method: 'GET' },
 };
 function makeRequest(urlStr, method, headers, body) {
   return new Promise((resolve, reject) => {
