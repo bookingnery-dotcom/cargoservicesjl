@@ -293,7 +293,18 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
       </div>
     </div>
 
-    <!-- CONTACT -->
+    <!-- TRACKING ZOOM -->
+    <div class="tlcard" id="zoomTrackCard" style="display:none;">
+      <div class="tlhead" style="background:linear-gradient(135deg,#1565C0,#1976D2);">
+        <h4 style="color:#fff;">✈️ Tracking ZOOM Venezuela</h4>
+        <span id="zoomGuiaNum" style="color:#90CAF9;font-size:12px;"></span>
+      </div>
+      <div class="tlbody">
+        <div id="zoomTrackStatus" style="text-align:center;padding:20px;color:#666;">🔄 Consultando tracking ZOOM...</div>
+        <div id="zoomTrackList"></div>
+      </div>
+    </div>
+
     <div class="cstrip">
       <div class="cs-left">
         <h4>¿Consultas sobre tu envío?</h4>
@@ -500,6 +511,16 @@ function render(g){
 
   document.getElementById('tlList').innerHTML=buildTimeline(g);
 
+  // Cargar tracking ZOOM si tiene número asignado
+  const guiaZoomNum = obtenerGuiaZoom(g);
+  if(guiaZoomNum){
+    document.getElementById('zoomTrackCard').style.display='block';
+    document.getElementById('zoomGuiaNum').textContent = '✈️ Guía ZOOM: ' + guiaZoomNum;
+    cargarTrackingZoom(guiaZoomNum);
+  } else {
+    document.getElementById('zoomTrackCard').style.display='none';
+  }
+
   const msg=encodeURIComponent(`Hola Cargo Services JL, consulto sobre mi guía *${g.col}* / *${g.cjl}* de ${g.rC} hacia ${g.dC}. Estado: ${g.estado||'En tránsito'}`);
   document.getElementById('waBtn1').onclick=()=>window.open(`https://wa.me/${WA1}?text=${msg}`,'_blank');
   document.getElementById('waBtn2').onclick=()=>window.open(`https://wa.me/${WA2}?text=${msg}`,'_blank');
@@ -509,10 +530,14 @@ function render(g){
 }
 // ─── STATUS CONFIG ───
 const SC={
+  'Ingresado Tienda Los Olivos' :{cls:'s-pending',   icon:'🏬', label:'Ingresado a Tienda Los Olivos'},
+  'Ingresado Tienda Chorrillos' :{cls:'s-pending',   icon:'🏬', label:'Ingresado a Tienda Chorrillos'},
   'Recogido'      :{cls:'s-pending',   icon:'📦', label:'Recogido'},
   'En almacén'    :{cls:'s-warehouse', icon:'🏬', label:'En almacén'},
-  'En tránsito'   :{cls:'s-transit',   icon:'🚚', label:'En tránsito'},
-  'En reparto'    :{cls:'s-transit',   icon:'🛵', label:'En reparto'},
+  'En tránsito'   :{cls:'s-transit',   icon:'🚚', label:'En tránsito Lima → Venezuela'},
+  'En aduana'     :{cls:'s-warehouse', icon:'📋', label:'En proceso de aduana'},
+  'Liberado de aduana':{cls:'s-warehouse', icon:'✅', label:'Liberado de aduana'},
+  'En reparto'    :{cls:'s-transit',   icon:'🛵', label:'En reparto local'},
   'Entregado'     :{cls:'s-delivered', icon:'✅', label:'Entregado'},
   'Con incidencia':{cls:'s-issue',     icon:'⚠️', label:'Con incidencia'},
 };
@@ -521,11 +546,12 @@ function getCfg(e){return SC[e]||{cls:'s-transit',icon:'🚚',label:e||'En trán
 // ─── TIMELINE STEPS ───
 // Cada paso del sistema de envío:
 const STEPS=[
-  {key:'Recogido',    icon:'📦', label:'Guía generada y paquete recogido',   sub:(g)=>`${g.rC} · ${g.fecha} ${g.hora||''}`},
-  {key:'En almacén',  icon:'🏬', label:'Ingresado a almacén de despacho',    sub:(g)=>`${g.rC}`},
-  {key:'En tránsito', icon:'🚚', label:`En camino a ciudad de destino`,       sub:(g)=>`${g.rC} → ${g.dC}`},
-  {key:'En reparto',  icon:'🛵', label:'En despacho / reparto local',         sub:(g)=>`${g.dC}`},
-  {key:'Entregado',   icon:'✅', label:'Entregado al destinatario',           sub:(g)=>`${g.dC} · ${g.dDir}`},
+  {key:'Ingresado Tienda Los Olivos', icon:'🏬', label:'Ingresado a Tienda Los Olivos', sub:(g)=>`Los Olivos, Lima · ${g.fecha} ${g.hora||''}`},
+  {key:'Ingresado Tienda Chorrillos', icon:'🏬', label:'Ingresado a Tienda Chorrillos', sub:(g)=>`Chorrillos, Lima · ${g.fecha} ${g.hora||''}`},
+  {key:'En tránsito', icon:'🚚', label:'En tránsito Lima → Venezuela', sub:(g)=>`Lima → ${g.dC}`},
+  {key:'En aduana',   icon:'📋', label:'En proceso de aduana Venezuela', sub:(g)=>`Venezuela`},
+  {key:'Liberado de aduana', icon:'✅', label:'Liberado de aduana', sub:(g)=>`Venezuela`},
+  {key:'Entregado',   icon:'✅', label:'Entregado al destinatario', sub:(g)=>`${g.dC}`},
 ];
 const ORDER=STEPS.map(s=>s.key);
 
@@ -583,6 +609,67 @@ window.onload=()=>{
   const guia=p.get('guia')||p.get('cjl')||p.get('col');
   if(guia){document.getElementById('tInput').value=guia.toUpperCase();buscar();}
 };
+
+// ─── TRACKING ZOOM ───
+function obtenerGuiaZoom(g){
+  // Obtener número ZOOM de la guía (multicaja o caja única)
+  if(g.guiaZoom) return g.guiaZoom;
+  if(g.cajas && g.cajas.length > 0){
+    const conZoom = g.cajas.find(c=>c&&c.guiaZoom);
+    if(conZoom) return conZoom.guiaZoom;
+  }
+  return null;
+}
+
+async function cargarTrackingZoom(guiaNum){
+  const statusEl = document.getElementById('zoomTrackStatus');
+  const listEl = document.getElementById('zoomTrackList');
+  statusEl.style.display='block';
+  statusEl.textContent='🔄 Consultando tracking ZOOM...';
+  listEl.innerHTML='';
+
+  try{
+    // Intentar con getZoomTrackWs
+    const resp = await fetch('/.netlify/functions/zoom-proxy', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({endpoint:'trackingWs', codigo:guiaNum, tipo_busqueda:1, web:1})
+    });
+    const data = await resp.json();
+    const tracking = (data&&data.entidadRespuesta&&data.entidadRespuesta.tracking)||[];
+
+    if(tracking.length > 0){
+      statusEl.style.display='none';
+      const colorEstatus = (cod)=>{
+        if([7,8,9,98,186].includes(cod)) return {bg:'#E8F5E9',color:'#2E7D32',ic:'✅'};
+        if([1,2,3].includes(cod))        return {bg:'#E3F2FD',color:'#1565C0',ic:'📦'};
+        if([12,102,534].includes(cod))   return {bg:'#FFF3E0',color:'#E65100',ic:'🚚'};
+        if([22,90,147].includes(cod))    return {bg:'#FFEBEE',color:'#C62828',ic:'⚠️'};
+        if([114,125].includes(cod))      return {bg:'#F3E5F5',color:'#6A1B9A',ic:'🏢'};
+        return {bg:'#F5F5F5',color:'#555',ic:'📋'};
+      };
+      listEl.innerHTML = tracking.map(e=>{
+        const cod = (e.estatus&&e.estatus.codestatus)||e.codestatus||0;
+        const nom = (e.estatus&&e.estatus.nombre)||(e.estatus&&e.estatus.nombreweb)||'';
+        const fecha = e.fechapro||'';
+        const hora = e.horareal||e.hora||'';
+        const oficina = (e.oficina&&e.oficina.nombre)||'';
+        const c = colorEstatus(cod);
+        return `<div style="display:flex;gap:12px;padding:12px 16px;border-bottom:1px solid #f0f0f0;">
+          <div style="font-size:20px;flex-shrink:0;">${c.ic}</div>
+          <div style="flex:1;">
+            <div style="font-weight:700;font-size:13px;color:${c.color};">${nom}</div>
+            <div style="font-size:11px;color:#888;margin-top:2px;">${fecha}${hora?' · '+hora:''}${oficina?' · '+oficina:''}</div>
+          </div>
+        </div>`;
+      }).join('');
+    } else {
+      statusEl.textContent='ℹ️ ZOOM aún no ha registrado movimientos para esta guía.';
+    }
+  }catch(e){
+    statusEl.textContent='⚠️ No se pudo obtener el tracking de ZOOM en este momento.';
+  }
+}
 </script>
 </body>
 </html>
