@@ -2849,8 +2849,8 @@ async function enviarAZoom(){
   const payload = {
     login: ZOOM_CFG.login,
     clave: ZOOM_CFG.clave,
-    codservicio: 3,
-    codoficinaori: 2633,
+    codservicio: 106,
+    codoficinaori: 253,
     remitente: ZOOM_CFG.remNombre,
     contacto_remitente: contactoRem,
     telefono_remitente: ZOOM_CFG.remTel,
@@ -2859,7 +2859,8 @@ async function enviarAZoom(){
     codpaisdes: '124',
     ciudaddes: (ciudadNombre||ciudad).replace(/\s*\(.*?\)\s*/g,'').trim(),
     codoficinades: parseInt(sucVal)||0,
-    retira_oficina: 0,
+    retira_oficina: 1,
+    retirarOficina: 1,
     destinatario: dN,
     contacto_destino: dN,
     rif_ci_destinatario: document.getElementById('zDD').value.trim(),
@@ -2868,7 +2869,8 @@ async function enviarAZoom(){
     celular: numCel,
     direcciondes: dirFinal,
     correodestinatario: '',
-    tipo_envio: document.getElementById('zTipo')?.value || 'M',
+    tipo_envio: 'MBV',
+    codtipoenv: 2,
     numero_piezas: 1,
     peso_bruto: parseFloat(peso)||1,
     valor_declarado: parseFloat(valor)||10,
@@ -2883,7 +2885,10 @@ async function enviarAZoom(){
     activacionzoom: '0',
     tipoPeso: '2',
     tipoMedidas: '2',
-    ge: '0'
+    unidadpeso: 2,
+    unidaddimensiones: 3,
+    ge: '1',
+    codservicioweb: 116568
   };
 
   try{
