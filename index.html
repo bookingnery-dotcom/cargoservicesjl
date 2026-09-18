@@ -621,6 +621,9 @@ tbody tr:hover{background:#FAFCFF;}
         <button class="btn sm" style="background:var(--amber);color:var(--navy);font-weight:800;" onclick="crearManifiesto()">
           📋 Crear Manifiesto
         </button>
+        <button class="btn sm" style="background:#25D366;color:#fff;font-weight:800;" onclick="enviarWAZoomMasivo()">
+          📱 Notificar ZOOM
+        </button>
       </div>
       <div class="card cb0">
         <div class="tw">
@@ -1402,6 +1405,9 @@ function generarGuia(){
   // Programar cambio automático a "En tránsito" el próximo viernes
   programarTransito(g.col, g.fecha);
 
+  // Enviar mensaje WhatsApp de registro automáticamente
+  enviarWARegistro(g);
+
   // Guardar cliente en BD automáticamente
   guardarClienteEnBD(g);
   // Reset items
@@ -2145,6 +2151,97 @@ function generarDeclaracionExportacion(){
 /* ══════════════════════════════
    INTEGRACIÓN ZOOM API — AMBIENTE PRUEBAS
    ══════════════════════════════════════ */
+
+/* ─── WHATSAPP BUSINESS API ─── */
+const WA_CFG = {
+  token: 'EAAVHQgSNHVYBSnJx5Wx36pzZBLcz78ZBS0ZBZCHV0riBZAL8Pf7ZBTo9nWZBB08FLzHAzYp0Mc6qlIiCwO5ETS9oRMy9EYEORoFuhfjF1VGLqBY4rU3D4O3vZAuHbBn19HjbtyjebK5rtKMyjWsepqFaUaxcBVTpB5DZBs6iWNbgBLoEWVV5MT7bHIIpyjrVQGSspHwZDZD',
+  phoneId: '1301032516425416',
+  wabaId: '1602157121638698',
+  telOlivos: '51902567044',
+  telChorrillos: '51903245854',
+};
+
+async function enviarWA(telefono, plantilla, params){
+  if(!telefono) return;
+  const num = telefono.replace(/\D/g,'');
+  const to = num.startsWith('51') ? num : '51'+num;
+  try{
+    const resp = await fetch(`https://graph.facebook.com/v18.0/${WA_CFG.phoneId}/messages`, {
+      method:'POST',
+      headers:{'Authorization':'Bearer '+WA_CFG.token,'Content-Type':'application/json'},
+      body:JSON.stringify({
+        messaging_product:'whatsapp',
+        to: to,
+        type:'template',
+        template:{
+          name: plantilla,
+          language:{code:'es'},
+          components:[{type:'body', parameters: params.map(p=>({type:'text',text:String(p)}))}]
+        }
+      })
+    });
+    const data = await resp.json();
+    console.log('WA enviado:', JSON.stringify(data));
+    return data;
+  }catch(e){
+    console.log('WA error:', e.message);
+  }
+}
+
+// Mensaje 1: Al crear la guía
+async function enviarWARegistro(g){
+  const tel = g.rT;
+  if(!tel) return;
+  const esCJL = (g.userKey||'').toLowerCase()==='chorrillos';
+  const sede = esCJL ? 'Chorrillos' : 'Los Olivos';
+  const telTienda = esCJL ? WA_CFG.telChorrillos : WA_CFG.telOlivos;
+  await enviarWA(tel, 'registro_guia', [
+    g.rN||'Cliente',
+    sede,
+    g.col||g.cjl||'',
+    g.bul||1,
+    g.peso||'',
+    (g.dC||'').split(',')[0].trim(),
+    telTienda.replace('51','')
+  ]);
+}
+
+// Mensaje 2: El viernes (salida) — se llama desde verificarEstadosAutomaticos
+async function enviarWASalida(g){
+  const tel = g.rT;
+  if(!tel) return;
+  const esCJL = (g.userKey||'').toLowerCase()==='chorrillos';
+  const telTienda = esCJL ? WA_CFG.telChorrillos : WA_CFG.telOlivos;
+  await enviarWA(tel, 'salida_envio', [
+    g.rN||'Cliente',
+    g.col||g.cjl||'',
+    telTienda.replace('51','')
+  ]);
+}
+
+// Mensaje 3: Cuando se asigna guía ZOOM (selección múltiple)
+async function enviarWAZoom(g){
+  const tel = g.rT;
+  if(!tel) return;
+  const esCJL = (g.userKey||'').toLowerCase()==='chorrillos';
+  const telTienda = esCJL ? WA_CFG.telChorrillos : WA_CFG.telOlivos;
+  // Obtener todas las guías ZOOM
+  let guiasZoom = '';
+  if(g.cajas && g.cajas.length > 0){
+    guiasZoom = g.cajas.filter(c=>c&&c.guiaZoom).map(c=>c.guiaZoom).join(', ');
+  } else if(g.guiaZoom){
+    guiasZoom = g.guiaZoom;
+  }
+  if(!guiasZoom) return;
+  await enviarWA(tel, 'retiro_zoom', [
+    g.rN||'Cliente',
+    g.col||g.cjl||'',
+    g.bul||1,
+    guiasZoom,
+    telTienda.replace('51','')
+  ]);
+}
+
 const ZOOM_CFG = {
   login: '',
   clave: '',
@@ -3631,9 +3728,32 @@ function verificarEstadosAutomaticos(){
         updateGuiaFS(g.col,{estado:'En tránsito',historial:hist});
         g.estado='En tránsito';
         g.historial=hist;
+        // Enviar mensaje WhatsApp de salida
+        enviarWASalida(g);
       }
     }
   });
+}
+
+// Mensaje 3 masivo: Notificar ZOOM a guías seleccionadas
+async function enviarWAZoomMasivo(){
+  const selIds = [...document.querySelectorAll('.rowChk:checked')].map(c=>c.dataset.col);
+  if(!selIds.length) return toast('Selecciona al menos una guía',1);
+  const selGuias = guias.filter(g=>selIds.includes(g.col));
+  const sinTel = selGuias.filter(g=>!g.rT);
+  const sinZoom = selGuias.filter(g=>!g.guiaZoom && !(g.cajas && g.cajas.some(c=>c&&c.guiaZoom)));
+  if(sinZoom.length > 0){
+    toast(`⚠️ ${sinZoom.length} guía(s) sin número ZOOM — se omitirán`,1);
+  }
+  const enviar = selGuias.filter(g=>g.rT && (g.guiaZoom || (g.cajas && g.cajas.some(c=>c&&c.guiaZoom))));
+  if(!enviar.length) return toast('No hay guías con teléfono y guía ZOOM para notificar',1);
+  toast(`📱 Enviando ${enviar.length} notificaciones ZOOM...`);
+  for(const g of enviar){
+    await enviarWAZoom(g);
+    await new Promise(r=>setTimeout(r,500));
+  }
+  toast(`✅ ${enviar.length} notificaciones ZOOM enviadas`);
+  deselAll();
 }
 
 function mostrarZoomManual(){
