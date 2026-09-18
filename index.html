@@ -2175,7 +2175,7 @@ async function enviarWA(telefono, plantilla, params){
         type:'template',
         template:{
           name: plantilla,
-          language:{code:'es_MX'},
+          language:{code:'es_PE'},
           components:[{type:'body', parameters: params.map(p=>({type:'text',text:String(p)}))}]
         }
       })
