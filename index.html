@@ -2195,12 +2195,18 @@ async function enviarWARegistro(g){
   const esCJL = (g.userKey||'').toLowerCase()==='chorrillos';
   const sede = esCJL ? 'Chorrillos' : 'Los Olivos';
   const telTienda = esCJL ? WA_CFG.telChorrillos : WA_CFG.telOlivos;
+  // Calcular peso total de todas las cajas
+  let pesoTotal = g.peso||'';
+  if(g.cajas && g.cajas.length > 1){
+    const suma = g.cajas.reduce((acc, c)=>acc + (parseFloat(c&&c.peso)||0), 0);
+    if(suma > 0) pesoTotal = suma.toFixed(2);
+  }
   await enviarWA(tel, 'registro_guias', [
     g.rN||'Cliente',
     sede,
     g.col||g.cjl||'',
     g.bul||1,
-    g.peso||'',
+    pesoTotal,
     (g.dC||'').split(',')[0].trim(),
     telTienda.replace('51','')
   ]);
@@ -3737,7 +3743,7 @@ function verificarEstadosAutomaticos(){
 
 // Mensaje 3 masivo: Notificar ZOOM a guías seleccionadas
 async function enviarWAZoomMasivo(){
-  const selIds = [...document.querySelectorAll('.rowChk:checked')].map(c=>c.dataset.col);
+  const selIds = [...seleccionadas];
   if(!selIds.length) return toast('Selecciona al menos una guía',1);
   const selGuias = guias.filter(g=>selIds.includes(g.col));
   const sinTel = selGuias.filter(g=>!g.rT);
