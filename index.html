@@ -2164,7 +2164,14 @@ const WA_CFG = {
 async function enviarWA(telefono, plantilla, params){
   if(!telefono) return;
   const num = telefono.replace(/\D/g,'');
-  const to = num.startsWith('51') ? num : '51'+num;
+  let to;
+  if(num.startsWith('51') || num.startsWith('58') || num.startsWith('57')){
+    to = num; // Ya tiene prefijo internacional
+  } else if(num.startsWith('04') || num.startsWith('02') || num.startsWith('0212')){
+    to = '58' + num.substring(1); // Venezuela: quita el 0 y agrega 58
+  } else {
+    to = '51' + num; // Por defecto Perú
+  }
   try{
     const resp = await fetch(`https://graph.facebook.com/v18.0/${WA_CFG.phoneId}/messages`, {
       method:'POST',
@@ -2195,18 +2202,26 @@ async function enviarWARegistro(g){
   const esCJL = (g.userKey||'').toLowerCase()==='chorrillos';
   const sede = esCJL ? 'Chorrillos' : 'Los Olivos';
   const telTienda = esCJL ? WA_CFG.telChorrillos : WA_CFG.telOlivos;
-  // Calcular peso total de todas las cajas
-  let pesoTotal = g.peso||'';
+  // Calcular peso total y medidas de todas las cajas
+  let pesoMedidas = '';
+  const totalCajas = parseInt(g.bul)||1;
   if(g.cajas && g.cajas.length > 1){
-    const suma = g.cajas.reduce((acc, c)=>acc + (parseFloat(c&&c.peso)||0), 0);
-    if(suma > 0) pesoTotal = suma.toFixed(2);
+    pesoMedidas = g.cajas.map((c,i)=>{
+      const p = c&&c.peso ? c.peso+' kg' : '';
+      const m = (c&&c.alto&&c.largo&&c.ancho) ? `${c.alto}x${c.largo}x${c.ancho} cm` : '';
+      return `Caja ${i+1}: ${[p,m].filter(Boolean).join(' | ')}`;
+    }).join('\n');
+  } else {
+    const p = g.peso ? g.peso+' kg' : '';
+    const m = (g.alto&&g.largo&&g.ancho) ? `${g.alto}x${g.largo}x${g.ancho} cm` : '';
+    pesoMedidas = [p,m].filter(Boolean).join(' | ');
   }
   await enviarWA(tel, 'registro_guias', [
     g.rN||'Cliente',
     sede,
     g.col||g.cjl||'',
-    g.bul||1,
-    pesoTotal,
+    totalCajas,
+    pesoMedidas||'—',
     (g.dC||'').split(',')[0].trim(),
     telTienda.replace('51','')
   ]);
