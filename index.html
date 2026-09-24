@@ -3295,6 +3295,14 @@ async function guardarEdicion(){
   };
   try{
     await updateGuiaFS(editTargetCol, updates);
+    // Preservar guiaZoom y cajas en memoria local
+    const gi = guias.findIndex(x=>x.col===editTargetCol);
+    if(gi>=0){
+      const guiaActual = guias[gi];
+      guias[gi] = {...guiaActual, ...updates};
+      if(guiaActual.guiaZoom) guias[gi].guiaZoom = guiaActual.guiaZoom;
+      if(guiaActual.cajas) guias[gi].cajas = guiaActual.cajas;
+    }
     closeOv('ovEditar');
     toast(`Guía ${editTargetCol} editada ✓`);
   }catch(e){ alEl.textContent='Error: '+e.message; alEl.className='al al-er show'; }
