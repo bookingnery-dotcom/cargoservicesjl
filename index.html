@@ -624,6 +624,9 @@ tbody tr:hover{background:#FAFCFF;}
         <button class="btn sm" style="background:#25D366;color:#fff;font-weight:800;" onclick="enviarWAZoomMasivo()">
           📱 Notificar ZOOM
         </button>
+        <button class="btn sm" style="background:#128C7E;color:#fff;font-weight:800;" onclick="reenviarWARegistroMasivo()">
+          📱 Reenviar Registro
+        </button>
       </div>
       <div class="card cb0">
         <div class="tw">
@@ -3757,6 +3760,24 @@ function verificarEstadosAutomaticos(){
 }
 
 // Mensaje 3 masivo: Notificar ZOOM a guías seleccionadas
+// Reenvío manual del mensaje 1 a guías seleccionadas
+async function reenviarWARegistroMasivo(){
+  const selIds = [...seleccionadas];
+  if(!selIds.length) return toast('Selecciona al menos una guía',1);
+  const selGuias = guias.filter(g=>selIds.includes(g.col));
+  const sinTel = selGuias.filter(g=>!g.rT);
+  if(sinTel.length > 0) toast(`⚠️ ${sinTel.length} guía(s) sin teléfono — se omitirán`,1);
+  const enviar = selGuias.filter(g=>g.rT);
+  if(!enviar.length) return toast('No hay guías con teléfono para notificar',1);
+  toast(`📱 Reenviando ${enviar.length} mensajes de registro...`);
+  for(const g of enviar){
+    await enviarWARegistro(g);
+    await new Promise(r=>setTimeout(r,500));
+  }
+  toast(`✅ ${enviar.length} mensajes de registro enviados`);
+  deselAll();
+}
+
 async function enviarWAZoomMasivo(){
   const selIds = [...seleccionadas];
   if(!selIds.length) return toast('Selecciona al menos una guía',1);
